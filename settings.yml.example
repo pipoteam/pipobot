@@ -1,0 +1,50 @@
+salons:
+  -
+    chan: room@server
+    login: jid@server
+    passwd: verysecret
+    ressource: here
+    nick: Pipobot
+    modules:
+        - _all
+
+groupes:
+    all:
+        - b
+        - bashfr
+        - blague
+        - boo
+        - botanswers
+        - boulet
+        - cmdalacon
+        - date
+        - exa
+        - getjid
+        - google
+        - haddock
+        - hg
+        - kaamelott
+        - kick
+        - lyrics
+        - mail
+        - mpd
+        - mute
+        - nextprev
+        - ola
+        - pendu
+        - pioche
+        - raced
+        - reminder
+        - roll
+        - rps
+        - say
+        - spell
+        - taggle
+        - todo
+        - trac
+        - tv
+        - unicode
+        - url
+        - vdm
+        - wiki
+        - xhtml

@@ -1,0 +1,13 @@
+syntax:glob
+.svn
+*.pyc
+*.pyo
+*.orig
+*.swp
+modules/blague/scores.db*
+modules/who/ldap_pass.py
+modules/trac/mount
+modules/trac/trac.db
+modules/belote/belote/
+modules/bourse/*.csv
+modules/belote/png/

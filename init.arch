@@ -1,0 +1,60 @@
+#!/bin/bash
+
+. /etc/rc.conf
+. /etc/rc.d/functions
+#. /etc/conf.d/deluged
+USER=pipo
+SRCDIR=/usr/local/share/botjabber
+PIDFILE=/var/run/botjabber.pid
+CONFFILE=/usr/local/share/botjabber/settings.yml
+
+[[ -f $PIDFILE ]] && PID=$(cat $PIDFILE)
+[[ -d /proc/$PID ]] || PID=
+
+case "$1" in
+  start)
+    stat_busy "Starting Bot"
+    [[ -z $PID ]] && su -s '/bin/sh' $USER -c "cd $SRCDIR && $SRCDIR/bot.py $CONFFILE > /var/log/botjabber.log 2>&1 &"
+    if [ $? -gt 0 ]; then
+      stat_fail
+    else
+      sleep 1
+      echo $(pgrep -u $USER bot.py) > $PIDFILE
+      add_daemon botjabber
+      stat_done
+    fi
+    ;;
+  stop)
+    stat_busy "Stopping Bot"
+    [[ ! -z $PID ]] && kill $PID &> /dev/null
+    if [ $? -gt 0 ]; then
+      stat_fail
+    else
+      kill $PID
+      rm $PIDFILE
+      rm_daemon botjabber
+      stat_done
+    fi
+    ;;
+  restart)
+    $0 stop
+    sleep 1
+    $0 start
+    ;;
+  update)
+    stat_busy "Updating Bot"
+    oldrev=`su -s '/bin/sh' $USER -c 'hg tip -R /usr/local/share/botjabber --template "{rev}"'`
+    su -s '/bin/sh' $USER -c "hg pull -u -R $SRCDIR"
+    newrev=`su -s '/bin/sh' $USER -c 'hg tip -R /usr/local/share/botjabber --template "{rev}"'`
+    if [ $? -gt 0 ]; then
+      stat_fail
+    fi
+    if ! [ $newrev=$oldrev ];then
+        $0 restart
+    fi
+    ;;
+  *)
+    echo "usage: $0 {start|stop|restart}"
+esac
+exit 0
+
