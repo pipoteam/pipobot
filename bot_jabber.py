@@ -22,7 +22,7 @@ class bot_jabber(xmpp.Client, threading.Thread):
         jid = xmpp.protocol.JID(login)
         xmpp.Client.__init__(self, jid.getDomain(), debug=[])
         threading.Thread.__init__(self)
-        logger.info("Connecting to %s" % chat)
+        logger.info(_("Connecting to %s") % chat)
 
         self.name = name
         #pseudo <-> jid
@@ -43,11 +43,11 @@ class bot_jabber(xmpp.Client, threading.Thread):
         #Connecting
         con = self.connect()
         if not con:
-            logger.error("Unable to connect !")
+            logger.error(_("Unable to connect !"))
             sys.exit()
         auth = self.auth(jid.getNode(), passwd, resource=res)
         if not auth:
-            logger.error("Unable to authenticate !")
+            logger.error(_("Unable to authenticate !"))
             sys.exit()
         self.RegisterHandler('message', self.message)
         self.RegisterHandler('presence', self.presence)
@@ -59,7 +59,7 @@ class bot_jabber(xmpp.Client, threading.Thread):
         pres.setTag('x', namespace=xmpp.NS_MUC)
         pres.getTag('x').addChild('history', {'maxchars':'0'})
         self.send(pres)
-        self.say("Hello everyone !")
+        self.say(_("Hello everyone !"))
 
     def message(self, conn, mess):
         """Method called when the bot receives a message"""
@@ -138,10 +138,10 @@ class bot_jabber(xmpp.Client, threading.Thread):
             else:
                 #In any other case, an error has occured in the module
                 if send is not None:
-                    self.say("Error from module %s : %s" % (classe.command, send))
+                    self.say(_("Error from module %s : %s") % (classe.command, send))
         except:
-            self.say("Error !")
-            logger.error("Error in %s : %s" % (classe.command, traceback.format_exc()))
+            self.say(_("Error !"))
+            logger.error(_("Error from module %s : %s") % (classe.command, traceback.format_exc()))
 
 
     def add_commands(self, classes):
@@ -159,7 +159,7 @@ class bot_jabber(xmpp.Client, threading.Thread):
     def kill(self):
         """Method used to kill the bot"""
         self.alive = False
-        self.say("I've been asked to leave you")
+        self.say(_("I've been asked to leave you"))
         self.disconnect()
 
     def say(self, mess, priv=None, in_reply_to=None):
@@ -177,7 +177,7 @@ class bot_jabber(xmpp.Client, threading.Thread):
                 message.setTo("%s/%s" % (self.chat, priv))
                 message.setType("chat")
             self.send(message)
-            logger.debug(u"Message sent to %s, type %s" % (message.getTo(), message.getType()))
+            logger.debug(_("Message sent to %s, type %s") % (message.getTo(), message.getType()))
 
 
     def say_xhtml(self, mess, mess_xhtml, priv=None, in_reply_to=None):
@@ -220,14 +220,14 @@ class bot_jabber(xmpp.Client, threading.Thread):
                 del self.droits[pseudo]
                 del self.jids[pseudo]
             except KeyError:
-                logger.error("user leaves without being in the room !")
+                logger.error(_("User %s leaves without being in the room !") % (pseudo))
             return
 
         self.droits[pseudo] = power
 
         #If the bot has no rights to view user's JID
         if mess.getJid() is None:
-            logger.error("The can't read JID in this room !")
+            logger.error(_("I can't read JID in this room !"))
             return
 
         jid = mess.getJid().split('/')[0]
@@ -261,16 +261,16 @@ class bot_jabber(xmpp.Client, threading.Thread):
         try:
             return self.jids[pseudo]
         except KeyError:
-            logger.error("The user %s is not in the room !" % (pseudo))
-            return "unknown user %s" % (pseudo)
+            logger.error(_("The user %s is not in the room !") % (pseudo))
+            return _("unknown user %s") % (pseudo)
 
     def pseudo2role(self, pseudo):
         """Method used to get role of a pseudo"""
         try:
             return self.droits[pseudo]
         except KeyError:
-            logger.error("The user %s is not in the room !" % (pseudo))
-            return "unknown user %s" % (pseudo)
+            logger.error(_("The user %s is not in the room !") % (pseudo))
+            return _("unknown user %s") % (pseudo)
         
     def disable_mute(self):
         """To give the bot its voice again"""

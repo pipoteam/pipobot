@@ -8,12 +8,15 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 import logging
 import os, yaml
+import gettext
 from optparse import OptionParser
 
 from modules import liste_classes
 
 # Constants
 DEFAULT_LOG = "/tmp/botjabber.log"
+DEFAULT_LANG = "en"
+APP_NAME = "pipobot"
 
 # Parametering options
 parser = OptionParser()
@@ -36,7 +39,7 @@ settings = yaml.load(s)
 s.close()
 
 # Configuring logging
-logger = logging.getLogger('pipobot')
+logger = logging.getLogger(APP_NAME)
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
@@ -55,6 +58,23 @@ logger.addHandler(file_handler)
 logger.info("-- Starting pipobot --")
 logger.info("Reading configuration file : %s" % settings_filename)
 logger.info("Logging file : %s" % log_filename)
+
+# Configuring language
+lang = settings["lang"] if "lang" in settings else DEFAULT_LANG
+logger.info("Language in config file : %s"%(lang))
+local_path = os.path.realpath(os.path.dirname(sys.argv[0]))
+local_path = os.path.join(local_path,"locale")
+try:
+    current_l = gettext.translation(APP_NAME, local_path, languages=[lang])
+    current_l.install()
+except IOError:
+    logger.error("The language %s is not supported, using %s instead"%(lang, DEFAULT_LANG))
+    try:
+        current_l = gettext.translation(APP_NAME, local_path, languages=[DEFAULT_LANG])
+        current_l.install()
+    except IOError:
+        logger.error("Error loading english translations : no translation will be used")
+
 
 # Starting bots
 bots = []
@@ -79,9 +99,9 @@ try :
     while raw_input("") != 'q' :
         continue
 except KeyboardInterrupt :
-    logger.info("Ctrl-c signal !")
+    logger.info(_("Ctrl-c signal !"))
 
-logger.info("Killing bots")
+logger.info(_("Killing bots"))
 for bot in bots :
     bot.kill()
 sys.exit()

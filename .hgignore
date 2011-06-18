@@ -4,6 +4,7 @@ syntax:glob
 *.pyo
 *.orig
 *.swp
+*.mo
 modules/blague/scores.db*
 modules/who/ldap_pass.py
 modules/trac/mount
