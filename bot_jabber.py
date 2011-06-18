@@ -88,8 +88,6 @@ class bot_jabber(xmpp.Client, threading.Thread):
         # Synchronous commands
         cmd = msg_body.split(" ")[0]
         for classe in self.commands_sync:
-            if not cmd.startswith("!") and not cmd.startswith(":"):
-                return
             if hasattr(classe, 'genericCmd'):
                 test = cmd[1:] in classe.genericCmd
                 tosend = msg_body

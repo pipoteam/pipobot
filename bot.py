@@ -1,40 +1,41 @@
 #! /usr/bin/python2 -Wignore::DeprecationWarning
 # -*- coding: utf-8 -*-
+"""Main module of the bot"""
 
 import bot_jabber
 import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
 import logging
-import os,yaml
+import os, yaml
 from optparse import OptionParser
 
 from modules import liste_classes
 
-# Constantes
-DEFAULT_LOG="/tmp/botjabber.log"
+# Constants
+DEFAULT_LOG = "/tmp/botjabber.log"
 
-# Paramétrage des options
+# Parametering options
 parser = OptionParser()
 parser.set_defaults(level=logging.INFO)
 parser.set_usage("usage: %prog [options] [confpath] ")
 parser.add_option("-q", "--quiet",
                   action="store_const", dest="level", const=logging.CRITICAL,
-                  help="N'affiche que les erreurs critiques dans la console")
+                  help="Just print critical errors in the terminal")
 parser.add_option("-d", "--debug",
                   action="store_const", dest="level", const=logging.DEBUG,
-                  help="Affiche les debugs")
+                  help="Print debugs")
 
-
+#Reading command-line options
 (options, args) = parser.parse_args()
 
-# Lecture de la conf
+# Reading configuration file
 settings_filename = args[0] if args else os.path.join(os.path.dirname(globals()["__file__"]),'settings.yml')
 s = open(settings_filename)
 settings = yaml.load(s)
 s.close()
 
-# Paramétrage du log
+# Configuring logging
 logger = logging.getLogger('pipobot')
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -50,20 +51,19 @@ file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
-# Hello world !
 
-logger.info("-- Démarage de pipobot --")
-logger.info("Lecture du fichier de configuration : %s" % settings_filename)
-logger.info("Ajout du log dans le fichier : %s" % log_filename)
+logger.info("-- Starting pipobot --")
+logger.info("Reading configuration file : %s" % settings_filename)
+logger.info("Logging file : %s" % log_filename)
 
-# Démarrage des bots
-bots=[]
-for salon in settings["salons"] :
+# Starting bots
+bots = []
+for salon in settings["rooms"] :
     bot = bot_jabber.bot_jabber(salon["login"], salon["passwd"], salon["ressource"], salon["chan"], salon["nick"])
     classes_salon = []
     for module_name in salon["modules"]+["help"] :
         if module_name.startswith('_') :
-            group = ["modules.%s" % module for module in settings["groupes"][module_name[1:]]]
+            group = ["modules.%s" % module for module in settings["groups"][module_name[1:]]]
         else :
             group = ["modules.%s" % module_name]
 
@@ -75,14 +75,13 @@ for salon in settings["salons"] :
     bot.start()
     bots.append(bot)
 
-#On attend gentiment
 try :
     while raw_input("") != 'q' :
         continue
 except KeyboardInterrupt :
-    logger.info("Fermeture par ctrl-c")
+    logger.info("Ctrl-c signal !")
 
-logger.info("Tuage des bots")
+logger.info("Killing bots")
 for bot in bots :
     bot.kill()
 sys.exit()
