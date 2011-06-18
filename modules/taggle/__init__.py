@@ -38,7 +38,7 @@ class CmdTaggle:
                 else:
                     self.bot.say("Bon bah puisque c'est comme ça je boude")
                     self.bot.mute = True
-                    self.bot.t = threading.Timer(30.0, self.bot.disableMute)
+                    self.bot.t = threading.Timer(30.0, self.bot.disable_mute)
                     self.bot.t.start()
                 return ""
             elif message.lower() == sender.lower():
@@ -67,7 +67,7 @@ class FakeBot:
         self.name = "lebot"
 
 if __name__ == '__main__':
-    #Placer ici les tests unitaires
+    #Unitary tests
     b = FakeBot()
     o = CmdTaggle(b)
     print o.answer('xouillet', 'Bad Company')    

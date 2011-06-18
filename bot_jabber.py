@@ -1,63 +1,68 @@
 #!/usr/bin/python
 #-*- coding: utf8 -*-
+"""This file contains the class 'bot_jabber' wich is a bot for jabber MUC"""
 
 import xmpp
 import logging
 import sys
 import traceback
 import threading
-import random
 import time
 logger = logging.getLogger('pipobot.bot_jabber') 
 
 
-LOG = open('/tmp/botnet7.log', 'a')
 XML_NAMESPACE = 'http://www.w3.org/1999/xhtml'
 
 class bot_jabber(xmpp.Client, threading.Thread):
+    """The implementation of a bot for jabber MUC"""
     def __init__(self, login, passwd, res, chat, name):
-        #Obligé de mettre ca pour definir un client...
         self.mute = False
+        #Definition of an XMPP client
         self.Namespace, self.DBG = 'jabber:client', xmpp.DBG_CLIENT
-        jid=xmpp.protocol.JID(login)
+        jid = xmpp.protocol.JID(login)
         xmpp.Client.__init__(self, jid.getDomain(), debug=[])
-        #xmpp.Client.__init__(self, jid.getDomain())
         threading.Thread.__init__(self)
-        logger.info("Connexion en cours sur %s" % chat)
+        logger.info("Connecting to %s" % chat)
 
         self.name = name
-        # dictionnaire stockant la correspondance pseudo <-> login INP-net
+        #pseudo <-> jid
         self.jids = {}
+        #pseudo <-> rights on the channel
         self.droits = {}
-        self.alive = True #servira a le tuer
-        self.commands_sync = [] #commandes sync a executer
-        self.commands_async = [] #commandes async a executer
-        self.commands_listen = [] #commandes listen a executer
-        self.commands_iq = [] #commandes iq
+        #If set to False, the bot will be killed
+        self.alive = True 
+        #synchronous commands
+        self.commands_sync = [] 
+        #asynchronous commands
+        self.commands_async = []
+        #listening commands
+        self.commands_listen = []
+        #iq commands
+        self.commands_iq = []
         self.chat = xmpp.protocol.JID(chat)
-        #Connexion jabber, etc...
-        con=self.connect()
+        #Connecting
+        con = self.connect()
         if not con:
-            print 'Impossible de se connecter !'
+            logger.error("Unable to connect !")
             sys.exit()
-        auth=self.auth(jid.getNode(), passwd, resource=res)
+        auth = self.auth(jid.getNode(), passwd, resource=res)
         if not auth:
-            print 'Impossible de s\'authentifier !'
+            logger.error("Unable to authenticate !")
             sys.exit()
         self.RegisterHandler('message', self.message)
         self.RegisterHandler('presence', self.presence)
         self.RegisterHandler('iq', self.iq)
 
-        #Code pour ne pas avoir l'historique
+        #To avoid getting the history of messages when connecting
         chatpres = xmpp.protocol.JID(chat+"/"+name)
-        p = xmpp.Presence(to=chatpres)
-        p.setTag('x', namespace=xmpp.NS_MUC)
-        p.getTag('x').addChild('history',{'maxchars':'0'})
-        self.send(p)
-        self.say("\o/ \o/ Je suis de retour, pour votre plus grand plaisir \o/ \o/ !!!")
+        pres = xmpp.Presence(to=chatpres)
+        pres.setTag('x', namespace=xmpp.NS_MUC)
+        pres.getTag('x').addChild('history', {'maxchars':'0'})
+        self.send(pres)
+        self.say("Hello everyone !")
 
     def message(self, conn, mess):
-        """Methode appelée lors de la reception d'un message"""
+        """Method called when the bot receives a message"""
 
         if self.mute:
             return
@@ -68,49 +73,55 @@ class bot_jabber(xmpp.Client, threading.Thread):
         if mess.getTag('delay'):
             return
 
-        m = mess.getBody()
+        msg_body = mess.getBody()
+        if msg_body == None:
+            return
        
-        # Commandes listen
+        # listen commands
         for classe in  self.commands_listen:
-            self.answer(classe, mess.getFrom().getResource(), m, mess)
+            self.answer(classe, mess.getFrom().getResource(), msg_body, mess)
 
-        # Commandes sync
-        if m != None:
-            m = m.lstrip()
-        if m == None or m == "" or (m[0] != '!' and m[0] != ":"):
+        msg_body = msg_body.lstrip()
+        if msg_body == "" or (msg_body[0] != '!' and msg_body[0] != ":"):
             return
 
-        cmd = m.split(" ")[0]
+        # Synchronous commands
+        cmd = msg_body.split(" ")[0]
         for classe in self.commands_sync:
-            rd = random.randint(1, 100)
+            if not cmd.startswith("!") and not cmd.startswith(":"):
+                return
             if hasattr(classe, 'genericCmd'):
-                if cmd in ["!"+s for s in classe.genericCmd]+[":"+s for s in classe.genericCmd]:
-                    if mess.getType() == "groupchat" or (mess.getType() == "chat" and classe.pm_allowed):
-                        if rd > 3:
-                            self.answer(classe, mess.getFrom().getResource(), m.strip(), mess)
-                        else:
-                            self.say("I'm sorry %s, I'm afraid I can't do that"%(mess.getFrom().getResource()))
-            if cmd == "!"+classe.command or cmd == ":"+classe.command:
-                if mess.getType() == "groupchat" or (mess.getType() == "chat" and classe.pm_allowed):
-                    if rd > 3:
-                        self.answer(classe, mess.getFrom().getResource(), m[1+len(classe.command):].strip(), mess)
-                    else:
-                        self.say("I'm sorry %s, I'm afraid I can't do that"%(mess.getFrom().getResource()))
+                test = cmd[1:] in classe.genericCmd
+                tosend = msg_body
+            else:
+                test = cmd[1:] == classe.command
+                tosend = msg_body[1+len(classe.command):]
 
+            if test and (mess.getType() == "groupchat" or 
+                         (mess.getType() == "chat" and classe.pm_allowed)):
+                self.answer(classe, mess.getFrom().getResource(), tosend.strip(), mess)
 
-    def answer(self, classe, sender, m, mess): 
+    def answer(self, classe, sender, text_msg, mess): 
+        """Method used to dispatch a command to the appropriate module"""
+        #The bot does not ansers to itself
         if sender == self.name:
             return
+
+        #If the bot has been muted
         if self.mute:
             return
         try:
-            send = classe.answer(sender, m)
+            #Calling the 'answer" method of the module
+            send = classe.answer(sender, text_msg)
+            #If the method is just a string, it will be the bot's answer
             if type(send) == str or type(send) == unicode:
                 self.say(send, in_reply_to=mess)
+            #If it's a list we display each message with a time delay
             elif type(send) == list:
                 for line in send:
                     time.sleep(0.3)
                     self.say(line, in_reply_to=mess)
+            #If it is a tuple, it is supposed to be (raw message, xhtml message)
             elif type(send) == tuple and len(send) >= 2:
                 if send[1] is None:
                     self.say(send[0], in_reply_to=mess)
@@ -127,23 +138,20 @@ class bot_jabber(xmpp.Client, threading.Thread):
                                 self.say_xhtml(message[0], message[1], priv=user, in_reply_to=mess)
 
             else:
+                #In any other case, an error has occured in the module
                 if send is not None:
-                    self.say("Erreur : retour : %s" % send)
+                    self.say("Error from module %s : %s" % (classe.command, send))
         except:
-            self.say("Erreur :(")
-            logger.error("Erreur dans la commande : %s" % traceback.format_exc())
+            self.say("Error !")
+            logger.error("Error in %s : %s" % (classe.command, traceback.format_exc()))
 
 
     def add_commands(self, classes):
-        """Methode appellée au debut où l'on spécifie les classes des modules"""
-
+        """Method called when we specify modules' classes, at the creation of bot's instance"""
         for classe in classes:
-            #print "Ajout de %s" % classe
             objet = classe(self)
             if hasattr(classe, 'answer'):
-                if hasattr(objet, 'command'):
-                    self.commands_sync.append(objet)
-                elif hasattr(objet, 'genericCmd'):
+                if hasattr(objet, 'command') or hasattr(objet, 'genericCmd'):
                     self.commands_sync.append(objet)
                 else:
                     self.commands_listen.append(objet)
@@ -151,14 +159,15 @@ class bot_jabber(xmpp.Client, threading.Thread):
                 self.commands_async.append(objet)
 
     def kill(self):
-
-        self.alive=False
-        self.say("Désolé, je me vois dans l'obligation de vous laisser, mais je reviendrai...enfin si on me relance")
+        """Method used to kill the bot"""
+        self.alive = False
+        self.say("I've been asked to leave you")
         self.disconnect()
 
     def say(self, mess, priv=None, in_reply_to=None):
-        """ Envoi un message sur le salon"""
+        """Method used to send a message in a the room"""
 
+        #If the bot has not been disabled
         if not self.mute:
             message = xmpp.Message(self.chat, mess, typ="groupchat")
             if in_reply_to:
@@ -170,51 +179,57 @@ class bot_jabber(xmpp.Client, threading.Thread):
                 message.setTo("%s/%s" % (self.chat, priv))
                 message.setType("chat")
             self.send(message)
-        logger.debug(u"Message envoyé à %s, type %s" % (message.getTo(), message.getType()))
+            logger.debug(u"Message sent to %s, type %s" % (message.getTo(), message.getType()))
 
 
     def say_xhtml(self, mess, mess_xhtml, priv=None, in_reply_to=None):
-        """ Envoi un message xhtml sur le salon"""
+        """Sending an xhtml message in the room"""
+        #The message is created from mess, in case some clients does not support XHTML (xep-0071)
 
-        # on fait le message de base avec le message pour ceux qui
-        # ne supporteraient pas le XHTML (xep-0071)
+        #If the bot has not been disabled
         if not self.mute:
             message = xmpp.Message(self.chat, mess, typ="groupchat")
             if in_reply_to:
                 message.setType( in_reply_to.getType() )
                 if in_reply_to.getType() == "chat":
                     message.setTo( in_reply_to.getFrom() )
+            #In case this is a private message
             if priv:
                 message.setTo("%s/%s" % (self.chat, priv))
                 message.setType("chat")
-            # on prépare le noeud XHTML
+            #We prepare the XHTML node
             if type(mess_xhtml) == unicode:
                 mess_xhtml = mess_xhtml.encode("utf8")
-            #mess_xhtml = mess_xhtml.replace("&","&amp;")
-            payload=xmpp.simplexml.XML2Node('<body xmlns="%s">%s</body>' % (XML_NAMESPACE, mess_xhtml))
-            # On ajoute le noeud au message puis on poste
+            payload = xmpp.simplexml.XML2Node('<body xmlns="%s">%s</body>' % (XML_NAMESPACE, mess_xhtml))
+            # We add the XHTML node to the message then send it
             message.addChild('html', {}, [payload], xmpp.NS_XHTML_IM)
             self.send(message)
 
     def presence(self, conn, mess):
-        """ Appelé a chaque evenement presence. Sert a mettre à jour la table de correspondance pseudos<->jids """
-
+        """Method called when the bot receives a presence message.
+           Used to record users in the room, as well as their jid and rights"""
+        
+        #Get the role of the participant
         for xtag in mess.getTags("x"):
             if xtag.getTag("item"):
                 power = xtag.getTag("item").getAttr("role")
-
+        
         pseudo = mess.getFrom().getResource()
-        self.droits[pseudo] = power
+        
+        #The user [pseudo] leaves the room
         if mess.getType() == 'unavailable':
             try:
                 del self.droits[pseudo]
                 del self.jids[pseudo]
             except KeyError:
-                print "Sortie sans être entré Oo"
+                logger.error("user leaves without being in the room !")
             return
 
+        self.droits[pseudo] = power
+
+        #If the bot has no rights to view user's JID
         if mess.getJid() is None:
-            print "Bot non admin"
+            logger.error("The can't read JID in this room !")
             return
 
         jid = mess.getJid().split('/')[0]
@@ -222,32 +237,48 @@ class bot_jabber(xmpp.Client, threading.Thread):
 
         
     def run(self):
+        """Method called when the bot is ran"""
+        #We start dameons for asynchronous methods
         for classe in self.commands_async:
             classe.daemon = True
             classe.start()
-
+        
+        #client's loop, exited only when self.alive has been set to False
         while self.alive:
             self.Process(1)
 
+        #When bot's killed, every asynchronous module must be killed too
         for classe in self.commands_async:
             classe.stop()
+
     def jid2pseudo(self, jid):
-        for k,v in self.jids.iteritems():
-            if v == jid:
-                return k
+        """Method used to return pseudo from JID"""
+        for jids, pseudo in self.jids.iteritems():
+            if jids == jid:
+                return pseudo
         return jid
 
     def pseudo2jid(self, pseudo):
-        return self.jids[pseudo]
+        """Method used to return JID from pseudo"""
+        try:
+            return self.jids[pseudo]
+        except KeyError:
+            logger.error("The user %s is not in the room !" % (pseudo))
+            return "unknown user %s" % (pseudo)
 
     def pseudo2role(self, pseudo):
-        return self.droits[pseudo]
+        """Method used to get role of a pseudo"""
+        try:
+            return self.droits[pseudo]
+        except KeyError:
+            logger.error("The user %s is not in the room !" % (pseudo))
+            return "unknown user %s" % (pseudo)
         
-    def disableMute(self):
+    def disable_mute(self):
+        """To give the bot its voice again"""
         self.mute = False
 
     def iq(self, conn, iqdata) :
-        """ Appelé lorsque l'on recoit un iq """
-
+        """Method called when the bot receives an IQ message"""
         for classe in  self.commands_iq :
             classe.process(iqdata)

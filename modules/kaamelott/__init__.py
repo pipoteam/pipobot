@@ -18,7 +18,6 @@ class Kaamelott:
         self.command = "kaamelott"
         self.desc = "Quelques citations de certaines personnes de kaamelott : arthur, burgonde, guethenoc, kadoc, karadoc, lancelot, leodagan, merlin, perceval."
         self.pm_allowed = True
-        self.isMulticmd = True
 
         self.dico = {}
         config = ListConfigParser()
