@@ -11,41 +11,26 @@ rooms:
 
 groups:
     all:
-        - b
         - bashfr
         - blague
-        - boo
         - botanswers
-        - boulet
+        - bourse
         - cmdalacon
         - date
-        - exa
         - getjid
         - google
-        - haddock
-        - hg
-        - kaamelott
-        - kick
         - lyrics
         - mail
         - mpd
-        - mute
         - nextprev
         - ola
         - pendu
-        - pioche
-        - raced
         - reminder
-        - roll
         - rps
-        - say
         - spell
-        - taggle
         - todo
-        - trac
         - tv
         - unicode
         - url
         - vdm
-        - wiki
         - xhtml
