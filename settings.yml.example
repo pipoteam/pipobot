@@ -12,6 +12,7 @@ rooms:
 groups:
     all:
         - bashfr
+        - bashorg
         - blague
         - botanswers
         - bourse
