@@ -26,10 +26,10 @@ vdm [n] : Affiche la vdm [n]"""
             return "Utilise un entier si tu veux une quote spécifique, ou rien si tu préfères aller à Toire"
         contenu = url.read()
         if byid:
-            res = contenu.partition('<div class="post" id="')[2].partition("VDM")[0].partition("<p>")[2].partition("VDM")[0]
+            res = contenu.partition('<div class="post article" id="')[2].partition("VDM")[0].partition("<p>")[2].partition("VDM")[0]
             nb = message
         else:
-            tmp = contenu.partition('div class="post" id="')[2]
+            tmp = contenu.partition('div class="post article" id="')[2]
             res = tmp.partition(">")[2].partition("VDM")[0]
             nb =  tmp.partition('"')[0]
         res = "VDM#%s : %sVDM"%(nb, res)
