@@ -119,7 +119,19 @@ class bot_jabber(xmpp.Client, threading.Thread):
                 for line in send:
                     time.sleep(0.3)
                     self.say(line, in_reply_to=mess)
-            #If it is a tuple, it is supposed to be (raw message, xhtml message)
+            #If it's a dictionary, it is {"text": raw_message, "xhtml" : xhtml_message}
+            #or                          {"text": raw_message, "monospace" : True}
+            #so xhtml message will be raw_message with xhtml information to have monospaced text
+            elif type(send) == dict:
+                if "xhtml" in send and "text" in send:
+                    self.say_xhtml(send["text"], send["xhtml"], in_reply_to=mess)
+                elif "text" in send and "monospace" in send:
+                    if send[monospace]:
+                        html_msg = '<p><span style="font-family: monospace">%s</span></p>' % send["text"].replace("\n", "<br/>\n") 
+                        self.say_xhtml(send["text"], html_msg, in_reply_to=mess)
+                    else:
+                        self.say(send["text"], in_reply_to = mess)
+                        
             elif type(send) == tuple and len(send) >= 2:
                 if send[1] is None:
                     self.say(send[0], in_reply_to=mess)
