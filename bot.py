@@ -54,6 +54,12 @@ file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
+engine = ""
+src = ""
+# Database 
+if "database" in settings:
+    engine = settings["database"]["engine"]
+    src = settings["database"]["src"]
 
 logger.info("-- Starting pipobot --")
 logger.info("Reading configuration file : %s" % settings_filename)
@@ -91,6 +97,21 @@ for salon in settings["rooms"] :
             __import__(module)
             for classe in liste_classes[module] :
                 classes_salon.append(classe)
+
+    if engine:
+        from sqlalchemy import create_engine
+        from sqlalchemy.orm import scoped_session, sessionmaker
+        from sqlalchemy.ext.declarative import declarative_base
+        from modules.bdd import Base
+
+        engine = create_engine('sqlite:///%s' % src, convert_unicode=True)
+        db_session = scoped_session(sessionmaker(autocommit=False,
+                                                 autoflush=False,
+                                                 bind=engine))
+        Base.query = db_session.query_property()
+        Base.metadata.create_all(bind=engine)
+        bot.session = db_session
+
     bot.add_commands(classes_salon)
     bot.start()
     bots.append(bot)

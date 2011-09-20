@@ -1,4 +1,12 @@
+config:
+    logpath: /tmp/testbot.log
+
+database:
+    engine: sqlite3
+    src: bdd/database.db
+
 lang: en
+
 rooms:
   -
     chan: room@server
