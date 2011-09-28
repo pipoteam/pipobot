@@ -218,12 +218,15 @@ class bot_jabber(xmpp.Client, threading.Thread):
     def presence(self, conn, mess):
         """Method called when the bot receives a presence message.
            Used to record users in the room, as well as their jid and rights"""
-        
+        power = "" 
+
         #Get the role of the participant
         for xtag in mess.getTags("x"):
             if xtag.getTag("item"):
                 power = xtag.getTag("item").getAttr("role")
-        
+
+        if power == "":
+            power = "unknown"
         pseudo = mess.getFrom().getResource()
         
         #The user [pseudo] leaves the room
