@@ -2,14 +2,16 @@
 #-*- coding: utf8 -*-
 import urllib
 import simplejson
+import lib.modules.SyncModule
 
-class CmdGoogle:
+class CmdGoogle(lib.modules.SyncModule):
     def __init__(self, bot):
-        self.bot = bot
-        self.command = u"google"
-        self.desc = u"!google mot-clé : recherche le mot clé dans google"
-	self.pm_allowed = True
-
+        desc = u"!google mot-clé : recherche le mot clé dans google"
+        lib.modules.SyncModule.__init__(bot,
+                                desc = desc,
+                                command = "google")
+    
+    @answercmd()
     def answer(self, sender, message):
         if message == '':
             return self.desc
@@ -28,14 +30,3 @@ class CmdGoogle:
                 ans = ans.replace("b>", "strong>")
                 ans_xhtml = ans_xhtml.replace("b>", "strong>")
             return (ans, ans_xhtml)
-
-if __name__ == '__main__':
-    #Placer ici les tests unitaires
-    o = CmdGoogle(None)
-    print o.answer('xouillet', 'bok ounet')
-    print o.answer('xouillet', '')
-else:
-    from .. import register
-    register(__name__, CmdGoogle)
-
-

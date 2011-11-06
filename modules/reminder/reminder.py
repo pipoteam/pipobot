@@ -2,40 +2,26 @@
 # -*- coding: utf-8 -*-
 
 import time
+import lib.modules.SyncModule
 from model import Remind
 from parsedates import parseall, ParseExcept
 
-class CmdReminder:
+class CmdReminder(lib.modules.SyncModule):
     def __init__(self, bot):
-        self.command = "remind"
-        self.bot = bot
-        self.desc = """Un module pour se souvenir de choses
+        desc = """Un module pour se souvenir de choses
     remind list : affiche les personnes qui ont des alertes prévues.
     remind list [name] : affiche la liste des alertes pour [name]
     remind list_all : affiche toutes les alertes
     remind add [owner] [date] [desc] : crée une alerte pour [owner] à la date au format [01/01/01,01h01] décrite par [desc]
     remind delete/remove [n,...] : supprime les alertes d'id [n,...]
     """
-        self.pm_allowed = True
+        lib.modules.SyncModule.__init__(bot, 
+                                    desc = desc,
+                                    command = "remind")
 
-    def answer(self, sender, message):
-        send = ''
-        if message == '':
-            return self.desc
-
-        args = message.split(" ")
-        name = args[0]
-        try:
-            send = getattr(self, name)(args[1:], sender)
-        except AttributeError:
-            send = "La commande %s n'existe pas pour !remind"%(name)
-        except ParseExcept as e:
-            return str(e)
-        return send
-    
+    @answercmd("list")
     def list(self, args, sender):
         #!remind list
-        print "args="+str(args)+"]"
         if len(args) == 0:
             owners = self.bot.session.query(Remind).group_by(Remind.owner).order_by(Remind.owner).all()
             if owners == []:
@@ -55,8 +41,10 @@ class CmdReminder:
             if send == "":
                 send = "Rien pour %s"%(who)
         return send
-
+    
+    @answercmd("add")
     def add(self, args, sender):
+        #XXX args must be a list (or we have to split it)
         #!remind add [owner] [date] [desc] : crée une alerte pour [owner] à la date [date] décrite par [desc]
         if len(args) < 3:
             send = "usage !remind add [owner] [date] [description]"
@@ -77,10 +65,8 @@ class CmdReminder:
                 self.bot.session.commit()
                 send = "Event ajouté pour le %s"%(time.strftime("%d/%m/%y,%Hh%M", time.localtime(date)))
         return send
-
-    def delete(self, args, sender):
-        return self.remove(args, sender)
-
+    
+    @answercmd("delete", "remove")
     def remove(self, args, sender):
         send = ""
         if len(args) < 1:
@@ -96,10 +82,3 @@ class CmdReminder:
                     send += "%s a été supprimé\n"%(deleted[0])
         self.bot.session.commit()
         return send[0:-1]
-
-if __name__ == "__main__":
-    b = CmdReminder(None)
-    print "add"
-    print b.answer("pipo", "remind add seb 22/04/11,20h07 un rappel pour voir")
-    print "list seb"
-    print b.answer("pipo", "remind list seb")

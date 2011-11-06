@@ -4,23 +4,16 @@
 import threading
 from lib.BotMPD import BotMPD
 from mpd import CommandError
+import lib.modules.SyncModule
 
 try:
     import config
 except ImportError:
     raise NameError("MPD config not found, unable to start MPD module")
     
-
-class CmdMpd(threading.Thread):
+class CmdMpd(lib.modules.SyncModule):
     def __init__(self, bot):
-        threading.Thread.__init__(self)
-        self.alive = True
-        self.daemon = True
-        self.verbose = False
-
-        self.command = "mpd"
-        self.bot = bot
-        self.desc = """Controle du mpd
+        desc = """Controle du mpd
     mpd current : chanson actuelle
     mpd next/prev/play: c'est assez explicite
     mpd shuffle : fait un shuffle sur la playlist
@@ -32,9 +25,14 @@ class CmdMpd(threading.Thread):
     mpd clean : pour retarder l'inévitable...
     mpd connected : pour consulter le nombre de personnes connectées sur icecast
     mpd settag [artist|title]=Nouvelle valeur"""
-        self.pm_allowed = False
+        lib.modules.SyncModule.__init(bot, 
+                                    desc = desc,
+                                    pm_allowed = False,
+                                    command = "mpd")
+        self.verbose = False
 
-
+    #TODO passer les commandes de lib/ ici et utiliser les décorateurs
+    @answercmd()
     def answer(self, sender, message):
         if hasattr(config, "DATADIR"):
             mpd = BotMPD(config.HOST, config.PORT, config.PASSWORD, config.DATADIR)
@@ -90,53 +88,3 @@ class CmdMpd(threading.Thread):
 
         mpd.disconnect()
         return send
-
-    def run(self):
-        while self.alive:
-            try:
-                mpd = BotMPD(config.HOST, config.PORT, config.PASSWORD)
-                mpd.send_idle()
-                r = mpd.fetch_idle()
-                repDict = {"The Who - Baba O`riley":"La musique des experts !!!",
-                            "The Who - Won't Get Fooled Again":"La musique des experts !!!",
-                            "Oledaf et Monsieur D - Le café":"Coffee time !",
-                            "Popcorn":"Moi aussi j'aime bien le popcorn",
-                            "popcorn":"Moi aussi j'aime bien le popcorn",
-                            "Ping Pong":"IPQ charlie est mauvais en ping pong :p",
-                            "Daddy DJ":"<xouillet> on écoutait ca comme des dingues à La Souterraine en Creuse \o/ </xouillet>",
-                            "Goldman":"JJG !!!",
-#                            "Clapton":"<xouillet> owi c'est Joe !!! </xouillet>",
-                            "Les 4 barbus - La pince a linge":"LA PINCE A LINGE !!!"}
-                repDict["Les 4 barbus - La pince a linge"] = """
-|\    /|
-| \  / |
-|  \/  |
-|  ()  |
-|_/||  |
-|  ()  |
-| (  ) |
-|  ()  |
-|  ||  |
-|__/\__| """
-                if r is not None and 'player' in r and self.verbose:
-                    title = mpd.currentsongf()
-                    self.bot.say("Nouvelle chanson : %s" % title)
-                    for c in repDict:
-                        if c in title:
-                            self.bot.say(repDict[c])
-                mpd.disconnect()
-            except:
-                continue
-            
-
-    def stop(self):
-        self.alive = False
-
-if __name__ == '__main__':
-    #Placer ici les tests unitaires
-    o = CmdMpd(None)
-    print o.answer('xouillet', 'nightmare 5') 
-else:
-    from .. import register
-    register(__name__, CmdMpd)
-

@@ -1,14 +1,17 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 from parser import extract,requete
+import lib.modules.SyncModule
 
-class CmdTv:
+class CmdTv(lib.modules.SyncModule):
     def __init__(self, bot):
-        self.command = "tv"
-        self.bot = bot
-        self.desc = "tv\nDonne les programmes tv de la soirée\n Les chaînes disponibles sont les suivantes :\n%s"%(", ".join(sorted(extract(requete.TNT).keys())))
-	self.pm_allowed = True
-
+        desc = "tv\nDonne les programmes tv de la soirée\n Les chaînes disponibles sont les suivantes :\n%s"%(", ".join(sorted(extract(requete.TNT).keys())))
+        lib.modules.SyncModule.__init__(bot,
+                                    desc = desc,
+                                    command = "tv")
+    
+    #TODO split function using decorators
+    @answercmd()
     def answer(self, sender, message):
         args = message.strip()
         if args == "":
@@ -23,16 +26,3 @@ class CmdTv:
                 return "%s : %s"%(args, res[args.lower()])
             except KeyError:
                 return "%s n'est pas une chaîne valide... Regardez le help pour plus d'informations"%(args)
-
-class FakeBot:
-    def __init__(self):
-        self.name = "bot"
-if __name__ == '__main__':
-    #Placer ici les tests unitaires
-    o = CmdTv(FakeBot())
-    print o.answer('xouillet', 'tv') 
-    print o.answer('xouillet', 'tv LCP')    
-else:
-    from .. import register
-    register(__name__, CmdTv)
-

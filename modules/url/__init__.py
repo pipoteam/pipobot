@@ -7,6 +7,7 @@ import lib.utils
 import httplib
 from BeautifulSoup import BeautifulSoup, SoupStrainer
 from HTMLParser import HTMLParseError
+import lib.modules.ListenModule
 
 class AppURLopener(urllib.FancyURLopener):
     def prompt_user_passwd(self, host, realm):
@@ -16,9 +17,10 @@ class AppURLopener(urllib.FancyURLopener):
 urllib._urlopener = AppURLopener()
 
 
-class CmdUrl:
+class CmdUrl(lib.modules.ListenModule):
     def __init__(self, bot):
-        self.bot = bot
+        desc = "Extracting title of page from URL"
+        lib.modules.ListenModule.__init__(bot, name = "url", desc = desc)
             
     def answer(self, sender, message):
         if type(message) not in (str, unicode):
@@ -61,13 +63,3 @@ class CmdUrl:
                 send.append("L'URL n'est pas valide !")
 
         return None if send == [] else "\n".join(send)
-
-if __name__ == '__main__':
-    #Placer ici les tests unitaires
-    url = CmdUrl(None)
-    print url.answer("xouillet","http://www.bde.enseeiht.fr/services/sondages/date-de-la-reunion-net7/")
-    print url.answer("xouillet","http://mpd:qsdfqsf@mpd.sleduc.fr/")
-else:
-    from .. import register
-    register(__name__, CmdUrl)
-

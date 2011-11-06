@@ -3,14 +3,17 @@
 from mercurial import ui, hg
 import time
 import os
+import lib.modules.SyncModule 
 
-class CmdVersion:
+class CmdVersion(lib.modules.SyncModule):
     def __init__(self, bot):
-        self.command = "version"
-        self.bot = bot
-        self.desc = "version: donne la version (révision hg) du bot"
-        self.pm_allowed = True
+        desc = "version: donne la version (révision hg) du bot"
+        lib.modules.SyncModule.__init__(bot, 
+                        desc = desc,
+                        command = "version",
+                        )
 
+    @answercmd
     def answer(self, sender, message):
         u = ui.ui()
         repo = hg.repository(u, os.getcwd())
@@ -19,12 +22,3 @@ class CmdVersion:
         date = time.strftime("%a %b %d %H:%M:%S %Y", time.localtime(stamp))
         res = "Je suis à la révision %s, datant du %s" % (rev, date)
         return res
-                
-if __name__ == '__main__':
-    #Placer ici les tests unitaires
-    o = CmdVersion(None)
-    print o.answer('xouillet', '')    
-else:
-    from .. import register
-    register(__name__, CmdVersion)
-

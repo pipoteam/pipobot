@@ -1,20 +1,24 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
+
 import random
 import urllib
 import lib.utils
 import re
 from BeautifulSoup import BeautifulSoup
+import lib.modules.SyncModule 
 
-class CmdVdm:
+class CmdVdm(lib.modules.SyncModule):
     def __init__(self, bot):
-        self.bot = bot
-        self.command = "vdm"
-        self.desc = """Pour afficher des vdm.
+        desc = """Pour afficher des vdm.
 vdm : Retourne une vdm aléatoire.
 vdm [n] : Affiche la vdm [n]"""
-        self.pm_allowed = True
+        lib.modules.SyncModule.__init__(bot, 
+                        desc = desc,
+                        command = "vdm",
+                        )
 
+    @answercmd()
     def answer(self, sender, message):
         if (not message.strip()):
             url = urllib.urlopen('http://www.viedemerde.fr/aleatoire')
@@ -33,13 +37,4 @@ vdm [n] : Affiche la vdm [n]"""
             res = tmp.partition(">")[2].partition("VDM")[0]
             nb =  tmp.partition('"')[0]
         res = "VDM#%s : %sVDM"%(nb, res)
-        return lib.utils.xhtml2text(res)
-
-if __name__ == '__main__':
-    #Placer ici les tests unitaires
-    o = CmdVdm(None)
-    print o.answer('pipo', '')
-else:
-    from .. import register
-    register(__name__, CmdVdm)
-
+        return modules.utils.xhtml2text(res)

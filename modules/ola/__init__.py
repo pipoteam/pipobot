@@ -2,14 +2,16 @@
 #-*- coding: utf-8 -*-
 import random
 import time
+import lib.modules.SyncModule
 
-class Ola:
+class Ola(lib.modueles.SyncModule):
     def __init__(self, bot):
-        self.bot = bot
-        self.command = "ola"
-        self.desc = "Fait la ola."
-        self.pm_allowed = True
+        desc = "Fait la ola."
+        lib.modules.SyncModule.__init__(bot,
+                                desc = desc,
+                                command = "ola")
 
+    @answercmd()
     def answer(self, sender, message):
         if message == "":
             message = str(random.randint(0, 1))
@@ -19,12 +21,3 @@ class Ola:
         if int(message) % 2 != 0:
             res.reverse()
         return res
-
-if __name__ == '__main__':
-    #Placer ici les tests unitaires
-    o = Ola(None)
-    print o.answer('xouillet', '2')
-else:
-    from .. import register
-    register(__name__,Ola)
-

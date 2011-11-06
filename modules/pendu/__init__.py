@@ -2,18 +2,21 @@
 #-*- coding: utf-8 -*-
 import random
 from pendu import Pendu
+import lib.modules.SyncModule
 
-class CmdPendu:
+class CmdPendu(lib.modules.SyncModule):
     def __init__(self, bot):
-        self.bot = bot
-        self.command = "pendu"
-        self.desc = """Un superbe jeu de pendu
+        desc = """Un superbe jeu de pendu
 pendu init : lance une partie avec un mot aléatoire (to be coded...)
 pendu init [word] : lance une partie avec 'word' comme mot à trouver
 pendu try [letter] : propose la lettre 'letter'
 pendu played : affiche la liste des lettres déjà jouées"""
-        self.pm_allowed = True
-            
+        lib.modules.SyncModule.__init__(bot,
+                                desc = desc,
+                                command = "pendu")
+
+    #TODO rewrite using decorators
+    @answercmd() 
     def answer(self, sender, message):
         if not hasattr(self.bot, "pendu"): 
             self.bot.pendu = Pendu("")
@@ -38,18 +41,3 @@ pendu played : affiche la liste des lettres déjà jouées"""
 
         elif cmd == "played":
             return self.bot.pendu.playedtostr()
-
-class Fakebot:
-    def __init__(self):
-        self.name = "pipo"
-
-if __name__ == '__main__':
-    bot = Fakebot()
-    p = CmdPendu(bot)
-    while True:
-        cmd = raw_input()
-        print p.answer("seb", cmd)
-else:
-    from .. import register
-    register(__name__, CmdPendu)
-

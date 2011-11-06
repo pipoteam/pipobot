@@ -5,20 +5,23 @@ import urllib
 import threading
 import lib.utils
 from BeautifulSoup import BeautifulSoup
+import lib.modules.SyncModule 
 
-class CmdBashfr:
+class CmdBashfr(lib.modules.SyncModule):
     def __init__(self, bot):
-        self.bot = bot
-        self.command = "bashfr"
-        self.desc = """Pour lire des quotes bashfr
+        desc = """Pour lire des quotes bashfr
 bashfr : Retourne une quote aléatoire de bashfr.
 bashfr [n] : Affiche la quote [n] de bashfr"""
-        self.pm_allowed = True
+        lib.modules.SyncModule.__init__(bot, 
+                        desc = desc,
+                        command = "bashfr",
+                        )
         self.bot.bashfrlock = False
 
     def enable(self):
         self.bot.bashfrlock = False
             
+    @answercmd()
     def answer(self, sender, message):
         if self.bot.bashfrlock:
             return "Attends un peu !!"
@@ -53,17 +56,3 @@ bashfr [n] : Affiche la quote [n] de bashfr"""
                 else:
                     x = x + lib.utils.xhtml2text(unicode(i))
             return "bashfr #%s :\n%s"%(nb, x)
-
-class FakeBot:
-    def __init__(self):
-        self.bashfrlock = False
-
-
-if __name__ == '__main__':
-    #Placer ici les tests unitaires
-    o = CmdBashfr(FakeBot())
-    print o.answer('pipo', '')
-else:
-    from .. import register
-    register(__name__, CmdBashfr)
-
