@@ -10,9 +10,10 @@ from lib.modules import AsyncModule
 class AsyncReminder(AsyncModule):
     def __init__(self, bot):
         desc = "Display reminds !"
-        AsyncModule.__init__(bot, 
-                                        name = "remind_check",
-                                        desc = desc)
+        AsyncModule.__init__(self, 
+                                bot,  
+                                name = "remind_check",
+                                desc = desc)
         self.lastcheck = time.time()
 
     def action(self):

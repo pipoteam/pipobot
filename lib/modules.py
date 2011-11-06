@@ -85,10 +85,9 @@ class SyncModule(BotModule) :
 
     def __init__(self, bot, desc, command, pm_allowed=True) :
         BotModule.__init__(self, bot, desc)
-
         self.command = command
         self.pm_allowed = pm_allowed
-    
+
     def is_concerned(self, command) :
         return command == self.command
 
@@ -152,7 +151,3 @@ class ListenModule(BotModule) :
 
     def is_concerned(self, command) :
         return True
-
-
-
-

@@ -12,7 +12,8 @@ class CmdBashfr(SyncModule):
         desc = """Pour lire des quotes bashfr
 bashfr : Retourne une quote aléatoire de bashfr.
 bashfr [n] : Affiche la quote [n] de bashfr"""
-        SyncModule.__init__(bot, 
+        SyncModule.__init__(self, 
+                        bot,  
                         desc = desc,
                         command = "bashfr",
                         )

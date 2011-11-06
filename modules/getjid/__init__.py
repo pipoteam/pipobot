@@ -6,9 +6,10 @@ from lib.modules import SyncModule, answercmd
 class CmdGetjid(SyncModule):
     def __init__(self, bot):
         desc = "getjid [nom]\nAffiche la première partie du jid pour découvrir qui se cache derrière un pseudo"
-        SyncModule.__init__(bot, 
-                                    desc = desc,
-                                    command = "getjid")
+        SyncModule.__init__(self, 
+                            bot,  
+                            desc = desc,
+                            command = "getjid")
             
     @answercmd
     def answer(self, sender, message):

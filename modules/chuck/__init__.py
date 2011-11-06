@@ -12,10 +12,11 @@ class CmdChuck:
         desc = """Pour afficher des chucknorrisfact.
 chuck : Retourne un fact aléatoire.
 chuck [n] : Affiche le fact [n]"""
-        SyncModule.__init__(bot, 
-                        desc = desc,
-                        command = "chuck",
-                        )
+        SyncModule.__init__(self, 
+                            bot,  
+                            desc = desc,
+                            command = "chuck",
+                            )
 
     @answercmd
     def answer(self, sender, message):

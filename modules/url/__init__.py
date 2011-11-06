@@ -20,7 +20,7 @@ urllib._urlopener = AppURLopener()
 class CmdUrl(ListenModule):
     def __init__(self, bot):
         desc = "Extracting title of page from URL"
-        ListenModule.__init__(bot, name = "url", desc = desc)
+        ListenModule.__init__(self, bot,  name = "url", desc = desc)
             
     def answer(self, sender, message):
         if type(message) not in (str, unicode):

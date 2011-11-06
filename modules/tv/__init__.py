@@ -6,9 +6,10 @@ from lib.modules import SyncModule, answercmd
 class CmdTv(SyncModule):
     def __init__(self, bot):
         desc = "tv\nDonne les programmes tv de la soirée\n Les chaînes disponibles sont les suivantes :\n%s"%(", ".join(sorted(extract(requete.TNT).keys())))
-        SyncModule.__init__(bot,
-                                    desc = desc,
-                                    command = "tv")
+        SyncModule.__init__(self, 
+                                bot, 
+                                desc = desc,
+                                command = "tv")
     
     #TODO split function using decorators
     @answercmd

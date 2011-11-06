@@ -14,9 +14,10 @@ class CmdTodo:
     todo remove [n,...] : supprime les todos d'id [n,...]
     todo search [element]: recherche un TODO qui contient [element]
     """
-        SyncModule.__init__(bot,
-                                    desc = desc,
-                                    command = "todo")
+        SyncModule.__init__(self,   
+                                bot, 
+                                desc = desc,
+                                command = "todo")
 
     @answercmd("list")
     def list(self, args, sender):

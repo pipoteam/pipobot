@@ -7,7 +7,8 @@ from lib.modules import SyncModule, answercmd
 class Ola(SyncModule):
     def __init__(self, bot):
         desc = "Fait la ola."
-        SyncModule.__init__(bot,
+        SyncModule.__init__(self, 
+                                bot, 
                                 desc = desc,
                                 command = "ola")
 

@@ -7,9 +7,10 @@ from lib.modules import SyncModule, answercmd
 class CmdGoogle(SyncModule):
     def __init__(self, bot):
         desc = u"!google mot-clé : recherche le mot clé dans google"
-        SyncModule.__init__(bot,
-                                desc = desc,
-                                command = "google")
+        SyncModule.__init__(self,
+                            bot, 
+                            desc = desc,
+                            command = "google")
     
     @answercmd
     def answer(self, sender, message):

@@ -19,9 +19,10 @@ def decode_header_str(header):
 
 class AsyncMail(AsyncModule):
     def __init__(self, bot):
-        AsyncModule.__init__(bot, 
-                                        name = "mail",
-                                        desc = "Displaying incoming mails")
+        AsyncModule.__init__(self, 
+                             bot,  
+                             name = "mail",
+                             desc = "Displaying incoming mails")
         f = open(MAILFILE, "w")
         f.write('')
         f.close()

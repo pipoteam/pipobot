@@ -29,7 +29,8 @@ class CmdAlacon(MultiSyncModule):
     def __init__(self, bot):
         commands = self.readconf()
         commands = self.gen_descriptor()
-        MultiSyncModule(bot,
+        MultiSyncModule(self, 
+                        bot,
                         commands = commands)
     
     def extract_to(self, cmd, value, backup):

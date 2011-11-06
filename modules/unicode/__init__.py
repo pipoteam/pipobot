@@ -22,9 +22,10 @@ class CmdUnicode:
 unicode nom
     Recherche le caractère unicode donc le nom ressemble à « nom »
 """
-        SyncModule.__init__(bot,
-                                    desc = desc,
-                                    command = "unicode")
+        SyncModule.__init__(self,   
+                            bot, 
+                            desc = desc,
+                            command = "unicode")
             
     def answer(self, sender, message):
         m = message.lower()

@@ -9,7 +9,8 @@ class CmdBlague(SyncModule):
     """ Ajoute un point-blague à un collègue blagueur compétent """
     def __init__(self, bot):
         desc = "blague [pseudo]\nAjoute un point blague à [pseudo]"
-        SyncModule.__init__(bot, 
+        SyncModule.__init__(self, 
+                        bot, 
                         desc = desc,
                         pm_allowed = False,
                         command = "blague",

@@ -8,6 +8,7 @@ import sys
 import traceback
 import threading
 import time
+from lib.modules import ListenModule, AsyncModule, MultiSyncModule, SyncModule
 logger = logging.getLogger('pipobot.bot_jabber') 
 
 
@@ -73,9 +74,10 @@ class bot_jabber(xmpp.Client, threading.Thread):
                 return
 
         msg_body = mess.getBody().lstrip()
-
-        for modules in self.modules :
-            module.answer(classe, mess.getFrom().getResource(), msg_body, mess)
+        logger.info(self.modules)
+        for module in self.modules :
+            #module.answer(classe, mess.getFrom().getResource(), msg_body, mess)
+            module.answer(mess.getFrom().getResource(), msg_body, mess)
 
     def add_commands(self, classes):
         """Method called when we specify modules' classes, at the creation of bot's instance"""

@@ -102,9 +102,13 @@ for salon in settings["rooms"] :
         else :
             group = [module_name]
 
-        for module in group :
-            __import__(module)
-            for classe in [c for c in dir(module) if type(c) == type and issubclass(c, lib.modules.BotModule)]  :
+        for module in group:
+            module_class =__import__(module)
+            logger.info(dir(module_class))
+            classes = [getattr(module_class, class_name) for class_name in dir(module_class)]
+            #XXX Quick FIX → all these classes are subclasses of BotModule too…
+            except_list = [lib.modules.SyncModule, lib.modules.AsyncModule, lib.modules.MultiSyncModule, lib.modules.BotModule]
+            for classe in [c for c in classes if type(c) == type and issubclass(c, lib.modules.BotModule) and c not in except_list]   :
                 classes_salon.append(classe)
 
     if engine:

@@ -7,9 +7,10 @@ from lib.modules import SyncModule, answercmd
 class CmdDate(SyncModule):
     def __init__(self, bot):
         desc = "date : Affiche la date et l'heure actuelle"
-        SyncModule.__init__(bot, 
-                                    desc = desc,
-                                    command = "date")
+        SyncModule.__init__(self, 
+                            bot,  
+                            desc = desc,
+                            command = "date")
 
     @answercmd    
     def answer(self, sender, message):

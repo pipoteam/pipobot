@@ -7,7 +7,8 @@ class CmdPrevep(SyncModule):
     def __init__(self, bot):
         desc = """prev [show1;show2;show3]
 Affiche les infos sur le dernier épisode en date de show1,show2,show3"""
-        SyncModule.__init__(bot,
+        SyncModule.__init__(self, 
+                                bot, 
                                 desc = desc,
                                 command = "prev")
 

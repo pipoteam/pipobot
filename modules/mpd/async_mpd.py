@@ -14,9 +14,10 @@ except ImportError:
 class AsyndMpd(AsyncModule):
     def __init__(self, bot):
         desc = "Display changes on the mpd server !"
-        AsyncModule.__init__(bot,
-                                    name = "checkmpd",
-                                    desc = desc)
+        AsyncModule.__init__(self, 
+                             bot, 
+                             name = "checkmpd",
+                             desc = desc)
 
     def action(self):
         try:

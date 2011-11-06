@@ -9,7 +9,7 @@ from lib import utils
 class CmdBot(ListenModule):
     def __init__(self, bot):
         desc = "The bot will not let you say anything about him !!"
-        ListenModule.__init__(bot, name = "repartie", desc = desc)
+        ListenModule.__init__(self, bot,  name = "repartie", desc = desc)
 
     def answer(self, sender, message):
         if type(message) not in (str, unicode):

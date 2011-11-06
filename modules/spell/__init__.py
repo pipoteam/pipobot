@@ -8,7 +8,8 @@ class CmdSpell(SyncModule):
         desc = """Correction orthographique
 spell check : vérifie si un mot existe ou pas
 spell suggest : donne les mots approchants"""
-        SyncModule.__init__(bot, 
+        SyncModule.__init__(self, 
+                                bot,  
                                 desc = desc,
                                 command = "spell")
     

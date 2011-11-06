@@ -8,11 +8,12 @@ from lib.modules import SyncModule, answercmd
 class CmdXhtml(SyncModule):
     def __init__(self, bot):
         desc = "xhtml code_xhtml\nAfficher le code xhtml formaté"
-        SyncModule.__init__(bot, 
-                        desc = desc,
-                        pm_allowed = False,
-                        command = "xhtml",
-                        )
+        SyncModule.__init__(self, 
+                            bot,  
+                            desc = desc,
+                            pm_allowed = False,
+                            command = "xhtml",
+                            )
             
     def answer(self, sender, message):
         d = {}

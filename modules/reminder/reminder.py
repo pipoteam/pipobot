@@ -15,9 +15,9 @@ class CmdReminder(SyncModule):
     remind add [owner] [date] [desc] : crée une alerte pour [owner] à la date au format [01/01/01,01h01] décrite par [desc]
     remind delete/remove [n,...] : supprime les alertes d'id [n,...]
     """
-        SyncModule.__init__(bot, 
-                                    desc = desc,
-                                    command = "remind")
+        SyncModule.__init__(self, bot,  
+                                desc = desc,
+                                command = "remind")
 
     @answercmd("list")
     def list(self, args, sender):

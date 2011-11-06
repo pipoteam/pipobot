@@ -12,9 +12,10 @@ class CmdHg(SyncModule):
 hg repos : affiche la liste des repos disponibles
 hg [repo] : donne le dernier changement du repo [repo]
 hg [repo] [rev] : affiche la révision [rev] du repo [repo]""" % (self.defaultrepo)
-        SyncModule.__init__(bot,
-                                    desc = desc,
-                                    command = "hg")
+        SyncModule.__init__(self, 
+                            bot, 
+                            desc = desc,
+                            command = "hg")
         self.readconf("modules/hg/config.yml")
 
     def readconf(self, filename):

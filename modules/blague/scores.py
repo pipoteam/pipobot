@@ -7,7 +7,8 @@ from model import Blagueur
 class CmdScores:
     def __init__(self, bot):
         desc = 'scores\nAffiche le palmarès actuel des blagueurs'
-        SyncModule.__init__(bot, 
+        SyncModule.__init__(self, 
+                        bot,  
                         desc = desc,
                         command = "scores",
                         )

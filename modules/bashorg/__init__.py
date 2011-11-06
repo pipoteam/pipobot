@@ -12,7 +12,7 @@ class CmdBashorg(SyncModule):
         desc = """To read quotes from bash.org
 bashorg : Returns a random quote from bash.org.
 bashorg [n] : Show the quote [n] from bash.org"""
-        SyncModule.__init__(bot, 
+        SyncModule.__init__(self, bot,  
                         desc = desc,
                         command = "bashorg",
                         )

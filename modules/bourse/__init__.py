@@ -17,7 +17,8 @@ class CmdBourse(SyncModule):
     def __init__(self, bot):
         desc = u"bourse [valeur [historique]] \n Affiche le taux de conversion d'une valeur boursière.\n"
         desc += u"	Valeurs disponibles: " + ', '.join(VALUES.keys())
-        SyncModule(bot, 
+        SyncModule.__init__(self, 
+                            bot, 
                             desc = desc,
                             command = "bourse")
 

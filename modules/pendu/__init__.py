@@ -11,7 +11,8 @@ pendu init : lance une partie avec un mot aléatoire (to be coded...)
 pendu init [word] : lance une partie avec 'word' comme mot à trouver
 pendu try [letter] : propose la lettre 'letter'
 pendu played : affiche la liste des lettres déjà jouées"""
-        SyncModule.__init__(bot,
+        SyncModule.__init__(self, 
+                                bot, 
                                 desc = desc,
                                 command = "pendu")
 

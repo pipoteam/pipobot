@@ -9,9 +9,10 @@ class CmdRPS(SyncModule):
 rps init : lance une nouvelle partie
 rps bot : pour se mesurer au bot !!!
 rps (Rock|Paper|Scissor) : pour jouer"""
-        SyncModule.__init__(bot, 
-                                    desc = desc,
-                                    command = "rps")
+        SyncModule.__init__(self, 
+                            bot,  
+                            desc = desc,
+                            command = "rps")
         self.choices = ["Rock", "Paper", "Scissors"]
         self.players = 0
         self.manche = {}

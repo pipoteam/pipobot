@@ -8,10 +8,11 @@ from lib.modules import SyncModule, answercmd
 class CmdVersion(SyncModule):
     def __init__(self, bot):
         desc = "version: donne la version (révision hg) du bot"
-        SyncModule.__init__(bot, 
-                        desc = desc,
-                        command = "version",
-                        )
+        SyncModule.__init__(self, 
+                            bot,  
+                            desc = desc,
+                            command = "version",
+                            )
 
     @answercmd
     def answer(self, sender, message):

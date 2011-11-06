@@ -13,10 +13,11 @@ class CmdVdm(SyncModule):
         desc = """Pour afficher des vdm.
 vdm : Retourne une vdm aléatoire.
 vdm [n] : Affiche la vdm [n]"""
-        SyncModule.__init__(bot, 
-                        desc = desc,
-                        command = "vdm",
-                        )
+        SyncModule.__init__(self,
+                            bot,  
+                            desc = desc,
+                            command = "vdm",
+                            )
 
     @answercmd
     def answer(self, sender, message):
