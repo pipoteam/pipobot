@@ -29,7 +29,7 @@ vdm [n] : Affiche la vdm [n]"""
             res = contenu.partition('<div class="post article" id="')[2].partition("VDM")[0].partition("<p>")[2].partition("VDM")[0]
             nb = message
         else:
-            tmp = contenu.partition('div class="post article" id="')[2]
+            tmp = contenu.partition('<div class="post article" id="')[2]
             res = tmp.partition(">")[2].partition("VDM")[0]
             nb =  tmp.partition('"')[0]
         res = "VDM#%s : %sVDM"%(nb, res)

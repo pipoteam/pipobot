@@ -15,12 +15,17 @@ XML_NAMESPACE = 'http://www.w3.org/1999/xhtml'
 
 class bot_jabber(xmpp.Client, threading.Thread):
     """The implementation of a bot for jabber MUC"""
-    def __init__(self, login, passwd, res, chat, name):
+    def __init__(self, login, passwd, res, chat, name, xmpp_log = None):
         self.mute = False
         #Definition of an XMPP client
         self.Namespace, self.DBG = 'jabber:client', xmpp.DBG_CLIENT
         jid = xmpp.protocol.JID(login)
-        xmpp.Client.__init__(self, jid.getDomain(), debug=[])
+        if xmpp_log is not None:
+            f = open(xmpp_log, "a")
+            xmpp.Client.__init__(self, jid.getDomain(), debug=f)
+            self._DEBUG._fh = f
+        else:
+            xmpp.Client.__init__(self, jid.getDomain(), debug = [])
         threading.Thread.__init__(self)
         logger.info(_("Connecting to %s") % chat)
 
@@ -126,8 +131,13 @@ class bot_jabber(xmpp.Client, threading.Thread):
                 if "xhtml" in send and "text" in send:
                     self.say_xhtml(send["text"], send["xhtml"], in_reply_to=mess)
                 elif "text" in send and "monospace" in send:
-                    if send[monospace]:
-                        html_msg = '<p><span style="font-family: monospace">%s</span></p>' % send["text"].replace("\n", "<br/>\n") 
+                    if send["monospace"]:
+                        html_msg = send["text"]
+                        html_msg = html_msg.replace("&", "&amp;")
+                        html_msg = html_msg.replace("<", "&lt;")
+                        html_msg = html_msg.replace(">", "&gt;")
+                        html_msg = '<p><span style="font-family: monospace">%s</span></p>' % html_msg.replace("\n", "<br/>\n") 
+                        #TODO others characters to convert ?
                         self.say_xhtml(send["text"], html_msg, in_reply_to=mess)
                     else:
                         self.say(send["text"], in_reply_to = mess)
@@ -218,15 +228,13 @@ class bot_jabber(xmpp.Client, threading.Thread):
     def presence(self, conn, mess):
         """Method called when the bot receives a presence message.
            Used to record users in the room, as well as their jid and rights"""
-        power = "" 
+        power = "unknown" 
 
         #Get the role of the participant
         for xtag in mess.getTags("x"):
             if xtag.getTag("item"):
                 power = xtag.getTag("item").getAttr("role")
 
-        if power == "":
-            power = "unknown"
         pseudo = mess.getFrom().getResource()
         
         #The user [pseudo] leaves the room

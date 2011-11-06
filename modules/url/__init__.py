@@ -4,6 +4,7 @@ import re
 import xmpp
 import urllib
 import modules.utils
+import httplib
 from BeautifulSoup import BeautifulSoup, SoupStrainer
 from HTMLParser import HTMLParseError
 
@@ -56,6 +57,8 @@ class CmdUrl:
                     send.append("Il est interdit d'accéder à cette page !")
                 else:
                     send.append("Erreur %s sur cette page"%(error[1]))
+            except httplib.InvalidURL:
+                send.append("L'URL n'est pas valide !")
 
         return None if send == [] else "\n".join(send)
 
@@ -63,7 +66,7 @@ if __name__ == '__main__':
     #Placer ici les tests unitaires
     url = CmdUrl(None)
     print url.answer("xouillet","http://www.bde.enseeiht.fr/services/sondages/date-de-la-reunion-net7/")
-    pass
+    print url.answer("xouillet","http://mpd:qsdfqsf@mpd.sleduc.fr/")
 else:
     from .. import register
     register(__name__, CmdUrl)

@@ -3,35 +3,33 @@
 
 import threading, traceback
 import time
-import lib.consts
-from lib.bddremind import BddReminder
+from model import Remind
 
 class AsyncReminder(threading.Thread):
     def __init__(self, bot):
         threading.Thread.__init__(self)
         self.alive = True
         self.command = 'reminder'
-        self.reminder = BddReminder(lib.consts.DB)
         self.bot = bot
 
     def run(self):
         lastcheck = time.time()
         while self.alive:
-            self.reminder = BddReminder(lib.consts.DB)
+            reminds = self.bot.session.query(Remind).order_by(Remind.date).all()
             now = time.time()
-            reminds = self.reminder.lstreminds()
             for remind in reminds:
-                if remind[-2] >= lastcheck and remind[-2] < now:
-                    date = time.strftime("le %d/%m/%Y à %H:%M", time.localtime(float(remind[3])))
-                    if (remind[1] != remind[4]):
-                        msg = "%s : %s m'a dit de te rappeler "%(remind[1], remind[4])
-                        msg += date.decode("utf-8") + " que : %s"%(remind[2])
+                if remind.date >= lastcheck and remind.date < now:
+                    date = time.strftime("le %d/%m/%Y à %H:%M", time.localtime(float(remind.date)))
+                    if (remind.owner != remind.reporter):
+                        msg = "%s : %s m'a dit de te rappeler "%(remind.owner, remind.reporter)
+                        msg += date.decode("utf-8") + " que : %s"%(remind.description)
                     else:
-                        msg = "%s : comme convenu je te rappelle "%(remind[1]) 
-                        msg += date.decode("utf-8") + " que : %s"%(remind[2])
+                        msg = "%s : comme convenu je te rappelle "%(remind.owner) 
+                        msg += date.decode("utf-8") + " que : %s"%(remind.description)
                     self.bot.say(msg)
-                elif remind[-2] < lastcheck:
-                    self.reminder.delreminder(remind[0])
+                elif remind.date < lastcheck:
+                    self.bot.session.delete(remind)
+                    self.bot.session.commit()
             lastcheck = now
             time.sleep(10)
 

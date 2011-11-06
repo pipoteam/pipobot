@@ -18,7 +18,7 @@ class CmdHelp:
                 else:
                     l.append(module.command)
             l.sort()
-            return self.genString(l)
+            return {"text" : self.genString(l), "monospace" : True}
         else:
             for module in self.bot.commands_sync:
                 if hasattr(module, 'genericCmd'):
@@ -51,7 +51,7 @@ class CmdHelp:
         if i +1 < len(l):
             send += "-%s"%(l[i+1])
 
-        return send
+        return send[:-1]
 
             
 if __name__ == '__main__':

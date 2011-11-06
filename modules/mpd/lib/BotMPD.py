@@ -174,7 +174,7 @@ class BotMPD(mpd.MPDClient):
         f = urllib.urlopen("http://admin:pipo@www.sleduc.fr/server-status")
         soup = BeautifulSoup.BeautifulSoup(f.read())
         clients = {}
-        res = "Liste des clients connectés sur icecast:\n"
+        res = "Liste des clients connectés sur mpd:\n"
         for tr in soup.findAll("tr"):
             hosts = tr.findAll("td",{"nowrap": "nowrap"})
             for host in hosts:
@@ -191,7 +191,7 @@ class BotMPD(mpd.MPDClient):
             except socket.herror:
                 reverse = "Moi y'en a pas savoir résoudre"
             res += "\t- %s (%s)\n\t\tSur %s, depuis %s\n"%(ip, reverse, vhost, since)
-        return res
+        return res[0:-1]
 
     def settag(self, args):
         if self.datadir is None:

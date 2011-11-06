@@ -1,9 +1,8 @@
 #! /usr/bin/python2
 # -*- coding: utf-8 -*-
 import time
-import sqlite3
-from consts import DB
-from lib.bddtodo import BddTodo
+from model import Todo
+from sqlalchemy.orm.exc import NoResultFound
 
 class CmdTodo:
     """ Gestion de TODO-lists """
@@ -23,68 +22,86 @@ class CmdTodo:
         send = ''
         if message == '':
             return self.desc
-        # Connection db
-        bdd = BddTodo(DB)
+
         try:
-            bdd.cursor.execute("SELECT * FROM todo")
-        except:
-            bdd.createtable()
-        args = message.split(" ")
-        name = args[0]
+            name, args = message.split(' ', 1)
+        except ValueError:
+            name = message
+            args = ""
         try:
-            send = getattr(self, name)(args[1:], bdd, sender)
+            send = getattr(self, name)(args, sender)
         except AttributeError:
             send = "La commande %s n'existe pas pour !todo"%(name)
         return send
 
-    def list(self, args, bdd, sender):
-        if len(args) == 0:
-            tmp = bdd.getlsts()
-            if tmp == "":
+    def list(self, args, sender):
+        if args == "":
+            tmp = self.bot.session.query(Todo).group_by(Todo.name).all()
+            if tmp == []:
                 return "Pas de todolist…"
             else:
-                return "Toutes les TODO-lists: \n%s"%(tmp)
-        elif len(args) == 1:
-            liste = args[0]
-            if liste == "all":
-                send = bdd.getalltodo()
-            else:
-                send = bdd.gettodo(liste)
-            if send == "":
-                return "TODO-list vide"
-            return send
+                return "Toutes les TODO-lists: \n%s"%("\n".join([todo.name for todo in tmp]))
         else:
-           return "usage: !todo list ou !todo list [une_liste]"
+            try:
+                ex = ""
+                liste, ex = args.split(' ', 1)
+            except:
+                liste = args
+                if liste == "all":
+                    tmp = self.bot.session.query(Todo).order_by(Todo.name).all()
+                    listname = ""
+                    send = "\n"
+                    for elt in tmp:
+                        if elt.name != listname:
+                            send += "%s: \n" % (elt.name)
+                            listname = elt.name
+                        send += "\t%s \n" % elt
+                else:
+                    tmp = self.bot.session.query(Todo).filter(Todo.name == liste).all()
+                    if tmp == []:
+                        send = ""
+                    else:
+                        send = "%s :\n%s"%(liste, "\n".join(map(str, tmp)))
+                if send.strip() == "":
+                    return "TODO-list vide"
+                return send
+            return "usage: !todo list ou !todo list [une_liste]"
     
-    def add(self, args, bdd, sender):
-        if len(args) < 3:
+    def add(self, args, sender):
+        try:
+            liste, msg = args.split(' ', 1)
+        except ValueError:
             return "usage: !todo add [une_liste] [un_todo]"
-        liste = args[0]
         if liste == "all":
             return "On ne peut pas nommer une liste 'all'"
-        msg = " ".join(args[1:])
-        bdd.newtodo(liste, msg, sender)
+        todo = Todo(liste, msg, sender, time.time()) 
+        self.bot.session.add(todo)
+        self.bot.session.commit()
         return "TODO ajouté"
 
-    def search(self, args, bdd, sender):
+    def search(self, args, sender):
         if len(args) < 1:
             return "usage: !todo search [champ]"
         else:
-            tosearch = " ".join(args)
-            return bdd.search(tosearch)
+            found = self.bot.session.query(Todo).filter(Todo.content.like("%" + args + "%"))
+            return "\n".join(map(str, found))
 
-    def remove(self, args, bdd, sender):
+    def remove(self, args, sender):
         send = ""
         if len(args) < 1:
             return "usage !todo remove id1,id2,id3,…"
-        for i in args[0].split(","):
+        else:
+            arg = args.split(",")
+        for i in arg:
             n = int(i)
-            deleted = bdd.deltodo(n)
-            if deleted != "":
-                send += "%s a été supprimé\n"%(deleted)
+            deleted = self.bot.session.query(Todo).filter(Todo.id == n).all()
+            if deleted == []:
+                send += "Pas de todo d'id %s\n"%(n)
             else:
-                send += "%s n'est pas dans la table"%(n)
-        return send
+                self.bot.session.delete(deleted[0])
+                send += "%s a été supprimé\n"%(deleted[0])
+        self.bot.session.commit()
+        return send[0:-1]
 
 if __name__ == "__main__":
     b = CmdTodo(None)

@@ -15,6 +15,7 @@ from modules import liste_classes
 
 # Constants
 DEFAULT_LOG = "/tmp/botjabber.log"
+DEFAULT_XMPPLOG = None #default = no log of xmpp messages
 DEFAULT_LANG = "en"
 APP_NAME = "pipobot"
 
@@ -54,6 +55,8 @@ file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
+xmpp_log = settings["config"]["xmpplog"] if "config" in settings and "xmpplog" in settings["config"] else DEFAULT_XMPPLOG
+
 engine = ""
 src = ""
 # Database 
@@ -85,7 +88,7 @@ except IOError:
 # Starting bots
 bots = []
 for salon in settings["rooms"] :
-    bot = bot_jabber.bot_jabber(salon["login"], salon["passwd"], salon["ressource"], salon["chan"], salon["nick"])
+    bot = bot_jabber.bot_jabber(salon["login"], salon["passwd"], salon["ressource"], salon["chan"], salon["nick"], xmpp_log)
     classes_salon = []
     for module_name in salon["modules"]+["help"] :
         if module_name.startswith('_') :

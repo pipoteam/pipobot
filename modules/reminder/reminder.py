@@ -1,9 +1,9 @@
 #! /usr/bin/python2
 # -*- coding: utf-8 -*-
+
 import time
-from consts import DB
-from lib.bddremind import BddReminder
-from lib.parsedates import parseall, ParseExcept
+from model import Remind
+from parsedates import parseall, ParseExcept
 
 class CmdReminder:
     def __init__(self, bot):
@@ -23,45 +23,40 @@ class CmdReminder:
         if message == '':
             return self.desc
 
-        # Connection db
-        bdd = BddReminder(DB)
-        try:
-            bdd.cursor.execute("SELECT * FROM reminder")
-        except:
-            bdd.createtable()
-        
         args = message.split(" ")
         name = args[0]
         try:
-            send = getattr(self, name)(args[1:], bdd, sender)
+            send = getattr(self, name)(args[1:], sender)
         except AttributeError:
             send = "La commande %s n'existe pas pour !remind"%(name)
         except ParseExcept as e:
             return str(e)
         return send
     
-    def list(self, args, bdd, sender):
+    def list(self, args, sender):
         #!remind list
+        print "args="+str(args)+"]"
         if len(args) == 0:
-            owners = bdd.getowners()
-            owners = list(set([elt[0] for elt in owners]))
-            if owners == "":
+            owners = self.bot.session.query(Remind).group_by(Remind.owner).order_by(Remind.owner).all()
+            if owners == []:
                 send = "Rien de prévu..."
             else:
-                owners = [owner.encode("utf-8") for owner in owners]
+                owners = [str(owner).encode("utf-8") for owner in owners]
                 send = "Touts les gens qui vont être avertis : "+" ".join(owners)
         elif args[0] == "all":
-            send = (bdd.getallreminds())
+            reminds = self.bot.session.query(Remind).order_by(Remind.owner).all()
+            send = "\n".join(reminds)
             if send == "":
                 send = "Aucun événement prévu"
         else:
             who = args[0]
-            send = bdd.getreminds(who) 
+            res = self.bot.session.query(Remind).filter(Remind.owner == who).all()
+            send = "\n".join([str(elt) for elt in res])
             if send == "":
                 send = "Rien pour %s"%(who)
         return send
 
-    def add(self, args, bdd, sender):
+    def add(self, args, sender):
         #!remind add [owner] [date] [desc] : crée une alerte pour [owner] à la date [date] décrite par [desc]
         if len(args) < 3:
             send = "usage !remind add [owner] [date] [description]"
@@ -74,29 +69,33 @@ class CmdReminder:
             except ValueError:
                 return "La date doit être au format %d/%m/%y,%Hh%M"
             msg = " ".join(args[2:])
-            error = bdd.newevent(owner, msg, date, sender)
-            if error == -1:
+            if date < time.time():
                 send = "On n'ajoute pas un événement dans le passé !!!"
             else:
+                r = Remind(owner, msg, date, sender)
+                self.bot.session.add(r)
+                self.bot.session.commit()
                 send = "Event ajouté pour le %s"%(time.strftime("%d/%m/%y,%Hh%M", time.localtime(date)))
         return send
 
-    def delete(self, args, bdd, sender):
-        return self.remove(args, bdd, sender)
+    def delete(self, args, sender):
+        return self.remove(args, sender)
 
-    def remove(self, args, bdd, sender):
+    def remove(self, args, sender):
         send = ""
         if len(args) < 1:
             send = "usage !remind remove id1,id2,id3"
         else:
-            try:
-                for i in args[0].split(","):
-                    n = int(i)
-                    deleted = bdd.delreminder(n)
-                    send += "%s a été supprimé\n"%(deleted)
-            except:
-                send = "RTFM ! Non vraiment Benoît, c'est toi qui te chie dessus. (Et c'est pas propre)"
-        return send
+            for i in args[0].split(","):
+                n = int(i)
+                deleted = self.bot.session.query(Remind).filter(Remind.id == n).all()
+                if deleted == []:
+                    send += "Pas de remind d'id %s\n"%(n)
+                else:
+                    self.bot.session.delete(deleted[0])
+                    send += "%s a été supprimé\n"%(deleted[0])
+        self.bot.session.commit()
+        return send[0:-1]
 
 if __name__ == "__main__":
     b = CmdReminder(None)
