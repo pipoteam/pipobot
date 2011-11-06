@@ -3,23 +3,19 @@
 
 import re
 import modules.utils
+import lib.modules.SyncModule 
 
-class CmdXhtml:
+class CmdXhtml(lib.modules.SyncModule):
     def __init__(self, bot):
-        self.bot = bot
-        self.command = "xhtml"
-        self.desc = "xhtml code_xhtml\nAfficher le code xhtml formaté"
-	self.pm_allowed = True
+        desc = "xhtml code_xhtml\nAfficher le code xhtml formaté"
+        lib.modules.SyncModule.__init__(bot, 
+                        desc = desc,
+                        pm_allowed = False,
+                        command = "xhtml",
+                        )
             
     def answer(self, sender, message):
-        return (modules.utils.xhtml2text(message), message)
-
-if __name__ == '__main__':
-    #Placer ici les tests unitaires
-    o = CmdXhtml(None)
-    print o.answer('xouillet', 'argument')
-    print o.answer('xouillet', '')    
-else:
-    from .. import register
-    register(__name__, CmdXhtml)
-
+        d = {}
+        d["text"] = message
+        d["xhtml"] = modules.utils.xhtml2text(message)
+        return d

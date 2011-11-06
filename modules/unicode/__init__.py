@@ -9,6 +9,7 @@ MAX=5
 #    unicodes = [l.split(";")[0:2] for l in unicode_file]
 
 import os
+import lib.modules.SyncModule
 
 unicode_file = open(os.path.join(os.path.dirname(__file__), 'UnicodeDataLower.txt'))
 unicodes = [l.split(";")[0:2] for l in unicode_file]
@@ -16,15 +17,14 @@ unicode_file.close()
 
 class CmdUnicode:
     def __init__(self, bot):
-        self.bot = bot
-        self.command = "unicode"
-        self.desc = """
-unicode caractère
+        desc = """Unicode caractère
     Affiche des informations sur le caractère unicode « caractère »
 unicode nom
     Recherche le caractère unicode donc le nom ressemble à « nom »
-""".strip()
-        self.pm_allowed = True
+"""
+        lib.modules.SyncModule.__init__(bot,
+                                    desc = desc,
+                                    command = "unicode")
             
     def answer(self, sender, message):
         m = message.lower()
@@ -54,13 +54,3 @@ unicode nom
             if c >= MAX:
                 break
         return send
-
-if __name__ == '__main__':
-    #Placer ici les tests unitaires
-    o = CmdUnicode(None)
-    print o.answer('xouillet', 'copyright')    
-    print o.answer('xouillet', 'abc')    
-else :
-    from .. import register
-    register(__name__, CmdUnicode)
-

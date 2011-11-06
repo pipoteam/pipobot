@@ -5,16 +5,19 @@ import urllib
 import modules.utils
 import re
 from BeautifulSoup import BeautifulSoup
+import lib.modules.SyncModule 
 
 class CmdChuck:
     def __init__(self, bot):
-        self.bot = bot
-        self.command = "chuck"
-        self.desc = """Pour afficher des chucknorrisfact.
+        desc = """Pour afficher des chucknorrisfact.
 chuck : Retourne un fact aléatoire.
 chuck [n] : Affiche le fact [n]"""
-        self.pm_allowed = True
+        lib.modules.SyncModule.__init__(bot, 
+                        desc = desc,
+                        command = "chuck",
+                        )
 
+    @answercmd()
     def answer(self, sender, message):
         if (not message.strip()):
             url = urllib.urlopen('http://www.chucknorrisfacts.fr/index.php?p=parcourir&tri=aleatoire')
@@ -30,12 +33,3 @@ chuck [n] : Affiche le fact [n]"""
         index = fact.get("id").partition("fact")[2]
         content = modules.utils.xhtml2text(fact.text)
         return "Fact #%s : %s"%(index, content)
-
-if __name__ == '__main__':
-    #Placer ici les tests unitaires
-    o = CmdChuck(None)
-    print o.answer('pipo', '')
-else:
-    from .. import register
-    register(__name__, CmdChuck)
-

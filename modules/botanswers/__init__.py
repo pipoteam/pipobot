@@ -3,12 +3,15 @@
 import random
 import repartie
 import re
-import modules.utils
+import lib.modules.AsyncModule 
+import lib.modules.utils
 
-class CmdBot:
+class CmdBot(lib.modules.ListenModule):
     def __init__(self, bot):
-        self.bot = bot
-            
+        desc = "The bot will not let you say anything about him !!"
+        lib.modules.ListenModule.__init__(bot, name = "repartie", desc = desc)
+    
+    @answercmd()
     def answer(self, sender, message):
         if type(message) not in (str, unicode):
             return
@@ -41,19 +44,4 @@ class CmdBot:
         l = [["server", "serveur", "bot"], ["merde", "bois", "carton"]]
         if all([any([elt2 in message.lower() for elt2 in elt]) for elt in l]):
             msg = "Tu sais ce qu'il te dit le serveur ? Et puis surveille ton langage d'abord !!!"
-            modules.utils.kick(sender, msg, self.bot)
-
-class FakeBot:
-    def __init__(self):
-        self.name = "Pipo-test"
-
-if __name__ == '__main__':
-    #Placer ici les tests unitaires
-    bot = FakeBot()
-    c = CmdBot(bot)
-    print c.answer("qsfd", "Pipo-test: est un connard")
-    pass
-else:
-    from .. import register
-    register(__name__, CmdBot)
-
+            lib.modules.utils.kick(sender, msg, self.bot)

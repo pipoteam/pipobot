@@ -1,20 +1,20 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
 import enchant
+import lib.modules.SyncModule
 
-class CmdSpell:
+class CmdSpell(lib.modules.SyncModule):
     def __init__(self, bot):
-        self.bot = bot
-        self.command = "spell"
-        self.desc = """Correction orthographique
+        desc = """Correction orthographique
 spell check : vérifie si un mot existe ou pas
 spell suggest : donne les mots approchants"""
-        self.pm_allowed = True
-            
+        lib.modules.SyncModule.__init__(bot, 
+                                desc = desc,
+                                command = "spell")
+    
+    @answercmd()
     def answer(self, sender, message):
         dico = enchant.Dict("fr_FR")
-        if sender == self.bot.name:
-            return
         args = message.split()
         mot = args[0]
         if len(args) < 1:
@@ -30,10 +30,3 @@ spell suggest : donne les mots approchants"""
             res = "Suggestions possibles pour %s : "%(mot)
             res += "; ".join(suggestions)
             return res
-
-if __name__ == '__main__':
-    pass
-else:
-    from .. import register
-    register(__name__, CmdSpell)
-

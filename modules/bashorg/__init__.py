@@ -5,20 +5,23 @@ import urllib
 import threading
 import modules.utils
 from BeautifulSoup import BeautifulSoup
+import lib.modules.SyncModule 
 
-class CmdBashorg:
+class CmdBashorg(lib.modules.SyncModule):
     def __init__(self, bot):
-        self.bot = bot
-        self.command = "bashorg"
-        self.desc = """To read quotes from bash.org
+        desc = """To read quotes from bash.org
 bashorg : Returns a random quote from bash.org.
 bashorg [n] : Show the quote [n] from bash.org"""
-        self.pm_allowed = True
+        lib.modules.SyncModule.__init__(bot, 
+                        desc = desc,
+                        command = "bashorg",
+                        )
         self.bot.bashorglock = False
 
     def enable(self):
         self.bot.bashorglock = False
-            
+
+    @answercmd() 
     def answer(self, sender, message):
         if self.bot.bashfrlock:
             return "Please do not flood !"
@@ -47,17 +50,3 @@ bashorg [n] : Show the quote [n] from bash.org"""
                 break
 
         return "%s :\n %s"%(nb, content)
-
-class FakeBot:
-    def __init__(self):
-        self.bashfrlock = False
-
-
-if __name__ == '__main__':
-    #Placer ici les tests unitaires
-    o = CmdBashorg(FakeBot())
-    print o.answer('pipo', '')
-else:
-    from .. import register
-    register(__name__, CmdBashorg)
-

@@ -1,15 +1,18 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 import time
+import lib.modules.SyncModule 
 from model import Blagueur
 
 class CmdScores:
     def __init__(self, bot):
-        self.bot = bot
-        self.command = 'scores'
-        self.desc = 'scores\nAffiche le palmarès actuel des blagueurs'
-        self.pm_allowed = True
+        desc = 'scores\nAffiche le palmarès actuel des blagueurs'
+        lib.modules.SyncModule.__init__(bot, 
+                        desc = desc,
+                        command = "scores",
+                        )
 
+    @answercmd()
     def answer(self, sender, message):
         """Affiche les scores des blagueurs"""
         classement = self.bot.session.query(Blagueur).order_by(Blagueur.score).all()

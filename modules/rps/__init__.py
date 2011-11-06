@@ -1,20 +1,23 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
 import random
+import lib.modules.SyncModule
 
-class CmdRPS:
+class CmdRPS(lib.modules.SyncModule):
     def __init__(self, bot):
-        self.bot = bot
-        self.command = "rps"
-        self.desc = """Rock Paper Scissors:
+        desc = """Rock Paper Scissors:
 rps init : lance une nouvelle partie
 rps bot : pour se mesurer au bot !!!
 rps (Rock|Paper|Scissor) : pour jouer"""
+        lib.modules.SyncModule.__init__(bot, 
+                                    desc = desc,
+                                    command = "rps")
         self.choices = ["Rock", "Paper", "Scissors"]
         self.players = 0
         self.manche = {}
-        self.pm_allowed = True
-            
+
+    #TODO split module to user decorators
+    @answercmd()
     def answer(self, sender, message):
         if not hasattr(self.bot, "rps"): 
             self.bot.rps = self
@@ -91,11 +94,3 @@ rps (Rock|Paper|Scissor) : pour jouer"""
                 return "Results: %s, Winner: %s"%(resultats, ret)
             else:
                 return "Results: %s, Winners: %s"%(resultats, ret)
-
-if __name__ == '__main__':
-    #Placer ici les tests unitaires
-    pass
-else:
-    from .. import register
-    register(__name__, CmdRPS)
-
