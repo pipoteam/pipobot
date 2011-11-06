@@ -4,14 +4,14 @@
 import threading
 from lib.BotMPD import BotMPD
 from mpd import CommandError
-import lib.modules.SyncModule
+from lib.modules import SyncModule, answercmd
 
 try:
     import config
 except ImportError:
     raise NameError("MPD config not found, unable to start MPD module")
     
-class CmdMpd(lib.modules.SyncModule):
+class CmdMpd(SyncModule):
     def __init__(self, bot):
         desc = """Controle du mpd
     mpd current : chanson actuelle
@@ -25,14 +25,14 @@ class CmdMpd(lib.modules.SyncModule):
     mpd clean : pour retarder l'inévitable...
     mpd connected : pour consulter le nombre de personnes connectées sur icecast
     mpd settag [artist|title]=Nouvelle valeur"""
-        lib.modules.SyncModule.__init(bot, 
+        SyncModule.__init(bot, 
                                     desc = desc,
                                     pm_allowed = False,
                                     command = "mpd")
         self.verbose = False
 
     #TODO passer les commandes de lib/ ici et utiliser les décorateurs
-    @answercmd()
+    @answercmd
     def answer(self, sender, message):
         if hasattr(config, "DATADIR"):
             mpd = BotMPD(config.HOST, config.PORT, config.PASSWORD, config.DATADIR)

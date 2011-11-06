@@ -1,16 +1,16 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
 
-import lib.modules.SyncModule
+from lib.modules import SyncModule, answercmd
 
-class CmdGetjid(lib.modules.SyncModule):
+class CmdGetjid(SyncModule):
     def __init__(self, bot):
         desc = "getjid [nom]\nAffiche la première partie du jid pour découvrir qui se cache derrière un pseudo"
-        lib.modules.SyncModule.__init__(bot, 
+        SyncModule.__init__(bot, 
                                     desc = desc,
                                     command = "getjid")
             
-    @answercmd()
+    @answercmd
     def answer(self, sender, message):
         if self.bot.jids == {}:
             return "Jppt car j'ai pas les droits"

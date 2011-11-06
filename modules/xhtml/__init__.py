@@ -3,12 +3,12 @@
 
 import re
 import modules.utils
-import lib.modules.SyncModule 
+from lib.modules import SyncModule, answercmd 
 
-class CmdXhtml(lib.modules.SyncModule):
+class CmdXhtml(SyncModule):
     def __init__(self, bot):
         desc = "xhtml code_xhtml\nAfficher le code xhtml formaté"
-        lib.modules.SyncModule.__init__(bot, 
+        SyncModule.__init__(bot, 
                         desc = desc,
                         pm_allowed = False,
                         command = "xhtml",

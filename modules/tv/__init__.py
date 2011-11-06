@@ -1,17 +1,17 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 from parser import extract,requete
-import lib.modules.SyncModule
+from lib.modules import SyncModule, answercmd
 
-class CmdTv(lib.modules.SyncModule):
+class CmdTv(SyncModule):
     def __init__(self, bot):
         desc = "tv\nDonne les programmes tv de la soirée\n Les chaînes disponibles sont les suivantes :\n%s"%(", ".join(sorted(extract(requete.TNT).keys())))
-        lib.modules.SyncModule.__init__(bot,
+        SyncModule.__init__(bot,
                                     desc = desc,
                                     command = "tv")
     
     #TODO split function using decorators
-    @answercmd()
+    @answercmd
     def answer(self, sender, message):
         args = message.strip()
         if args == "":

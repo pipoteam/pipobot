@@ -5,7 +5,7 @@ import threading
 import traceback
 import time
 from email.header import decode_header
-import lib.modules.AsyncModule
+from lib.modules import AsyncModule
 MAILFILE = '/var/mail/bot'
 
 def decode_header_str(header):
@@ -17,9 +17,9 @@ def decode_header_str(header):
             m += head.decode(enc).encode("utf8")+' '
     return m
 
-class AsyncMail(lib.modules.AsyncModule):
+class AsyncMail(AsyncModule):
     def __init__(self, bot):
-        lib.modules.AsyncModule.__init__(bot, 
+        AsyncModule.__init__(bot, 
                                         name = "mail",
                                         desc = "Displaying incoming mails")
         f = open(MAILFILE, "w")

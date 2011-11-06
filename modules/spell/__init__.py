@@ -1,18 +1,18 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
 import enchant
-import lib.modules.SyncModule
+from lib.modules import SyncModule, answercmd
 
-class CmdSpell(lib.modules.SyncModule):
+class CmdSpell(SyncModule):
     def __init__(self, bot):
         desc = """Correction orthographique
 spell check : vérifie si un mot existe ou pas
 spell suggest : donne les mots approchants"""
-        lib.modules.SyncModule.__init__(bot, 
+        SyncModule.__init__(bot, 
                                 desc = desc,
                                 command = "spell")
     
-    @answercmd()
+    @answercmd
     def answer(self, sender, message):
         dico = enchant.Dict("fr_FR")
         args = message.split()

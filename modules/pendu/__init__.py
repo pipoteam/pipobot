@@ -2,21 +2,21 @@
 #-*- coding: utf-8 -*-
 import random
 from pendu import Pendu
-import lib.modules.SyncModule
+from lib.modules import SyncModule, answercmd
 
-class CmdPendu(lib.modules.SyncModule):
+class CmdPendu(SyncModule):
     def __init__(self, bot):
         desc = """Un superbe jeu de pendu
 pendu init : lance une partie avec un mot aléatoire (to be coded...)
 pendu init [word] : lance une partie avec 'word' comme mot à trouver
 pendu try [letter] : propose la lettre 'letter'
 pendu played : affiche la liste des lettres déjà jouées"""
-        lib.modules.SyncModule.__init__(bot,
+        SyncModule.__init__(bot,
                                 desc = desc,
                                 command = "pendu")
 
     #TODO rewrite using decorators
-    @answercmd() 
+    @answercmd 
     def answer(self, sender, message):
         if not hasattr(self.bot, "pendu"): 
             self.bot.pendu = Pendu("")

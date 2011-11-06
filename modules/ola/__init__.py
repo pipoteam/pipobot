@@ -2,16 +2,16 @@
 #-*- coding: utf-8 -*-
 import random
 import time
-import lib.modules.SyncModule
+from lib.modules import SyncModule, answercmd
 
 class Ola(lib.modueles.SyncModule):
     def __init__(self, bot):
         desc = "Fait la ola."
-        lib.modules.SyncModule.__init__(bot,
+        SyncModule.__init__(bot,
                                 desc = desc,
                                 command = "ola")
 
-    @answercmd()
+    @answercmd
     def answer(self, sender, message):
         if message == "":
             message = str(random.randint(0, 1))

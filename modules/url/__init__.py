@@ -7,7 +7,7 @@ import lib.utils
 import httplib
 from BeautifulSoup import BeautifulSoup, SoupStrainer
 from HTMLParser import HTMLParseError
-import lib.modules.ListenModule
+from lib.modules import ListenModule
 
 class AppURLopener(urllib.FancyURLopener):
     def prompt_user_passwd(self, host, realm):
@@ -17,10 +17,10 @@ class AppURLopener(urllib.FancyURLopener):
 urllib._urlopener = AppURLopener()
 
 
-class CmdUrl(lib.modules.ListenModule):
+class CmdUrl(ListenModule):
     def __init__(self, bot):
         desc = "Extracting title of page from URL"
-        lib.modules.ListenModule.__init__(bot, name = "url", desc = desc)
+        ListenModule.__init__(bot, name = "url", desc = desc)
             
     def answer(self, sender, message):
         if type(message) not in (str, unicode):

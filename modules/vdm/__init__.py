@@ -6,19 +6,19 @@ import urllib
 import lib.utils
 import re
 from BeautifulSoup import BeautifulSoup
-import lib.modules.SyncModule 
+from lib.modules import SyncModule, answercmd 
 
-class CmdVdm(lib.modules.SyncModule):
+class CmdVdm(SyncModule):
     def __init__(self, bot):
         desc = """Pour afficher des vdm.
 vdm : Retourne une vdm aléatoire.
 vdm [n] : Affiche la vdm [n]"""
-        lib.modules.SyncModule.__init__(bot, 
+        SyncModule.__init__(bot, 
                         desc = desc,
                         command = "vdm",
                         )
 
-    @answercmd()
+    @answercmd
     def answer(self, sender, message):
         if (not message.strip()):
             url = urllib.urlopen('http://www.viedemerde.fr/aleatoire')

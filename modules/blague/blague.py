@@ -2,20 +2,20 @@
 # -*- coding: utf-8 -*-
 
 from model import Blagueur
-import lib.modules.SyncModule 
+from lib.modules import SyncModule, answercmd 
 import time
 
-class CmdBlague(lib.modules.SyncModule):
+class CmdBlague(SyncModule):
     """ Ajoute un point-blague à un collègue blagueur compétent """
     def __init__(self, bot):
         desc = "blague [pseudo]\nAjoute un point blague à [pseudo]"
-        lib.modules.SyncModule.__init__(bot, 
+        SyncModule.__init__(bot, 
                         desc = desc,
                         pm_allowed = False,
                         command = "blague",
                         )
 
-    @answercmd()
+    @answercmd
     def answer(self, sender, message):
         send = ''
         if message == '':

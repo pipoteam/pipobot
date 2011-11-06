@@ -4,15 +4,15 @@ import os
 import yaml
 import lib
 import mercurial
-import lib.modules.SyncModule
+from lib.modules import SyncModule, answercmd
 
-class CmdHg(lib.modules.SyncModule):
+class CmdHg(SyncModule):
     def __init__(self, bot):
         desc = """hg : donne le dernier changement sur le repo %s
 hg repos : affiche la liste des repos disponibles
 hg [repo] : donne le dernier changement du repo [repo]
 hg [repo] [rev] : affiche la révision [rev] du repo [repo]""" % (self.defaultrepo)
-        lib.modules.SyncModule.__init__(bot,
+        SyncModule.__init__(bot,
                                     desc = desc,
                                     command = "hg")
         self.readconf("modules/hg/config.yml")
@@ -24,7 +24,7 @@ hg [repo] [rev] : affiche la révision [rev] du repo [repo]""" % (self.defaultre
         self.repos = settings["repos"]
         self.defaultrepo = settings["general"]["default"]
 
-    @answercmd()
+    @answercmd
     def answer(self, sender, message):
         args = message.split(" ")
         #!hg

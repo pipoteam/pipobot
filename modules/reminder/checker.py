@@ -4,13 +4,13 @@
 import threading, traceback
 import time
 from model import Remind
-import lib.modules.AsyncModule
+from lib.modules import AsyncModule
 
 
-class AsyncReminder(lib.modules.AsyncModule):
+class AsyncReminder(AsyncModule):
     def __init__(self, bot):
         desc = "Display reminds !"
-        lib.modules.AsyncModule.__init__(bot, 
+        AsyncModule.__init__(bot, 
                                         name = "remind_check",
                                         desc = desc)
         self.lastcheck = time.time()

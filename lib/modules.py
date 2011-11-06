@@ -3,6 +3,9 @@
 
 import threading
 
+def answercmd(f) :
+    pass
+
 class ModuleException(Exception) :
 
     def __init__(self, desc) :
@@ -26,36 +29,36 @@ class BotModule(object) :
             return
 
         if mess.getType() == "chat" and not self.pm_allowed :
-        self.answer(classe, mess.getFrom().getResource(), tosend.strip(), mess)
-            #Calling the 'answer" method of the module
-            send = self.answer(sender, text_msg)
+            try :
+                #Calling the 'answer" method of the module
+                send = self.answer(sender, text_msg)
 
-            #If the method is just a string, it will be the bot's answer
-            if type(send) == str or type(send) == unicode:
-                bot.say(send, in_reply_to=mess)
+                #If the method is just a string, it will be the bot's answer
+                if type(send) == str or type(send) == unicode:
+                    bot.say(send, in_reply_to=mess)
 
-            #If it's a list we display each message with a time delay
-            elif type(send) == list:
-                for line in send:
-                    time.sleep(0.3)
-                    bot.say(line, in_reply_to=mess)
-                    
-            #If it's a dictionary, it is {"text": raw_message,    # Text message, transform XHTML if empty
-            #                             "xhtml" : xhtml_message # XHTML message
-            #                             "monospace" : True      # XHTML message is the text with monospace
-            #                             "users" : { "pseudo1" : {...} } # Send the same type of dictionnary
-            #                                                               in private to the users
-            #                            }
-            elif type(send) == dict:
-               self._dict_messages(send)
+                #If it's a list we display each message with a time delay
+                elif type(send) == list:
+                    for line in send:
+                        time.sleep(0.3)
+                        bot.say(line, in_reply_to=mess)
+                        
+                #If it's a dictionary, it is {"text": raw_message,    # Text message, transform XHTML if empty
+                #                             "xhtml" : xhtml_message # XHTML message
+                #                             "monospace" : True      # XHTML message is the text with monospace
+                #                             "users" : { "pseudo1" : {...} } # Send the same type of dictionnary
+                #                                                               in private to the users
+                #                            }
+                elif type(send) == dict:
+                   self._dict_messages(send)
 
-            else:
-                #In any other case, an error has occured in the module
-                if send is not None:
-                    self.say(_("Error from module %s : %s") % (classe.command, send))
-        except:
-            self.say(_("Error !"))
-            logger.error(_("Error from module %s : %s") % (classe.command, traceback.format_exc()))
+                else:
+                    #In any other case, an error has occured in the module
+                    if send is not None:
+                        self.say(_("Error from module %s : %s") % (classe.command, send))
+            except:
+                self.say(_("Error !"))
+                logger.error(_("Error from module %s : %s") % (classe.command, traceback.format_exc()))
 
     def _dict_messages(self, send, priv=None) :
         if "xhtml" in send and "text" in send:
@@ -106,7 +109,7 @@ class MultiSyncModule(BotModule) :
         return command in self.command
 
     def answer(self, command, sender, args) :
-        if command not is self.commands :
+        if command not in self.commands :
             raise ModuleException("Command %s not handled by this module" % command)
 
         return "To be implemented"

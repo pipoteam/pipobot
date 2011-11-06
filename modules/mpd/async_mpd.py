@@ -4,17 +4,17 @@
 import threading
 from lib.BotMPD import BotMPD
 from mpd import CommandError
-import lib.modules.AsyncModule
+from lib.modules import AsyncModule
 
 try:
     import config
 except ImportError:
     raise NameError("MPD config not found, unable to start MPD module")
     
-class AsyndMpd(lib.modules.AsyncModule):
+class AsyndMpd(AsyncModule):
     def __init__(self, bot):
         desc = "Display changes on the mpd server !"
-        lib.modules.AsyncModule.__init__(bot,
+        AsyncModule.__init__(bot,
                                     name = "checkmpd",
                                     desc = desc)
 

@@ -2,16 +2,16 @@
 #-*- coding: utf8 -*-
 import urllib
 import simplejson
-import lib.modules.SyncModule
+from lib.modules import SyncModule, answercmd
 
-class CmdGoogle(lib.modules.SyncModule):
+class CmdGoogle(SyncModule):
     def __init__(self, bot):
         desc = u"!google mot-clé : recherche le mot clé dans google"
-        lib.modules.SyncModule.__init__(bot,
+        SyncModule.__init__(bot,
                                 desc = desc,
                                 command = "google")
     
-    @answercmd()
+    @answercmd
     def answer(self, sender, message):
         if message == '':
             return self.desc

@@ -1,15 +1,15 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
 import random
-import lib.modules.SyncModule
+from lib.modules import SyncModule, answercmd
 
-class CmdRPS(lib.modules.SyncModule):
+class CmdRPS(SyncModule):
     def __init__(self, bot):
         desc = """Rock Paper Scissors:
 rps init : lance une nouvelle partie
 rps bot : pour se mesurer au bot !!!
 rps (Rock|Paper|Scissor) : pour jouer"""
-        lib.modules.SyncModule.__init__(bot, 
+        SyncModule.__init__(bot, 
                                     desc = desc,
                                     command = "rps")
         self.choices = ["Rock", "Paper", "Scissors"]
@@ -17,7 +17,7 @@ rps (Rock|Paper|Scissor) : pour jouer"""
         self.manche = {}
 
     #TODO split module to user decorators
-    @answercmd()
+    @answercmd
     def answer(self, sender, message):
         if not hasattr(self.bot, "rps"): 
             self.bot.rps = self

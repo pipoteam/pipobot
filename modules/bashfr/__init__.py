@@ -5,14 +5,14 @@ import urllib
 import threading
 import lib.utils
 from BeautifulSoup import BeautifulSoup
-import lib.modules.SyncModule 
+from lib.modules import SyncModule, answercmd 
 
-class CmdBashfr(lib.modules.SyncModule):
+class CmdBashfr(SyncModule):
     def __init__(self, bot):
         desc = """Pour lire des quotes bashfr
 bashfr : Retourne une quote aléatoire de bashfr.
 bashfr [n] : Affiche la quote [n] de bashfr"""
-        lib.modules.SyncModule.__init__(bot, 
+        SyncModule.__init__(bot, 
                         desc = desc,
                         command = "bashfr",
                         )
@@ -21,7 +21,7 @@ bashfr [n] : Affiche la quote [n] de bashfr"""
     def enable(self):
         self.bot.bashfrlock = False
             
-    @answercmd()
+    @answercmd
     def answer(self, sender, message):
         if self.bot.bashfrlock:
             return "Attends un peu !!"

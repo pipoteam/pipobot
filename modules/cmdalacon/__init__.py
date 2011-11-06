@@ -3,7 +3,7 @@
 import ConfigParser
 import random
 import re
-import lib.modules.MultiSyncModule 
+from lib.modules import MultiSyncModule, answercmd
 
 def multiwordReplace(text, wordDic):
     """
@@ -25,11 +25,11 @@ class ListConfigParser(ConfigParser.RawConfigParser):
         else:
             return value
 
-class CmdAlacon(lib.modules.MultiSyncModule):
+class CmdAlacon(MultiSyncModule):
     def __init__(self, bot):
         commands = self.readconf()
         commands = self.gen_descriptor()
-        lib.modules.MultiSyncModule(bot,
+        MultiSyncModule(bot,
                         commands = commands)
     
     def extract_to(self, cmd, value, backup):
@@ -49,7 +49,7 @@ class CmdAlacon(lib.modules.MultiSyncModule):
 
         config = ListConfigParser()
         config.read('modules/cmdalacon/cmdlist.cfg')
-        for c in config.sections()
+        for c in config.sections() :
             self.dico[c] = {}
             commands[c] = self.dico[c]['desc']
             self.dico[c]['desc'] = config.get(c, 'desc') 
@@ -59,7 +59,7 @@ class CmdAlacon(lib.modules.MultiSyncModule):
             self.extract_to(self, c, "toSomebody", "toNobody")
         return commands
     
-    @answercmd()
+    @answercmd
     def answer(self, cmd, sender, message):
         toall = [self.bot.jid2pseudo(people) for people in self.bot.droits.iterkeys() if self.bot.jid2pseudo(people) not in [self.bot.name, sender]]
         replacement = {"__somebody__":message, "__sender__":sender, "_all_":" ".join(toall)}

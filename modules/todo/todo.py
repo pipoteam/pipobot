@@ -14,7 +14,7 @@ class CmdTodo:
     todo remove [n,...] : supprime les todos d'id [n,...]
     todo search [element]: recherche un TODO qui contient [element]
     """
-        lib.modules.SyncModule.__init__(bot,
+        SyncModule.__init__(bot,
                                     desc = desc,
                                     command = "todo")
 

@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import time
-import lib.modules.SyncModule
+from lib.modules import SyncModule, answercmd
 from model import Remind
 from parsedates import parseall, ParseExcept
 
-class CmdReminder(lib.modules.SyncModule):
+class CmdReminder(SyncModule):
     def __init__(self, bot):
         desc = """Un module pour se souvenir de choses
     remind list : affiche les personnes qui ont des alertes prévues.
@@ -15,7 +15,7 @@ class CmdReminder(lib.modules.SyncModule):
     remind add [owner] [date] [desc] : crée une alerte pour [owner] à la date au format [01/01/01,01h01] décrite par [desc]
     remind delete/remove [n,...] : supprime les alertes d'id [n,...]
     """
-        lib.modules.SyncModule.__init__(bot, 
+        SyncModule.__init__(bot, 
                                     desc = desc,
                                     command = "remind")
 

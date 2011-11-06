@@ -3,15 +3,14 @@
 import random
 import repartie
 import re
-import lib.modules.AsyncModule 
-import lib.modules.utils
+from lib.modules import ListenModule
+from lib import utils
 
-class CmdBot(lib.modules.ListenModule):
+class CmdBot(ListenModule):
     def __init__(self, bot):
         desc = "The bot will not let you say anything about him !!"
-        lib.modules.ListenModule.__init__(bot, name = "repartie", desc = desc)
-    
-    @answercmd()
+        ListenModule.__init__(bot, name = "repartie", desc = desc)
+
     def answer(self, sender, message):
         if type(message) not in (str, unicode):
             return
@@ -44,4 +43,4 @@ class CmdBot(lib.modules.ListenModule):
         l = [["server", "serveur", "bot"], ["merde", "bois", "carton"]]
         if all([any([elt2 in message.lower() for elt2 in elt]) for elt in l]):
             msg = "Tu sais ce qu'il te dit le serveur ? Et puis surveille ton langage d'abord !!!"
-            lib.modules.utils.kick(sender, msg, self.bot)
+            utils.kick(sender, msg, self.bot)

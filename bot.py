@@ -10,6 +10,7 @@ import logging
 import os, yaml
 import gettext
 from optparse import OptionParser
+import lib.modules
 
 
 # Constants
@@ -85,25 +86,17 @@ except IOError:
         raise
 
 
-liste_classes_global = {}
-def append_modules_path(path) :
-    logger.info("Importing modules from %s" % path)    
-    sys.path.insert(0,path)
-    import classlist
-    liste_classes_global.update(classlist.classlist)
-    logger.debug("New liste_classes : %r" % liste_classes_global)
-
-append_modules_path("modules/")
+sys.path.insert(0,"modules/")
 if "extra_modules" in settings["config"] :
     for module_path in settings["config"]["extra_modules"] :
-        append_modules_path(module_path)
+        sys.path.insert(0,module_path)
 
 # Starting bots
 bots = []
 for salon in settings["rooms"] :
     bot = bot_jabber.bot_jabber(salon["login"], salon["passwd"], salon["ressource"], salon["chan"], salon["nick"], xmpp_log)
     classes_salon = []
-    for module_name in salon["modules"]+["help"] :
+    for module_name in salon["modules"] :
         if module_name.startswith('_') :
             group = settings["groups"][module_name[1:]]
         else :
@@ -111,7 +104,7 @@ for salon in settings["rooms"] :
 
         for module in group :
             __import__(module)
-            for classe in liste_classes_global[module] :
+            for classe in [c for c in dir(module) if type(c) == type and issubclass(c, lib.modules.BotModule)]  :
                 classes_salon.append(classe)
 
     if engine:

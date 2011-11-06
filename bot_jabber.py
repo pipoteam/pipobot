@@ -21,6 +21,7 @@ class bot_jabber(xmpp.Client, threading.Thread):
         #Definition of an XMPP client
         self.Namespace, self.DBG = 'jabber:client', xmpp.DBG_CLIENT
 
+        jid = xmpp.protocol.JID(login)
         if xmpp_log is not None:
             f = open(xmpp_log, "a")
             xmpp.Client.__init__(self, jid.getDomain(), debug=f)
@@ -44,7 +45,6 @@ class bot_jabber(xmpp.Client, threading.Thread):
         self.alive = True 
         self.name = name
 
-        jid = xmpp.protocol.JID(login)
         self.chat = xmpp.protocol.JID(chat)
 
         self.jids = {}
@@ -120,15 +120,15 @@ class bot_jabber(xmpp.Client, threading.Thread):
 
         return message
     
-    def say(self, **kwargs) :
+    def say(self, *args, **kwargs) :
         #If the bot has not been disabled
         if not self.mute:
-            self.send(self.forge_message(**kwargs))
+            self.send(self.forge_message(*args, **kwargs))
 
-    def say_xhtml(self, message) :
+    def say_xhtml(self, *args, **kwargs) :
         #If the bot has not been disabled
         if not self.mute:
-            self.send(self.xhtml(**kwargs))
+            self.send(self.xhtml(*args, **kwargs))
 
     def presence(self, conn, mess):
         """Method called when the bot receives a presence message.

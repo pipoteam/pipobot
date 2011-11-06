@@ -9,7 +9,7 @@ MAX=5
 #    unicodes = [l.split(";")[0:2] for l in unicode_file]
 
 import os
-import lib.modules.SyncModule
+from lib.modules import SyncModule, answercmd
 
 unicode_file = open(os.path.join(os.path.dirname(__file__), 'UnicodeDataLower.txt'))
 unicodes = [l.split(";")[0:2] for l in unicode_file]
@@ -22,7 +22,7 @@ class CmdUnicode:
 unicode nom
     Recherche le caractère unicode donc le nom ressemble à « nom »
 """
-        lib.modules.SyncModule.__init__(bot,
+        SyncModule.__init__(bot,
                                     desc = desc,
                                     command = "unicode")
             

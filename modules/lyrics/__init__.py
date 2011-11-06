@@ -2,16 +2,16 @@
 #-*- coding: utf-8 -*-
 import random
 import lyricstime
-import lib.modules.SyncModule
+from lib.modules import SyncModule, answercmd
 
-class CmdLyrics(lib.modules.SyncModule):
+class CmdLyrics(SyncModule):
     def __init__(self, bot):
         desc = "Retourne des paroles."
-        lib.modules.SyncModule.__init__(bot, 
+        SyncModule.__init__(bot, 
                                     desc = desc,
                                     command = "lyrics")
             
-    @answercmd()
+    @answercmd
     def answer(self, sender, message):
         res = lyricstime.query(message)
         return res

@@ -3,12 +3,12 @@
 from mercurial import ui, hg
 import time
 import os
-import lib.modules.SyncModule 
+from lib.modules import SyncModule, answercmd 
 
-class CmdVersion(lib.modules.SyncModule):
+class CmdVersion(SyncModule):
     def __init__(self, bot):
         desc = "version: donne la version (révision hg) du bot"
-        lib.modules.SyncModule.__init__(bot, 
+        SyncModule.__init__(bot, 
                         desc = desc,
                         command = "version",
                         )

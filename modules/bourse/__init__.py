@@ -5,7 +5,7 @@ import csv
 import os
 import time 
 import sys
-import lib.modules.SyncModule 
+from lib.modules import SyncModule, answercmd 
 
 ROOT_URL = 'http://www.banque-france.fr/fr/statistiques/taux/telnomot/'
 CACHE_PATH = os.path.abspath(os.path.dirname(sys.argv[0])) + '/modules/bourse'
@@ -13,11 +13,11 @@ VALUES = {'CHF':'qs.d.ceurchci.csv', 'USD':'qs.d.ceurusci.csv', 'JPY':'qs.d.ceur
 CACHE_LIMIT = 2 * 3600
 
 
-class CmdBourse(lib.modules.SyncModule):
+class CmdBourse(SyncModule):
     def __init__(self, bot):
         desc = u"bourse [valeur [historique]] \n Affiche le taux de conversion d'une valeur boursière.\n"
         desc += u"	Valeurs disponibles: " + ', '.join(VALUES.keys())
-        lib.modules.SyncModule(bot, 
+        SyncModule(bot, 
                             desc = desc,
                             command = "bourse")
 
