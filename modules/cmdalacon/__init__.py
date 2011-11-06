@@ -28,15 +28,14 @@ class ListConfigParser(ConfigParser.RawConfigParser):
 class CmdAlacon(MultiSyncModule):
     def __init__(self, bot):
         commands = self.readconf()
-        commands = self.gen_descriptor()
-        MultiSyncModule(self, 
+        MultiSyncModule.__init__(self, 
                         bot,
-                        commands = commands)
+                        commands=commands)
     
-    def extract_to(self, cmd, value, backup):
+    def extract_to(self, config, cmd, value, backup):
         try:
             v = config.get(cmd, value)
-        except ConfigParser.NoSectionError:
+        except ConfigParser.NoOptionError :
             v = config.get(cmd, backup)
         if type(v) != list:
             v = [v]
@@ -52,12 +51,12 @@ class CmdAlacon(MultiSyncModule):
         config.read('modules/cmdalacon/cmdlist.cfg')
         for c in config.sections() :
             self.dico[c] = {}
-            commands[c] = self.dico[c]['desc']
             self.dico[c]['desc'] = config.get(c, 'desc') 
+            commands[c] = self.dico[c]['desc']
             self.dico[c]['toNobody'] = config.get(c, 'toNobody') if type(config.get(c, 'toNobody')) == list else [config.get(c, 'toNobody')]
-            self.extract_to(self, c, "toSender", "toNobody")
-            self.extract_to(self, c, "toBot", "toSender")
-            self.extract_to(self, c, "toSomebody", "toNobody")
+            self.extract_to(config, c, "toSender", "toNobody")
+            self.extract_to(config, c, "toBot", "toNobody")
+            self.extract_to(config, c, "toSomebody", "toNobody")
         return commands
     
     @answercmd

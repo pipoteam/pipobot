@@ -107,7 +107,7 @@ for salon in settings["rooms"] :
             logger.info(dir(module_class))
             classes = [getattr(module_class, class_name) for class_name in dir(module_class)]
             #XXX Quick FIX → all these classes are subclasses of BotModule too…
-            except_list = [lib.modules.SyncModule, lib.modules.AsyncModule, lib.modules.MultiSyncModule, lib.modules.BotModule]
+            except_list = [lib.modules.SyncModule, lib.modules.AsyncModule, lib.modules.MultiSyncModule, lib.modules.BotModule, lib.modules.ListenModule]
             for classe in [c for c in classes if type(c) == type and issubclass(c, lib.modules.BotModule) and c not in except_list]   :
                 classes_salon.append(classe)
 

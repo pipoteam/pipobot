@@ -8,6 +8,7 @@ from lib.modules import SyncModule, answercmd
 
 class CmdHg(SyncModule):
     def __init__(self, bot):
+        self.readconf("modules/hg/config.yml")
         desc = """hg : donne le dernier changement sur le repo %s
 hg repos : affiche la liste des repos disponibles
 hg [repo] : donne le dernier changement du repo [repo]
@@ -16,7 +17,6 @@ hg [repo] [rev] : affiche la révision [rev] du repo [repo]""" % (self.defaultre
                             bot, 
                             desc = desc,
                             command = "hg")
-        self.readconf("modules/hg/config.yml")
 
     def readconf(self, filename):
         f = open(filename, "r")

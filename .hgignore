@@ -12,3 +12,4 @@ modules/trac/trac.db
 modules/belote/belote/
 modules/bourse/*.csv
 modules/belote/png/
+settings.yml

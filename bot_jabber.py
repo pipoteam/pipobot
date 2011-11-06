@@ -3,12 +3,12 @@
 """This file contains the class 'bot_jabber' wich is a bot for jabber MUC"""
 
 import xmpp
-import logging
 import sys
 import traceback
 import threading
 import time
 from lib.modules import ListenModule, AsyncModule, MultiSyncModule, SyncModule
+import logging
 logger = logging.getLogger('pipobot.bot_jabber') 
 
 
@@ -73,16 +73,14 @@ class bot_jabber(xmpp.Client, threading.Thread):
            or mess.getBody() == None :
                 return
 
-        msg_body = mess.getBody().lstrip()
-        logger.info(self.modules)
         for module in self.modules :
-            #module.answer(classe, mess.getFrom().getResource(), msg_body, mess)
-            module.answer(mess.getFrom().getResource(), msg_body, mess)
+            module.do_answer(mess)
 
     def add_commands(self, classes):
         """Method called when we specify modules' classes, at the creation of bot's instance"""
 
         for classe in classes:
+            logger.debug("Registering %s" % classe)
             objet = classe(self)
             self.modules.append(objet)
 
@@ -130,7 +128,7 @@ class bot_jabber(xmpp.Client, threading.Thread):
     def say_xhtml(self, *args, **kwargs) :
         #If the bot has not been disabled
         if not self.mute:
-            self.send(self.xhtml(*args, **kwargs))
+            self.send(self.forge_xhtml(*args, **kwargs))
 
     def presence(self, conn, mess):
         """Method called when the bot receives a presence message.
