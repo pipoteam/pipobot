@@ -2,7 +2,7 @@
 #-*- coding: utf-8 -*-
 import random
 import urllib
-import modules.utils
+import lib.utils
 import re
 from BeautifulSoup import BeautifulSoup
 
@@ -28,7 +28,7 @@ chuck [n] : Affiche le fact [n]"""
         soup = BeautifulSoup(contenu)
         fact = soup.findAll("div", {"class": "fact"})[0]
         index = fact.get("id").partition("fact")[2]
-        content = modules.utils.xhtml2text(fact.text)
+        content = lib.utils.xhtml2text(fact.text)
         return "Fact #%s : %s"%(index, content)
 
 if __name__ == '__main__':

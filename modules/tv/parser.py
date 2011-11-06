@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import urllib
 from BeautifulSoup import BeautifulSoup
-from modules.utils import xhtml2text
+from lib.utils import xhtml2text
 
 class requete:
     SOIREE = ("contenu grille grilleprimes grillehome", "http://www.programme-tv.net")

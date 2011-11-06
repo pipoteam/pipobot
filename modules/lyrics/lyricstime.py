@@ -5,7 +5,7 @@ import os
 import sys
 sys.path.append("modules/mpd")
 from BeautifulSoup import BeautifulSoup
-from modules.utils import xhtml2text
+from lib.utils import xhtml2text
 from lib.BotMPD import BotMPD
 
 try:

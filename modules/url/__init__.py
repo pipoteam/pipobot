@@ -3,7 +3,7 @@
 import re
 import xmpp
 import urllib
-import modules.utils
+import lib.utils
 import httplib
 from BeautifulSoup import BeautifulSoup, SoupStrainer
 from HTMLParser import HTMLParseError
@@ -34,12 +34,12 @@ class CmdUrl:
                     title = 'Pas de titre'
                     html = o.read(1000000)
                     try:
-                        SoupList = BeautifulSoup(modules.utils.unescape(html), parseOnlyThese=SoupStrainer('title'))
+                        SoupList = BeautifulSoup(lib.utils.unescape(html), parseOnlyThese=SoupStrainer('title'))
                     except UnicodeDecodeError:
-                        SoupList = BeautifulSoup(modules.utils.unescape(html.decode("latin1", "ignore")), parseOnlyThese=SoupStrainer('title'))
+                        SoupList = BeautifulSoup(lib.utils.unescape(html.decode("latin1", "ignore")), parseOnlyThese=SoupStrainer('title'))
                     try:
                         titles = [title for title in SoupList]
-                        title = modules.utils.xhtml2text(titles[0].renderContents())
+                        title = lib.utils.xhtml2text(titles[0].renderContents())
                     except IndexError:
                         title = "Pas de titre"
                     except HTMLParseError:

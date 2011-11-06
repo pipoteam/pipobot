@@ -15,64 +15,67 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../bot_jabber.py:25
+#: ../bot_jabber.py:25 ../bot_jabber.py:30
 #, python-format
 msgid "Connecting to %s"
 msgstr ""
 
-#: ../bot_jabber.py:46
+#: ../bot_jabber.py:46 ../bot_jabber.py:51
 msgid "Unable to connect !"
 msgstr ""
 
-#: ../bot_jabber.py:50
+#: ../bot_jabber.py:50 ../bot_jabber.py:55
 msgid "Unable to authenticate !"
 msgstr ""
 
-#: ../bot_jabber.py:62
+#: ../bot_jabber.py:62 ../bot_jabber.py:67
 msgid "Hello everyone !"
 msgstr ""
 
-#: ../bot_jabber.py:141 ../bot_jabber.py:144
+#: ../bot_jabber.py:141 ../bot_jabber.py:144 ../bot_jabber.py:163
+#: ../bot_jabber.py:166
 #, python-format
 msgid "Error from module %s : %s"
 msgstr ""
 
-#: ../bot_jabber.py:143
+#: ../bot_jabber.py:143 ../bot_jabber.py:165
 msgid "Error !"
 msgstr ""
 
-#: ../bot_jabber.py:162
+#: ../bot_jabber.py:162 ../bot_jabber.py:184
 msgid "I've been asked to leave you"
 msgstr ""
 
-#: ../bot_jabber.py:180
+#: ../bot_jabber.py:180 ../bot_jabber.py:202
 #, python-format
 msgid "Message sent to %s, type %s"
 msgstr ""
 
-#: ../bot_jabber.py:223
+#: ../bot_jabber.py:223 ../bot_jabber.py:246
 #, python-format
 msgid "User %s leaves without being in the room !"
 msgstr ""
 
-#: ../bot_jabber.py:230
+#: ../bot_jabber.py:230 ../bot_jabber.py:253
 msgid "I can't read JID in this room !"
 msgstr ""
 
-#: ../bot_jabber.py:264 ../bot_jabber.py:272
+#: ../bot_jabber.py:264 ../bot_jabber.py:272 ../bot_jabber.py:287
+#: ../bot_jabber.py:295
 #, python-format
 msgid "The user %s is not in the room !"
 msgstr ""
 
-#: ../bot_jabber.py:265 ../bot_jabber.py:273
+#: ../bot_jabber.py:265 ../bot_jabber.py:273 ../bot_jabber.py:288
+#: ../bot_jabber.py:296
 #, python-format
 msgid "unknown user %s"
 msgstr ""
 
-#: ../bot.py:102
+#: ../bot.py:102 ../bot.py:139
 msgid "Ctrl-c signal !"
 msgstr ""
 
-#: ../bot.py:104
+#: ../bot.py:104 ../bot.py:141
 msgid "Killing bots"
 msgstr ""

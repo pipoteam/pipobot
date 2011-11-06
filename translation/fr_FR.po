@@ -15,64 +15,67 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../bot_jabber.py:25
+#: ../bot_jabber.py:25 ../bot_jabber.py:30
 #, python-format
 msgid "Connecting to %s"
 msgstr "Connexion à %s"
 
-#: ../bot.py:102
+#: ../bot.py:102 ../bot.py:139
 msgid "Ctrl-c signal !"
 msgstr "Signal Ctrl-c reçu"
 
-#: ../bot.py:104
+#: ../bot.py:104 ../bot.py:141
 msgid "Killing bots"
 msgstr "Tuons les bots"
 
-#: ../bot_jabber.py:46
+#: ../bot_jabber.py:46 ../bot_jabber.py:51
 msgid "Unable to connect !"
 msgstr "Connexion impossible"
 
-#: ../bot_jabber.py:50
+#: ../bot_jabber.py:50 ../bot_jabber.py:55
 msgid "Unable to authenticate !"
 msgstr "Authentification impossible"
 
-#: ../bot_jabber.py:62
+#: ../bot_jabber.py:62 ../bot_jabber.py:67
 msgid "Hello everyone !"
 msgstr "Bojour à tous !"
 
-#: ../bot_jabber.py:141 ../bot_jabber.py:144
+#: ../bot_jabber.py:141 ../bot_jabber.py:144 ../bot_jabber.py:163
+#: ../bot_jabber.py:166
 #, python-format
 msgid "Error from module %s : %s"
 msgstr "Erreur dans le module %s : %s"
 
-#: ../bot_jabber.py:143
+#: ../bot_jabber.py:143 ../bot_jabber.py:165
 msgid "Error !"
 msgstr "Erreur !"
 
-#: ../bot_jabber.py:162
+#: ../bot_jabber.py:162 ../bot_jabber.py:184
 msgid "I've been asked to leave you"
 msgstr "J'ai reçu l'ordre de vous quitter"
 
-#: ../bot_jabber.py:180
+#: ../bot_jabber.py:180 ../bot_jabber.py:202
 #, python-format
 msgid "Message sent to %s, type %s"
 msgstr "Message envoyé à %s, type %s"
 
-#: ../bot_jabber.py:264 ../bot_jabber.py:272
+#: ../bot_jabber.py:264 ../bot_jabber.py:272 ../bot_jabber.py:287
+#: ../bot_jabber.py:295
 #, python-format
 msgid "The user %s is not in the room !"
 msgstr "L'utilisateur %s n'est pas dans le salon !"
 
-#: ../bot_jabber.py:265 ../bot_jabber.py:273
+#: ../bot_jabber.py:265 ../bot_jabber.py:273 ../bot_jabber.py:288
+#: ../bot_jabber.py:296
 #, python-format
 msgid "unknown user %s"
 msgstr "Utilisateur %s inconnu"
 
-#: ../bot_jabber.py:223
+#: ../bot_jabber.py:223 ../bot_jabber.py:246
 #, python-format
 msgid "User %s leaves without being in the room !"
 msgstr "L'utilisateur %s quitte le salon sans y être entré !"
 
-#: ../bot_jabber.py:230
+#: ../bot_jabber.py:230 ../bot_jabber.py:253
 msgid "I can't read JID in this room !"
 msgstr "Je ne peux pas lire les JID dans ce salon !"

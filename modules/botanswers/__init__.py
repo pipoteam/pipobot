@@ -3,7 +3,7 @@
 import random
 import repartie
 import re
-import modules.utils
+import lib.utils
 
 class CmdBot:
     def __init__(self, bot):
@@ -41,7 +41,7 @@ class CmdBot:
         l = [["server", "serveur", "bot"], ["merde", "bois", "carton"]]
         if all([any([elt2 in message.lower() for elt2 in elt]) for elt in l]):
             msg = "Tu sais ce qu'il te dit le serveur ? Et puis surveille ton langage d'abord !!!"
-            modules.utils.kick(sender, msg, self.bot)
+            lib.utils.kick(sender, msg, self.bot)
 
 class FakeBot:
     def __init__(self):

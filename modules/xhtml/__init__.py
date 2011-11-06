@@ -2,7 +2,7 @@
 #-*- coding: utf-8 -*-
 
 import re
-import modules.utils
+import lib.utils
 
 class CmdXhtml:
     def __init__(self, bot):
@@ -12,7 +12,7 @@ class CmdXhtml:
 	self.pm_allowed = True
             
     def answer(self, sender, message):
-        return (modules.utils.xhtml2text(message), message)
+        return (lib.utils.xhtml2text(message), message)
 
 if __name__ == '__main__':
     #Placer ici les tests unitaires

@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 import time
 from sqlalchemy import Column, Integer, String
-from modules.bdd import Base
+from lib.bdd import Base
 
 class Todo(Base):
     __tablename__ = "todo"

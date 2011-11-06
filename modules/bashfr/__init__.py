@@ -3,7 +3,7 @@
 import random
 import urllib
 import threading
-import modules.utils
+import lib.utils
 from BeautifulSoup import BeautifulSoup
 
 class CmdBashfr:
@@ -51,7 +51,7 @@ bashfr [n] : Affiche la quote [n] de bashfr"""
                     x += "\n"
                     pass
                 else:
-                    x = x + modules.utils.xhtml2text(unicode(i))
+                    x = x + lib.utils.xhtml2text(unicode(i))
             return "bashfr #%s :\n%s"%(nb, x)
 
 class FakeBot:

@@ -1,10 +1,10 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-import modules.bdd
+import lib.bdd
 import time
 from sqlalchemy import Column, Integer, String
 
-class Remind(modules.bdd.Base):
+class Remind(lib.bdd.Base):
     __tablename__ = "remind"
     id = Column(Integer, primary_key = True, autoincrement = True)
     owner = Column(String)

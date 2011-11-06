@@ -2,7 +2,7 @@
 #-*- coding: utf-8 -*-
 import random
 import urllib
-import modules.utils
+import lib.utils
 import re
 from BeautifulSoup import BeautifulSoup
 
@@ -33,7 +33,7 @@ vdm [n] : Affiche la vdm [n]"""
             res = tmp.partition(">")[2].partition("VDM")[0]
             nb =  tmp.partition('"')[0]
         res = "VDM#%s : %sVDM"%(nb, res)
-        return modules.utils.xhtml2text(res)
+        return lib.utils.xhtml2text(res)
 
 if __name__ == '__main__':
     #Placer ici les tests unitaires

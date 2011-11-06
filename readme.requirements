@@ -1,0 +1,15 @@
+global:
+    xmpppy
+    python2-yaml
+python-beautifulsoup:
+    bashfr, wiki, chuck, bashorg, bideetmusique, lyrics, mpd, url, exa, tv, vdm
+python-sqlalchemy:
+    todo, blague, reminder, boulet, raced
+python-simplejson:
+    google
+python-mpd:
+    mpd
+python-eyeD3:
+    mpd
+python2-pyenchant:
+    spell

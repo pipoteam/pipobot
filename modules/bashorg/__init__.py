@@ -3,7 +3,7 @@
 import random
 import urllib
 import threading
-import modules.utils
+import lib.utils
 from BeautifulSoup import BeautifulSoup
 
 class CmdBashorg:
@@ -42,8 +42,8 @@ bashorg [n] : Show the quote [n] from bash.org"""
         for elt in tables:
             p = elt.findAll("p", {"class": "qt"})
             if p != []:
-                content = modules.utils.xhtml2text(unicode(p[0]))
-                nb = modules.utils.xhtml2text(unicode(elt.findAll("b")[0].text))
+                content = lib.utils.xhtml2text(unicode(p[0]))
+                nb = lib.utils.xhtml2text(unicode(elt.findAll("b")[0].text))
                 break
 
         return "%s :\n %s"%(nb, content)

@@ -11,7 +11,6 @@ import os, yaml
 import gettext
 from optparse import OptionParser
 
-from modules import liste_classes
 
 # Constants
 DEFAULT_LOG = "/tmp/botjabber.log"
@@ -83,7 +82,21 @@ except IOError:
         current_l.install()
     except IOError:
         logger.error("Error loading english translations : no translation will be used")
+        raise
 
+
+liste_classes_global = {}
+def append_modules_path(path) :
+    logger.info("Importing modules from %s" % path)    
+    sys.path.insert(0,path)
+    import classlist
+    liste_classes_global.update(classlist.classlist)
+    logger.debug("New liste_classes : %r" % liste_classes_global)
+
+append_modules_path("modules/")
+if "extra_modules" in settings["config"] :
+    for module_path in settings["config"]["extra_modules"] :
+        append_modules_path(module_path)
 
 # Starting bots
 bots = []
@@ -92,20 +105,20 @@ for salon in settings["rooms"] :
     classes_salon = []
     for module_name in salon["modules"]+["help"] :
         if module_name.startswith('_') :
-            group = ["modules.%s" % module for module in settings["groups"][module_name[1:]]]
+            group = settings["groups"][module_name[1:]]
         else :
-            group = ["modules.%s" % module_name]
+            group = [module_name]
 
         for module in group :
             __import__(module)
-            for classe in liste_classes[module] :
+            for classe in liste_classes_global[module] :
                 classes_salon.append(classe)
 
     if engine:
         from sqlalchemy import create_engine
         from sqlalchemy.orm import scoped_session, sessionmaker
         from sqlalchemy.ext.declarative import declarative_base
-        from modules.bdd import Base
+        from lib.bdd import Base
 
         engine = create_engine('sqlite:///%s' % src, convert_unicode=True)
         db_session = scoped_session(sessionmaker(autocommit=False,
