@@ -40,7 +40,7 @@ class bot_jabber(xmpp.Client, threading.Thread):
         if not auth:
             logger.error(_("Unable to authenticate !"))
             sys.exit()
-
+        self.modules = []
         self.mute = False
         self.alive = True 
         self.name = name

@@ -4,7 +4,7 @@ import random
 import time
 from lib.modules import SyncModule, answercmd
 
-class Ola(lib.modueles.SyncModule):
+class Ola(SyncModule):
     def __init__(self, bot):
         desc = "Fait la ola."
         SyncModule.__init__(bot,

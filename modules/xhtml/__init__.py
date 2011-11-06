@@ -2,7 +2,7 @@
 #-*- coding: utf-8 -*-
 
 import re
-import modules.utils
+import lib.utils
 from lib.modules import SyncModule, answercmd 
 
 class CmdXhtml(SyncModule):
@@ -17,5 +17,5 @@ class CmdXhtml(SyncModule):
     def answer(self, sender, message):
         d = {}
         d["text"] = message
-        d["xhtml"] = modules.utils.xhtml2text(message)
+        d["xhtml"] = libs.utils.xhtml2text(message)
         return d

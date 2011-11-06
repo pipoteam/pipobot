@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import os
 import yaml
-import lib
+import hglib
 import mercurial
 from lib.modules import SyncModule, answercmd
 
@@ -47,6 +47,6 @@ hg [repo] [rev] : affiche la révision [rev] du repo [repo]""" % (self.defaultre
         if not repo in self.repos:
             return "Le repo %s n'existe pas" % repo
         try:
-            return lib.log(self.repos[repo], int(rev))
+            return hglib.log(self.repos[repo], int(rev))
         except mercurial.error.RepoError: 
             return "Le répertoire %s associé à %s n'est pas valide !" % (self.repos[repo], repo)

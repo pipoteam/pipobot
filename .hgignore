@@ -5,7 +5,7 @@ syntax:glob
 *.orig
 *.swp
 *.mo
-modules/blague/scores.db*
+bdd/database.db
 modules/who/ldap_pass.py
 modules/trac/mount
 modules/trac/trac.db
