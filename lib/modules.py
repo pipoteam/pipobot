@@ -40,7 +40,10 @@ class BotModule(object) :
 
         try :
             #Calling the answer method of the module
-            if isinstance(self, SyncModule)  :
+            if isinstance(self, Help):
+                command, args = self.parse(msg_body, self.prefixs)
+                send = self.answer(sender, command, args)
+            elif isinstance(self, SyncModule)  :
                 command, args =  self.parse(msg_body, self.prefixs)
                 send = self.answer(sender, args)
             elif isinstance(self, ListenModule) :
@@ -108,7 +111,7 @@ class SyncModule(BotModule) :
         spl = body.split(" ")
         for prefix in prefixs :
             if body.startswith(prefix) :
-                command = spl[0][len(prefix):]
+                command = spl[0][len(prefix):].strip()
                 break
         return command, " ".join(spl[1:])
     
@@ -123,6 +126,9 @@ class SyncModule(BotModule) :
     def answer(self, sender, args) :
         return "To be implemented"
 
+    def help(self, body):
+        if body == self.command:
+            return self.desc
         
 class MultiSyncModule(BotModule) :
     """ Defines a bot module that will answer/execute an action
@@ -142,6 +148,11 @@ class MultiSyncModule(BotModule) :
             raise ModuleException("Command %s not handled by this module" % command)
 
         return "To be implemented"
+
+    def help(self, body):
+        for command, desc in self.commands.iteritems():
+            if body == command:
+                return desc
 
 
 class AsyncModule(BotModule, threading.Thread) :
@@ -169,6 +180,10 @@ class AsyncModule(BotModule, threading.Thread) :
     def stop(self) :
         self.alive = False
 
+    def help(self, body):
+        if body == self.name:
+            return self.desc
+
          
 class ListenModule(BotModule) :
     """ Defines a bot module that will receive all
@@ -181,3 +196,70 @@ class ListenModule(BotModule) :
 
     def is_concerned(self, command) :
         return True
+    
+    def help(self, body):
+        if body == self.name:
+            return self.desc
+
+class Help(SyncModule):
+    """ Defines the help module : when we use the command
+        !help _modulename_ it will display the corresponding
+        description of the module"""
+
+    def __init__(self, bot, all_cmd):
+        desc = "!help name : display the help for the module `name`"
+        SyncModule.__init__(self, bot, desc, "help")
+        self.all_cmd = all_cmd
+        self.compact_help_content = ""
+        self.genHelp()
+
+    def answer(self, command, sender, args) :
+        if args == "":
+            return self.compact_help_content
+        elif args == "all":
+            return self.all_help_content
+        for cmd in self.all_cmd:
+            hlp = cmd.help(args)
+            if hlp is not None:
+                self.bot.say(hlp)
+    
+    def genHelp(self):
+        sync_lst = []
+        listen_lst = []
+        multi_lst = []
+        for cmd in self.all_cmd:
+            if isinstance(cmd, SyncModule):
+                sync_lst.append(cmd.command)
+            elif isinstance(cmd, ListenModule):
+                listen_lst.append(cmd.name)
+            elif isinstance(cmd, MultiSyncModule):
+                multi_lst.extend(cmd.commands.keys())
+        delim = "*"*10
+        sync = "%s[Sync commands]%s\n%s" % (delim, delim, Help.genString(sorted(sync_lst)))
+        listen = "%s[Listen commands]%s\n%s" % (delim, delim, Help.genString(sorted(listen_lst)))
+        multi = "%s[Multi commands]%s\n%s" % (delim, delim, Help.genString(sorted(multi_lst)))
+        self.all_help_content = "\n%s\n%s\n %s" % (sync, listen, multi)
+        allcmds = sync_lst + multi_lst
+        self.compact_help_content = "Votre serviteur peut exécuter : \n%s" % Help.genString(sorted(allcmds))
+
+    @staticmethod
+    def genString(l):
+        send = ""
+        i = 0
+        while i+2 < len(l):
+            cmd1 = l[i]
+            cmd2 = l[i+1]
+            cmd3 = l[i+2]
+            espaces1 = " "*(25 - len(cmd1) - 1)
+            espaces2 = " "*(25 - len(cmd2) - 1)
+            line = "-%s%s-%s%s-%s\n"%(cmd1, espaces1, cmd2, espaces2, cmd3)
+            send += line
+            i += 3
+        if i < len(l):
+            espaces = " "*(25 - len(l[i]) - 1)
+            send += "-%s%s"%(l[i], espaces)
+        if i +1 < len(l):
+            send += "-%s"%(l[i+1])
+        if i == len(l):
+            send = send[0:-1]
+        return send
