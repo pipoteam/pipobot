@@ -4,7 +4,7 @@ import time
 from lib.modules import SyncModule, answercmd 
 from model import Blagueur
 
-class CmdScores:
+class CmdScores(SyncModule):
     def __init__(self, bot):
         desc = 'scores\nAffiche le palmarès actuel des blagueurs'
         SyncModule.__init__(self, 

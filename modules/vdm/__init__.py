@@ -38,4 +38,4 @@ vdm [n] : Affiche la vdm [n]"""
             res = tmp.partition(">")[2].partition("VDM")[0]
             nb =  tmp.partition('"')[0]
         res = "VDM#%s : %sVDM"%(nb, res)
-        return modules.utils.xhtml2text(res)
+        return lib.utils.xhtml2text(res)

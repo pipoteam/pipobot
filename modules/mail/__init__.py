@@ -46,7 +46,7 @@ class AsyncMail(AsyncModule):
             except:
                 self.spam = -2
         if self.mfrom != "" and self.msubject != "":
-            if spam < 2:
+            if self.spam < 2:
                 try:
                     self.bot.say(">> Mail de %s : %s (Spam Score : %f)" % (self.mfrom, self.msubject, self.spam))
                 except:

@@ -7,7 +7,7 @@ import re
 from BeautifulSoup import BeautifulSoup
 from lib.modules import SyncModule, answercmd 
 
-class CmdChuck:
+class CmdChuck(SyncModule):
     def __init__(self, bot):
         desc = """Pour afficher des chucknorrisfact.
 chuck : Retourne un fact aléatoire.

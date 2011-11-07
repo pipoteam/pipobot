@@ -4,6 +4,7 @@
 import threading
 import logging
 import traceback
+import time
 logger = logging.getLogger('pipobot.lib.modules') 
 
 def answercmd(f) :
@@ -73,7 +74,7 @@ class BotModule(object) :
             else:
                 #In any other case, an error has occured in the module
                 if send is not None:
-                    self.bot.say(_("Error from module %s : %s") % (classe.command, send))
+                    self.bot.say(_("Error from module %s : %s") % (command, send))
         except:
             self.bot.say(_("Error !"))
             logger.error(_("Error from module %s : %s") % (self.__class__, traceback.format_exc()))

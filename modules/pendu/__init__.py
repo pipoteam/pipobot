@@ -31,6 +31,7 @@ pendu played : affiche la liste des lettres déjà jouées"""
         if cmd == "init":
             if argument == "":
                 self.bot.pendu.word = "pipo" #TODO faire un random dans un dico
+                self.bot.say("Et c'est parti pour un pendu !")
             else:
                 self.bot.pendu.word = argument
                 self.bot.say("Et c'est parti pour un pendu !")

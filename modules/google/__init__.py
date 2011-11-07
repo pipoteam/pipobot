@@ -30,4 +30,7 @@ class CmdGoogle(SyncModule):
                 ans_xhtml += '<br/>\n<a href="' + i['url'] + '" >' + i['title'] + '</a>'
                 ans = ans.replace("b>", "strong>")
                 ans_xhtml = ans_xhtml.replace("b>", "strong>")
-            return (ans, ans_xhtml)
+            rep = {}
+            rep["text"] = ans
+            rep["text"] = ans_xhtml
+            return rep

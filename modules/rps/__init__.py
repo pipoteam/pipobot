@@ -25,17 +25,17 @@ rps (Rock|Paper|Scissor) : pour jouer"""
 
         args = message.split()
         if len(args) == 0:
-            return "Regarde le help au lieu de vouloir jouer comme ça !"
+            return "rps expects some args"
         cmd = args[0].strip()
         if cmd == "init":
-            if int(args[1]) > len(self.bot.jids):
-                return "Ouais bah invite des amis avant de vouloir faire ça !"
             try:
+                if int(args[1]) > len(self.bot.jids):
+                    return "Not enough players in the room"
                 self.players = int(args[1])
                 self.manche = {}
                 return "Game initialized with %s players"%(int(args[1]))
             except (ValueError, IndexError):
-                return "Va apprendre à faire un init !!"
+                return "You should see the man…"
         elif cmd == "bot":
             self.manche[self.bot.name] = random.choice(self.choices)
             left = self.players - len(self.manche.keys())

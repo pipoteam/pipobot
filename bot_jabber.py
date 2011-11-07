@@ -166,7 +166,7 @@ class bot_jabber(xmpp.Client, threading.Thread):
         """Method called when the bot is ran"""
         #We start dameons for asynchronous methods
         for module in self.modules:
-            if type(module) == AsyncModule :
+            if isinstance(module, AsyncModule):
                 module.start()
         
         #client's loop, exited only when self.alive has been set to False

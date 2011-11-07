@@ -18,7 +18,7 @@ class CmdTv(SyncModule):
         if args == "":
             channels = ["tf1", "france 2", "france 3", "canal+", "arte", "m6"]
             res = extract(requete.SOIREE)
-            return "".join("%s : %s\n"%(key, res[key]) for key in channels)
+            return "\n".join("%s : %s"%(key, res[key]) for key in channels)
         elif args == "channels":
             return "Les chaînes valides sont les suivantes :\n%s"%(", ".join(sorted(extract(requete.TNT).keys())))
         else:

@@ -15,7 +15,7 @@ unicode_file = open(os.path.join(os.path.dirname(__file__), 'UnicodeDataLower.tx
 unicodes = [l.split(";")[0:2] for l in unicode_file]
 unicode_file.close()
 
-class CmdUnicode:
+class CmdUnicode(SyncModule):
     def __init__(self, bot):
         desc = """Unicode caractère
     Affiche des informations sur le caractère unicode « caractère »
