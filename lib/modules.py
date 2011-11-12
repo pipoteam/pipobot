@@ -5,10 +5,19 @@ import threading
 import logging
 import traceback
 import time
+import inspect
 logger = logging.getLogger('pipobot.lib.modules') 
 
-def answercmd(f) :
+def defaultcmd(f) :
+    #We set a marker to indicate that this method is a valid command
+    setattr(f, "subcommand", "default")
     return f
+
+def answercmd(*args):
+    def wrapper(fct):
+        setattr(fct, "subcommand", args)
+        return fct
+    return wrapper
 
 class ModuleException(Exception) :
 
@@ -40,12 +49,9 @@ class BotModule(object) :
 
         try :
             #Calling the answer method of the module
-            if isinstance(self, Help):
-                command, args = self.parse(msg_body, self.prefixs)
-                send = self.answer(sender, command, args)
-            elif isinstance(self, SyncModule)  :
+            if isinstance(self, SyncModule)  :
                 command, args =  self.parse(msg_body, self.prefixs)
-                send = self.answer(sender, args)
+                send = self._answer(sender, args)
             elif isinstance(self, ListenModule) :
                 send = self.answer(sender, msg_body)
             elif isinstance(self, MultiSyncModule)  :
@@ -104,6 +110,21 @@ class BotModule(object) :
 class SyncModule(BotModule) :
     """ Defines a bot module that will answer/execute an action
     after a command. This is the most common case """
+    def __init__(self, bot, desc, command, pm_allowed=True) :
+        BotModule.__init__(self, bot, desc)
+        self.command = command
+        self.pm_allowed = pm_allowed
+        self.fcts = {}
+        for name, method in inspect.getmembers(self, predicate=inspect.ismethod):
+            try:
+                handlerarg = getattr(method, "subcommand")
+                if type(handlerarg) == tuple:
+                    for sub_fct in handlerarg:
+                        self.fcts[sub_fct] = method
+                else:
+                    self.fcts[handlerarg] = method
+            except AttributeError:
+                pass
 
     @staticmethod
     def parse(body, prefixs) :
@@ -115,16 +136,26 @@ class SyncModule(BotModule) :
                 break
         return command, " ".join(spl[1:])
     
-    def __init__(self, bot, desc, command, pm_allowed=True) :
-        BotModule.__init__(self, bot, desc)
-        self.command = command
-        self.pm_allowed = pm_allowed
-
     def is_concerned(self, body) :
         return SyncModule.parse(body, self.prefixs)[0] == self.command
 
-    def answer(self, sender, args) :
-        return "To be implemented"
+    def _answer(self, sender, args) :
+        split_args = args.split()
+        module_answer = "To be implemented"
+        if split_args == []:
+            key = "default"
+            error_msg = "La commande %s nécessite des arguments !" % self.command
+        else:
+            key = split_args[0]
+            error_msg = "La commande %s n'existe pas pour %s" % (key, self.command)
+        try:
+            module_answer = self.fcts[key](split_args[1:], sender)
+        except KeyError:
+            try:
+                module_answer = self.fcts["default"](split_args[1:], sender)
+            except KeyError:
+                return error_msg
+        return module_answer
 
     def help(self, body):
         if body == self.command:
@@ -206,19 +237,19 @@ class Help(SyncModule):
         !help _modulename_ it will display the corresponding
         description of the module"""
 
-    def __init__(self, bot, all_cmd):
+    def __init__(self, bot):
         desc = "!help name : display the help for the module `name`"
         SyncModule.__init__(self, bot, desc, "help")
-        self.all_cmd = all_cmd
         self.compact_help_content = ""
         self.genHelp()
 
-    def answer(self, command, sender, args) :
+    @defaultcmd
+    def _answer(self, sender, args) :
         if args == "":
             return self.compact_help_content
         elif args == "all":
             return self.all_help_content
-        for cmd in self.all_cmd:
+        for cmd in self.bot.modules:
             hlp = cmd.help(args)
             if hlp is not None:
                 self.bot.say(hlp)
@@ -227,7 +258,7 @@ class Help(SyncModule):
         sync_lst = []
         listen_lst = []
         multi_lst = []
-        for cmd in self.all_cmd:
+        for cmd in self.bot.modules:
             if isinstance(cmd, SyncModule):
                 sync_lst.append(cmd.command)
             elif isinstance(cmd, ListenModule):

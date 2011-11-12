@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import time
-from lib.modules import SyncModule, answercmd
+from lib.modules import SyncModule, answercmd, defaultcmd
 from model import Remind
 from parsedates import parseall, ParseExcept
 
