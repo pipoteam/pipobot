@@ -41,6 +41,9 @@ class BotModule(object) :
         msg_body = mess.getBody().lstrip()
         sender = mess.getFrom().getResource()
 
+        if sender == self.bot.name:
+            return
+        
         if not self.is_concerned(msg_body) :
             return
 
@@ -140,19 +143,20 @@ class SyncModule(BotModule) :
         return SyncModule.parse(body, self.prefixs)[0] == self.command
 
     def _answer(self, sender, args) :
-        split_args = args.split()
         module_answer = "To be implemented"
-        if split_args == []:
+        splitted_args = args.split(" ", 1)
+        if splitted_args == []:
             key = "default"
             error_msg = "La commande %s nécessite des arguments !" % self.command
         else:
-            key = split_args[0]
+            key = splitted_args[0]
             error_msg = "La commande %s n'existe pas pour %s" % (key, self.command)
+        cmd_args = splitted_args[1] if len(splitted_args) > 1 else ""
         try:
-            module_answer = self.fcts[key](split_args[1:], sender)
+            module_answer = self.fcts[key](sender, cmd_args)
         except KeyError:
             try:
-                module_answer = self.fcts["default"](split_args[1:], sender)
+                module_answer = self.fcts["default"](sender, args)
             except KeyError:
                 return error_msg
         return module_answer
@@ -244,7 +248,7 @@ class Help(SyncModule):
         self.genHelp()
 
     @defaultcmd
-    def _answer(self, sender, args) :
+    def answer(self, sender, args) :
         if args == "":
             return self.compact_help_content
         elif args == "all":
@@ -252,8 +256,9 @@ class Help(SyncModule):
         for cmd in self.bot.modules:
             hlp = cmd.help(args)
             if hlp is not None:
-                self.bot.say(hlp)
-    
+                return hlp
+        return "La commande %s n'existe pas" % args
+
     def genHelp(self):
         sync_lst = []
         listen_lst = []

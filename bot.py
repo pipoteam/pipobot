@@ -106,7 +106,6 @@ for salon in settings["rooms"] :
             module_class =__import__(module)
             logger.info(dir(module_class))
             classes = [getattr(module_class, class_name) for class_name in dir(module_class)]
-            classes.append(lib.modules.Help)
             #XXX Quick FIX → all these classes are subclasses of BotModule too…
             except_list = [lib.modules.SyncModule, lib.modules.AsyncModule, lib.modules.MultiSyncModule, lib.modules.BotModule, lib.modules.ListenModule]
             for classe in [c for c in classes if type(c) == type and issubclass(c, lib.modules.BotModule) and c not in except_list]:
@@ -126,6 +125,7 @@ for salon in settings["rooms"] :
         Base.metadata.create_all(bind=engine)
         bot.session = db_session
 
+    classes_salon.append(lib.modules.Help)
     bot.add_commands(classes_salon)
     bot.start()
     bots.append(bot)

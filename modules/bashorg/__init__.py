@@ -5,7 +5,7 @@ import urllib
 import threading
 import lib.utils
 from BeautifulSoup import BeautifulSoup
-from lib.modules import SyncModule, answercmd 
+from lib.modules import SyncModule, defaultcmd
 
 class CmdBashorg(SyncModule):
     def __init__(self, bot):
@@ -21,7 +21,7 @@ bashorg [n] : Show the quote [n] from bash.org"""
     def enable(self):
         self.bot.bashorglock = False
 
-    @answercmd 
+    @defaultcmd 
     def answer(self, sender, message):
         if self.bot.bashfrlock:
             return "Please do not flood !"

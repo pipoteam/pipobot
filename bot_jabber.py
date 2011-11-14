@@ -72,7 +72,6 @@ class bot_jabber(xmpp.Client, threading.Thread):
            or mess.getTag('delay')           \
            or mess.getBody() == None :
                 return
-
         for module in self.modules :
             module.do_answer(mess)
 
