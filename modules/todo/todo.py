@@ -1,10 +1,11 @@
 #! /usr/bin/python2
 # -*- coding: utf-8 -*-
 import time
-from model import Todo
 from sqlalchemy.orm.exc import NoResultFound
+from lib.modules import SyncModule, answercmd
+from model import Todo
 
-class CmdTodo:
+class CmdTodo(SyncModule):
     """ Gestion de TODO-lists """
     def __init__(self, bot):
         desc = """
@@ -12,15 +13,14 @@ class CmdTodo:
     todo list [name] : affiche la liste des todo de la liste [name]
     todo add [name] [msg] : crée le nouveau todo [msg] dans la liste [name]
     todo remove [n,...] : supprime les todos d'id [n,...]
-    todo search [element]: recherche un TODO qui contient [element]
-    """
+    todo search [element]: recherche un TODO qui contient [element] """
         SyncModule.__init__(self,   
                                 bot, 
                                 desc = desc,
                                 command = "todo")
 
     @answercmd("list")
-    def list(self, args, sender):
+    def list(self, sender, args):
         if args == "":
             tmp = self.bot.session.query(Todo).group_by(Todo.name).all()
             if tmp == []:
@@ -28,33 +28,28 @@ class CmdTodo:
             else:
                 return "Toutes les TODO-lists: \n%s"%("\n".join([todo.name for todo in tmp]))
         else:
-            try:
-                ex = ""
-                liste, ex = args.split(' ', 1)
-            except:
-                liste = args
-                if liste == "all":
-                    tmp = self.bot.session.query(Todo).order_by(Todo.name).all()
-                    listname = ""
-                    send = "\n"
-                    for elt in tmp:
-                        if elt.name != listname:
-                            send += "%s: \n" % (elt.name)
-                            listname = elt.name
-                        send += "\t%s \n" % elt
+            liste = args
+            if liste == "all":
+                tmp = self.bot.session.query(Todo).order_by(Todo.name).all()
+                listname = ""
+                send = "\n"
+                for elt in tmp:
+                    if elt.name != listname:
+                        send += "%s: \n" % (elt.name)
+                        listname = elt.name
+                    send += "\t%s \n" % elt
+            else:
+                tmp = self.bot.session.query(Todo).filter(Todo.name == liste).all()
+                if tmp == []:
+                    send = ""
                 else:
-                    tmp = self.bot.session.query(Todo).filter(Todo.name == liste).all()
-                    if tmp == []:
-                        send = ""
-                    else:
-                        send = "%s :\n%s"%(liste, "\n".join(map(str, tmp)))
-                if send.strip() == "":
-                    return "TODO-list vide"
-                return send
-            return "usage: !todo list ou !todo list [une_liste]"
+                    send = "%s :\n%s"%(liste, "\n".join(map(str, tmp)))
+            if send.strip() == "":
+                return "TODO-list vide"
+            return send
     
     @answercmd("add")
-    def add(self, args, sender):
+    def add(self, sender, args):
         try:
             liste, msg = args.split(' ', 1)
         except ValueError:
@@ -67,7 +62,7 @@ class CmdTodo:
         return "TODO ajouté"
 
     @answercmd("search")
-    def search(self, args, sender):
+    def search(self, sender, args):
         if len(args) < 1:
             return "usage: !todo search [champ]"
         else:
@@ -75,7 +70,7 @@ class CmdTodo:
             return "\n".join(map(str, found))
 
     @answercmd("remove", "delete")
-    def remove(self, args, sender):
+    def remove(self, sender, args):
         send = ""
         if len(args) < 1:
             return "usage !todo remove id1,id2,id3,…"

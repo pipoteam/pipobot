@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
-from lib.modules import SyncModule, answercmd
+from lib.modules import SyncModule, defaultcmd
 import core
 
 class CmdPrev(SyncModule):
@@ -12,7 +12,7 @@ Affiche les infos sur le dernier épisode en date de show1,show2,show3"""
                                 desc = desc,
                                 command = "prev")
 
-    @answercmd            
+    @defaultcmd
     def answer(self, sender, message):
         res = core.getdata(message, False)
         return res

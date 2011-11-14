@@ -6,7 +6,7 @@ import urllib
 import lib.utils
 import re
 from BeautifulSoup import BeautifulSoup
-from lib.modules import SyncModule, answercmd 
+from lib.modules import SyncModule, defaultcmd
 
 class CmdVdm(SyncModule):
     def __init__(self, bot):
@@ -19,7 +19,7 @@ vdm [n] : Affiche la vdm [n]"""
                             command = "vdm",
                             )
 
-    @answercmd
+    @defaultcmd
     def answer(self, sender, message):
         if (not message.strip()):
             url = urllib.urlopen('http://www.viedemerde.fr/aleatoire')

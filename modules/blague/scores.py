@@ -1,7 +1,7 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 import time
-from lib.modules import SyncModule, answercmd 
+from lib.modules import SyncModule, defaultcmd
 from model import Blagueur
 
 class CmdScores(SyncModule):
@@ -13,7 +13,7 @@ class CmdScores(SyncModule):
                         command = "scores",
                         )
 
-    @answercmd
+    @defaultcmd
     def answer(self, sender, message):
         """Affiche les scores des blagueurs"""
         classement = self.bot.session.query(Blagueur).order_by(Blagueur.score).all()

@@ -3,7 +3,7 @@
 
 import re
 import lib.utils
-from lib.modules import SyncModule, answercmd 
+from lib.modules import SyncModule, defaultcmd
 
 class CmdXhtml(SyncModule):
     def __init__(self, bot):
@@ -14,7 +14,7 @@ class CmdXhtml(SyncModule):
                             pm_allowed = False,
                             command = "xhtml",
                             )
-            
+    @defaultcmd
     def answer(self, sender, message):
         d = {}
         d["text"] = message

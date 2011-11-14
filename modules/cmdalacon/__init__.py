@@ -3,7 +3,7 @@
 import ConfigParser
 import random
 import re
-from lib.modules import MultiSyncModule, answercmd
+from lib.modules import MultiSyncModule, defaultcmd
 
 def multiwordReplace(text, wordDic):
     """
@@ -59,7 +59,7 @@ class CmdAlacon(MultiSyncModule):
             self.extract_to(config, c, "toSomebody", "toNobody")
         return commands
     
-    @answercmd
+    @defaultcmd
     def answer(self, cmd, sender, message):
         toall = [self.bot.jid2pseudo(people) for people in self.bot.droits.iterkeys() if self.bot.jid2pseudo(people) not in [self.bot.name, sender]]
         replacement = {"__somebody__":message, "__sender__":sender, "_all_":" ".join(toall)}

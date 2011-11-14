@@ -1,7 +1,7 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 from parser import extract,requete
-from lib.modules import SyncModule, answercmd
+from lib.modules import SyncModule, defaultcmd, answercmd
 
 class CmdTv(SyncModule):
     def __init__(self, bot):
@@ -11,16 +11,17 @@ class CmdTv(SyncModule):
                                 desc = desc,
                                 command = "tv")
     
-    #TODO split function using decorators
-    @answercmd
+    @answercmd("channels")
+    def channels(self, sender, message):
+        return "Les chaînes valides sont les suivantes :\n%s"%(", ".join(sorted(extract(requete.TNT).keys())))
+
+    @defaultcmd
     def answer(self, sender, message):
         args = message.strip()
         if args == "":
             channels = ["tf1", "france 2", "france 3", "canal+", "arte", "m6"]
             res = extract(requete.SOIREE)
             return "\n".join("%s : %s"%(key, res[key]) for key in channels)
-        elif args == "channels":
-            return "Les chaînes valides sont les suivantes :\n%s"%(", ".join(sorted(extract(requete.TNT).keys())))
         else:
             res = extract(requete.TNT)
             try:

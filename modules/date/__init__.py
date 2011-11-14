@@ -2,7 +2,7 @@
 #-*- coding: utf-8 -*-
 
 import time
-from lib.modules import SyncModule, answercmd
+from lib.modules import SyncModule, defaultcmd
 
 class CmdDate(SyncModule):
     def __init__(self, bot):
@@ -12,6 +12,6 @@ class CmdDate(SyncModule):
                             desc = desc,
                             command = "date")
 
-    @answercmd    
+    @defaultcmd    
     def answer(self, sender, message):
         return time.strftime("Nous sommes le %d/%m/%Y et il est %H:%M")

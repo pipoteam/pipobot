@@ -2,7 +2,7 @@
 #-*- coding: utf-8 -*-
 import random
 import time
-from lib.modules import SyncModule, answercmd
+from lib.modules import SyncModule, defaultcmd
 
 class Ola(SyncModule):
     def __init__(self, bot):
@@ -12,7 +12,7 @@ class Ola(SyncModule):
                                 desc = desc,
                                 command = "ola")
 
-    @answercmd
+    @defaultcmd
     def answer(self, sender, message):
         if message == "":
             message = str(random.randint(0, 1))

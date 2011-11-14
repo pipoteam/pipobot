@@ -58,8 +58,8 @@ class BotModule(object) :
             elif isinstance(self, ListenModule) :
                 send = self.answer(sender, msg_body)
             elif isinstance(self, MultiSyncModule)  :
-                command, args =  self.parse(msg_body, self.prefixs)
-                send = self.answer(sender, command, args)
+                command, args =  SyncModule.parse(msg_body, self.prefixs)
+                send = self._answer(sender, command, args)
             else :
                 # ???
                 return
@@ -174,15 +174,27 @@ class MultiSyncModule(BotModule) :
 
         self.commands = commands
         self.pm_allowed = pm_allowed
+        self.fcts = {}
+        for name, method in inspect.getmembers(self, predicate=inspect.ismethod):
+            try:
+                handlerarg = getattr(method, "subcommand")
+                if type(handlerarg) == tuple:
+                    for sub_fct in handlerarg:
+                        self.fcts[sub_fct] = method
+                else:
+                    self.fcts[handlerarg] = method
+            except AttributeError:
+                pass
 
     def is_concerned(self, body) :
         return SyncModule.parse(body, self.prefixs)[0] in self.commands
 
-    def answer(self, command, sender, args) :
+    def _answer(self, sender, command, args) :
         if command not in self.commands :
             raise ModuleException("Command %s not handled by this module" % command)
 
-        return "To be implemented"
+        module_answer = self.fcts["default"](command, sender, args)
+        return module_answer
 
     def help(self, body):
         for command, desc in self.commands.iteritems():

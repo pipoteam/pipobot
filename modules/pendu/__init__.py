@@ -15,31 +15,24 @@ pendu played : affiche la liste des lettres déjà jouées"""
                                 bot, 
                                 desc = desc,
                                 command = "pendu")
+        self.bot.pendu = Pendu("")
 
     #TODO rewrite using decorators
-    @answercmd 
-    def answer(self, sender, message):
-        if not hasattr(self.bot, "pendu"): 
-            self.bot.pendu = Pendu("")
+    @answercmd("init")
+    def init(self, sender, args):
+        if args == "":
+            self.bot.pendu.word = "pipo" #TODO use a dictionary…
+        else:
+            self.bot.pendu.word = args.strip()
+        self.bot.say("Et c'est parti pour un pendu !")
 
-        args = message.split()
-        cmd = args[0].strip()
-        try:
-            argument = args[1].strip()
-        except IndexError:
-            argument = ""
-        if cmd == "init":
-            if argument == "":
-                self.bot.pendu.word = "pipo" #TODO faire un random dans un dico
-                self.bot.say("Et c'est parti pour un pendu !")
-            else:
-                self.bot.pendu.word = argument
-                self.bot.say("Et c'est parti pour un pendu !")
-        elif cmd == "try":
-            if argument == "" or len(argument) > 1:
-                return "Il faut proposer une lettre :s"
-            else:
-                return self.bot.pendu.propose(argument)
+    @answercmd("try", "guess")
+    def guess(self, sender, args):
+        if args == "" or len(args) > 1:
+            return "Il faut proposer une lettre !"
+        else:
+            return self.bot.pendu.propose(args)
 
-        elif cmd == "played":
-            return self.bot.pendu.playedtostr()
+    @answercmd("played", "histo")
+    def played(self, sender, args):
+        return self.bot.pendu.playedtostr()

@@ -2,7 +2,7 @@
 #-*- coding: utf8 -*-
 import urllib
 import simplejson
-from lib.modules import SyncModule, answercmd
+from lib.modules import SyncModule, defaultcmd
 
 class CmdGoogle(SyncModule):
     def __init__(self, bot):
@@ -12,7 +12,7 @@ class CmdGoogle(SyncModule):
                             desc = desc,
                             command = "google")
     
-    @answercmd
+    @defaultcmd
     def answer(self, sender, message):
         if message == '':
             return self.desc

@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
-from lib.modules import SyncModule, answercmd
+from lib.modules import SyncModule, defaultcmd
 import core
 
 class CmdNext(SyncModule):
@@ -11,7 +11,7 @@ class CmdNext(SyncModule):
                                 desc = desc,
                                 command = "next")
 
-    @answercmd 
+    @defaultcmd
     def answer(self, sender, message):
         res = core.getdata(message, True)
         return res

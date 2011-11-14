@@ -2,7 +2,7 @@
 #-*- coding: utf-8 -*-
 import random
 import lyricstime
-from lib.modules import SyncModule, answercmd
+from lib.modules import SyncModule, defaultcmd
 
 class CmdLyrics(SyncModule):
     def __init__(self, bot):
@@ -12,7 +12,7 @@ class CmdLyrics(SyncModule):
                             desc = desc,
                             command = "lyrics")
             
-    @answercmd
+    @defaultcmd
     def answer(self, sender, message):
         res = lyricstime.query(message)
         return res

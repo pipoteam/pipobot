@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
 import enchant
-from lib.modules import SyncModule, answercmd
+from lib.modules import SyncModule, defaultcmd
 
 class CmdSpell(SyncModule):
     def __init__(self, bot):
@@ -13,7 +13,7 @@ spell suggest : donne les mots approchants"""
                                 desc = desc,
                                 command = "spell")
     
-    @answercmd
+    @defaultcmd
     def answer(self, sender, message):
         dico = enchant.Dict("fr_FR")
         args = message.split()

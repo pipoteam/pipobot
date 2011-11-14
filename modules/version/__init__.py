@@ -3,7 +3,7 @@
 from mercurial import ui, hg
 import time
 import os
-from lib.modules import SyncModule, answercmd 
+from lib.modules import SyncModule, defaultcmd
 
 class CmdVersion(SyncModule):
     def __init__(self, bot):
@@ -14,7 +14,7 @@ class CmdVersion(SyncModule):
                             command = "version",
                             )
 
-    @answercmd
+    @defaultcmd
     def answer(self, sender, message):
         u = ui.ui()
         repo = hg.repository(u, os.getcwd())

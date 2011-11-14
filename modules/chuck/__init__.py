@@ -5,7 +5,7 @@ import urllib
 import lib.utils
 import re
 from BeautifulSoup import BeautifulSoup
-from lib.modules import SyncModule, answercmd 
+from lib.modules import SyncModule, defaultcmd
 
 class CmdChuck(SyncModule):
     def __init__(self, bot):
@@ -18,7 +18,7 @@ chuck [n] : Affiche le fact [n]"""
                             command = "chuck",
                             )
 
-    @answercmd
+    @defaultcmd
     def answer(self, sender, message):
         if (not message.strip()):
             url = urllib.urlopen('http://www.chucknorrisfacts.fr/index.php?p=parcourir&tri=aleatoire')

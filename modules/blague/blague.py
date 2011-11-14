@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from model import Blagueur
-from lib.modules import SyncModule, answercmd 
+from lib.modules import SyncModule, defaultcmd
 import time
 
 class CmdBlague(SyncModule):
@@ -16,16 +16,15 @@ class CmdBlague(SyncModule):
                         command = "blague",
                         )
 
-    @answercmd
+    @defaultcmd
     def answer(self, sender, message):
         send = ''
         if message == '':
             return u"Donnez un point blague à un ami ! écrivez !blague pseudo (10 s minimum d'intervalle)"
         sjid = self.bot.pseudo2jid(sender.strip())
-        try:
-            jid = self.bot.pseudo2jid(message)
-        except KeyError:
-            return u"%s n'est pas là..." % message
+        jid = self.bot.pseudo2jid(message)
+        if jid == _("unknown user %s") % (message):
+            return jid
 
         if sjid == jid:
             return "Un peu de modestie, merde"

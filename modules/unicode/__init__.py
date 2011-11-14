@@ -9,7 +9,7 @@ MAX=5
 #    unicodes = [l.split(";")[0:2] for l in unicode_file]
 
 import os
-from lib.modules import SyncModule, answercmd
+from lib.modules import SyncModule, defaultcmd
 
 unicode_file = open(os.path.join(os.path.dirname(__file__), 'UnicodeDataLower.txt'))
 unicodes = [l.split(";")[0:2] for l in unicode_file]
@@ -26,7 +26,8 @@ unicode nom
                             bot, 
                             desc = desc,
                             command = "unicode")
-            
+    
+    @defaultcmd
     def answer(self, sender, message):
         m = message.lower()
         

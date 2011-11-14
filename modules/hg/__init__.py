@@ -4,7 +4,7 @@ import os
 import yaml
 import hglib
 import mercurial
-from lib.modules import SyncModule, answercmd
+from lib.modules import SyncModule, defaultcmd
 
 class CmdHg(SyncModule):
     def __init__(self, bot):
@@ -25,7 +25,7 @@ hg [repo] [rev] : affiche la révision [rev] du repo [repo]""" % (self.defaultre
         self.repos = settings["repos"]
         self.defaultrepo = settings["general"]["default"]
 
-    @answercmd
+    @defaultcmd
     def answer(self, sender, message):
         args = message.split(" ")
         #!hg

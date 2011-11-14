@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
 
-from lib.modules import SyncModule, answercmd
+from lib.modules import SyncModule, defaultcmd
 
 class CmdGetjid(SyncModule):
     def __init__(self, bot):
@@ -11,7 +11,7 @@ class CmdGetjid(SyncModule):
                             desc = desc,
                             command = "getjid")
             
-    @answercmd
+    @defaultcmd
     def answer(self, sender, message):
         if self.bot.jids == {}:
             return "Jppt car j'ai pas les droits"

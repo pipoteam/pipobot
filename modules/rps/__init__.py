@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
 import random
-from lib.modules import SyncModule, answercmd
+from lib.modules import SyncModule, answercmd, defaultcmd
 
 class CmdRPS(SyncModule):
     def __init__(self, bot):
@@ -16,40 +16,38 @@ rps (Rock|Paper|Scissor) : pour jouer"""
         self.choices = ["Rock", "Paper", "Scissors"]
         self.players = 0
         self.manche = {}
+        self.bot.rps = self
 
     #TODO split module to user decorators
-    @answercmd
-    def answer(self, sender, message):
-        if not hasattr(self.bot, "rps"): 
-            self.bot.rps = self
-
-        args = message.split()
-        if len(args) == 0:
-            return "rps expects some args"
-        cmd = args[0].strip()
-        if cmd == "init":
-            try:
-                if int(args[1]) > len(self.bot.jids):
-                    return "Not enough players in the room"
-                self.players = int(args[1])
-                self.manche = {}
-                return "Game initialized with %s players"%(int(args[1]))
-            except (ValueError, IndexError):
-                return "You should see the man…"
-        elif cmd == "bot":
-            self.manche[self.bot.name] = random.choice(self.choices)
-            left = self.players - len(self.manche.keys())
-            if left == 0:
-                self.bot.say("I've played !")
-                res = self.results()
-                self.players = 0
-                self.manche = {}
-                self.bot.say(res)
-            elif left == 1:
-                self.bot.say("I have played, only %s answer is expected. Come on!"%(left))
-            else:
-                self.bot.say( "I have played, %s answers are expected"%(left))
-
+    @answercmd("init")
+    def init(self, sender, args):
+        args = args.split()
+        try:
+            if int(args[0]) > len(self.bot.jids):
+                return "Not enough players in the room"
+            self.players = int(args[0])
+            self.manche = {}
+            return "Game initialized with %s players"%(int(args[0]))
+        except (ValueError, IndexError):
+            return "You should see the man…"
+    
+    @answercmd("bot")
+    def bot_play(self, sender, args):
+        self.manche[self.bot.name] = random.choice(self.choices)
+        left = self.players - len(self.manche.keys())
+        if left == 0:
+            self.bot.say("I've played !")
+            res = self.results()
+            self.players = 0
+            self.manche = {}
+            self.bot.say(res)
+        elif left == 1:
+            self.bot.say("I have played, only %s answer is expected. Come on!"%(left))
+        else:
+            self.bot.say( "I have played, %s answers are expected"%(left))
+    
+    @defaultcmd
+    def default(self, sender, message):
         if message in self.choices:
             if sender in self.manche.keys():
                 l = ["You must be stupid.", "What else?!"]
@@ -70,6 +68,7 @@ rps (Rock|Paper|Scissor) : pour jouer"""
                     self.bot.say("%s has played, only %s answer is expected. Come on!"%(sender, left))
                 else:
                     self.bot.say("%s has played, %s answers are expected."%(sender, left))
+        
 
     @staticmethod
     def beats(choice1, choice2):

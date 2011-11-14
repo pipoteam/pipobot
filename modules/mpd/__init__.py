@@ -4,7 +4,7 @@
 import threading
 from lib.BotMPD import BotMPD
 from mpd import CommandError
-from lib.modules import SyncModule, answercmd
+from lib.modules import SyncModule, defaultcmd
 
 try:
     import config
@@ -32,7 +32,7 @@ class CmdMpd(SyncModule):
         self.verbose = False
 
     #TODO passer les commandes de lib/ ici et utiliser les décorateurs
-    @answercmd
+    @defaultcmd
     def answer(self, sender, message):
         if hasattr(config, "DATADIR"):
             mpd = BotMPD(config.HOST, config.PORT, config.PASSWORD, config.DATADIR)
