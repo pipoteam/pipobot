@@ -190,7 +190,7 @@ class bot_jabber(xmpp.Client, threading.Thread):
             return self.jids[pseudo]
         except KeyError:
             logger.error(_("The user %s is not in the room !") % (pseudo))
-            return _("unknown user %s") % (pseudo)
+            return ""
 
     def pseudo2role(self, pseudo):
         """Method used to get role of a pseudo"""
@@ -198,7 +198,7 @@ class bot_jabber(xmpp.Client, threading.Thread):
             return self.droits[pseudo]
         except KeyError:
             logger.error(_("The user %s is not in the room !") % (pseudo))
-            return _("unknown user %s") % (pseudo)
+            return ""
         
     def disable_mute(self):
         """To give the bot its voice again"""
