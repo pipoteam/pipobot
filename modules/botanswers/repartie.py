@@ -28,7 +28,7 @@ Hum désolé, t'étais en train de me dire quelquechose ?"""
 indirect = """N'essaye pas de parler de moi dans mon dos !
 Taggle !
 D'où tu parles de moi comme ca toi ?
-Si t'as quelque chose à dire, dis-le ! (et si tu dis « le » tu t'en prend une)
+Si t'as quelque chose à dire, dis-le ! (et si tu dis « le » tu t'en prends une)
 Ou sinon tu peux la fermer et parler de quelqu'un d'autre ?
 Moi tu sais que je fais que ce que l'on me demande de faire 
 On parle de moi ? 
