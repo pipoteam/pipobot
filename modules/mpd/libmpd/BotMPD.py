@@ -220,7 +220,3 @@ class BotMPD(mpd.MPDClient):
             except ValueError:
                 return "Ouiiii, la graMMaire n'est pas respectéee"
         return "\n".join(mess)
-
-if __name__ == "__main__":
-    bot = BotMPD('localhost', '6600', 'pipopipo')
-    print bot.connected()

@@ -32,5 +32,5 @@ class CmdGoogle(SyncModule):
                 ans_xhtml = ans_xhtml.replace("b>", "strong>")
             rep = {}
             rep["text"] = ans
-            rep["text"] = ans_xhtml
+            rep["xhtml"] = ans_xhtml
             return rep

@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import threading
-from lib.BotMPD import BotMPD
 from mpd import CommandError
 from lib.modules import SyncModule, defaultcmd
+from libmpd.BotMPD import BotMPD
 
 try:
     import config
@@ -25,10 +25,11 @@ class CmdMpd(SyncModule):
     mpd clean : pour retarder l'inévitable...
     mpd connected : pour consulter le nombre de personnes connectées sur icecast
     mpd settag [artist|title]=Nouvelle valeur"""
-        SyncModule.__init(bot, 
-                                    desc = desc,
-                                    pm_allowed = False,
-                                    command = "mpd")
+        SyncModule.__init__(self, 
+                            bot, 
+                            desc = desc,
+                            pm_allowed = False,
+                            command = "mpd")
         self.verbose = False
 
     #TODO passer les commandes de lib/ ici et utiliser les décorateurs

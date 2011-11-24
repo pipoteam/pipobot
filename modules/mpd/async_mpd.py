@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import threading
-from lib.BotMPD import BotMPD
 from mpd import CommandError
-from lib.modules import AsyncModule
+from libmpd.BotMPD import BotMPD
+from libmpd.modules import AsyncModule
 
 try:
     import config
