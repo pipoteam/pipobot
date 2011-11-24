@@ -61,8 +61,8 @@ class CmdAlacon(MultiSyncModule):
     
     @defaultcmd
     def answer(self, cmd, sender, message):
-        toall = [self.bot.jid2pseudo(people) for people in self.bot.droits.iterkeys() if self.bot.jid2pseudo(people) not in [self.bot.name, sender]]
-        replacement = {"__somebody__":message, "__sender__":sender, "_all_":" ".join(toall)}
+        toall = self.bot.occupants.get_all(" ", [self.bot.name, sender])
+        replacement = {"__somebody__" : message, "__sender__" : sender, "_all_" : toall}
         if message.lower() == sender.lower():
             key = "toSender"
         elif message == '':

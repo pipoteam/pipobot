@@ -34,10 +34,7 @@ class CmdBot(ListenModule):
         elif re.search("(\s|^)+si\s+il(\s|$)+", message.lower()):
             return "%s: S'IL, c'est mieux !!!"%(sender)
         elif re.search("(^|\s)+_all_(\!|\?|\:|\s+|$)", message.lower()):
-            if self.bot.pseudo2role(self.bot.name) == "moderator":
-                reply = ", ".join(["%s"%(people) for people in self.bot.jids.iterkeys() if self.bot.pseudo2jid(people) not in [self.bot.pseudo2jid(sender), self.bot.pseudo2jid(self.bot.name)]])
-            else:
-                reply = ", ".join(["%s"%(people) for people in self.bot.droits.iterkeys() if self.bot.jid2pseudo(people) not in [sender, self.bot.name]])
+            reply = self.bot.occupants.get_all(", ", [sender, self.bot.name]) 
             message = message.replace("_all_", reply)
             return message
         l = [["server", "serveur", "bot"], ["merde", "bois", "carton"]]

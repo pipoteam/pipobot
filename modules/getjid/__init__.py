@@ -13,11 +13,9 @@ class CmdGetjid(SyncModule):
 
     @defaultcmd 
     def answer(self, sender, message):
-        if self.bot.jids == {}:
-            return "Jppt car j'ai pas les droits"
         who = sender if message == "" else message
-        jid = self.bot.pseudo2jid(who)
+        jid = self.bot.occupants.pseudo_to_jid(who)
         if jid == "":
-            return "%s n'est pas dans le salon" % who
+            return "%s n'est pas dans le salon ou je n'ai pas le droit de lire les jid…" % who
         else:
             return jid

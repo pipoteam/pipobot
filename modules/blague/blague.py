@@ -21,8 +21,8 @@ class CmdBlague(SyncModule):
         send = ''
         if message == '':
             return u"Donnez un point blague à un ami ! écrivez !blague pseudo (10 s minimum d'intervalle)"
-        sjid = self.bot.pseudo2jid(sender.strip())
-        jid = self.bot.pseudo2jid(message)
+        sjid = self.bot.occupants.pseudo_to_jid(sender.strip())
+        jid = self.bot.occupants.pseudo_to_jid(message)
         if jid == "":
             return "%s n'est pas dans le salon !" % message
 

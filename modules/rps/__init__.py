@@ -23,7 +23,7 @@ rps (Rock|Paper|Scissor) : pour jouer"""
     def init(self, sender, args):
         args = args.split()
         try:
-            if int(args[0]) > len(self.bot.jids):
+            if int(args[0]) > len(self.bot.occupants.users.keys()):
                 return "Not enough players in the room"
             self.players = int(args[0])
             self.manche = {}

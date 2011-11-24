@@ -7,8 +7,9 @@ import sys
 import traceback
 import threading
 import time
-from lib.modules import ListenModule, AsyncModule, MultiSyncModule, SyncModule
 import logging
+from lib.modules import ListenModule, AsyncModule, MultiSyncModule, SyncModule
+from lib.user import Occupants, User
 logger = logging.getLogger('pipobot.bot_jabber') 
 
 
@@ -48,8 +49,7 @@ class bot_jabber(xmpp.Client, threading.Thread):
 
         self.chat = xmpp.protocol.JID(chat)
 
-        self.jids = {}
-        self.droits = {}
+        self.occupants = Occupants()
 
         self.RegisterHandler('message', self.message)
         self.RegisterHandler('presence', self.presence)
@@ -132,34 +132,23 @@ class bot_jabber(xmpp.Client, threading.Thread):
     def presence(self, conn, mess):
         """Method called when the bot receives a presence message.
            Used to record users in the room, as well as their jid and rights"""
-        power = "unknown" 
+        role = ""
+        jid = ""
 
         #Get the role of the participant
         for xtag in mess.getTags("x"):
             if xtag.getTag("item"):
-                power = xtag.getTag("item").getAttr("role")
+                role = xtag.getTag("item").getAttr("role")
 
         pseudo = mess.getFrom().getResource()
         
         #The user [pseudo] leaves the room
         if mess.getType() == 'unavailable':
-            try:
-                del self.droits[pseudo]
-                del self.jids[pseudo]
-            except KeyError:
-                logger.error(_("User %s leaves without being in the room !") % (pseudo))
-            return
-
-        self.droits[pseudo] = power
-
-        #If the bot has no rights to view user's JID
-        if mess.getJid() is None:
-            logger.error(_("I can't read JID in this room !"))
-            return
-
-        jid = mess.getJid().split('/')[0]
-        self.jids[pseudo] = jid
-
+            self.occupants.rm_user(pseudo)
+        else:
+            if mess.getJid() is not None:
+                jid = mess.getJid().split("/")[0]
+            self.occupants.add_user(pseudo, jid, role)
         
     def run(self):
         """Method called when the bot is ran"""
@@ -177,29 +166,6 @@ class bot_jabber(xmpp.Client, threading.Thread):
             if type(module) == AsyncModule :
                 classe.stop()
 
-    def jid2pseudo(self, jid):
-        """Method used to return pseudo from JID"""
-        for jids, pseudo in self.jids.iteritems():
-            if jids == jid:
-                return pseudo
-        return jid
-
-    def pseudo2jid(self, pseudo):
-        """Method used to return JID from pseudo"""
-        try:
-            return self.jids[pseudo]
-        except KeyError:
-            logger.error(_("The user %s is not in the room !") % (pseudo))
-            return ""
-
-    def pseudo2role(self, pseudo):
-        """Method used to get role of a pseudo"""
-        try:
-            return self.droits[pseudo]
-        except KeyError:
-            logger.error(_("The user %s is not in the room !") % (pseudo))
-            return ""
-        
     def disable_mute(self):
         """To give the bot its voice again"""
         self.mute = False
