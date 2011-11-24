@@ -23,7 +23,7 @@ class CmdScores(SyncModule):
             pseudo = ""
             sc += "\n" + 75*"_"
             for blag in classement:
-                pseudo = self.bot.jid2pseudo(blag.pseudo)
+                pseudo = self.bot.occupants.jid_to_pseudo(blag.pseudo)
                 sc += "\n| %-4s  -  " % (blag.score)
                 if len(pseudo) > 30:
                     sc += "%s " % (pseudo[:30])
