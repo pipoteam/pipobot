@@ -207,7 +207,7 @@ class AsyncModule(BotModule, threading.Thread) :
     daemon thread. Typically for waiting for asynchronous event
     such as mail, etc... """
     
-    def __init__(self, bot, name, desc) :
+    def __init__(self, bot, name, desc, delay = 0) :
         threading.Thread.__init__(self)
         BotModule.__init__(self, bot, desc)
 
@@ -215,6 +215,8 @@ class AsyncModule(BotModule, threading.Thread) :
         self.alive = True
         self.daemon = True
 
+        # How many seconds between two calls to module's 'action' method
+        self.delay = delay
         self.name = name
 
     def is_concerned(self, command) :
@@ -222,6 +224,7 @@ class AsyncModule(BotModule, threading.Thread) :
 
     def run(self) :
         while self.alive :
+            time.sleep(self.delay)
             self.action()
 
     def stop(self) :

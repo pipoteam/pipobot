@@ -22,7 +22,8 @@ class AsyncMail(AsyncModule):
         AsyncModule.__init__(self, 
                              bot,  
                              name = "mail",
-                             desc = "Displaying incoming mails")
+                             desc = "Displaying incoming mails"
+                             delay = 0)
         f = open(MAILFILE, "w")
         f.write('')
         f.close()
@@ -34,8 +35,6 @@ class AsyncMail(AsyncModule):
 
     def action(self):
         t = self.file.readline()
-        if t == '':
-            time.sleep(1)
         if t[:5] == "From:":
             self.mfrom = decode_header_str(t[5:].strip())
         if t[:8] == "Subject:":

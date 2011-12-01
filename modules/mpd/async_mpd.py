@@ -11,12 +11,13 @@ try:
 except ImportError:
     raise NameError("MPD config not found, unable to start MPD module")
     
-class AsyndMpd(AsyncModule):
+class AsyncMpd(AsyncModule):
     def __init__(self, bot):
         desc = "Display changes on the mpd server !"
         AsyncModule.__init__(self, 
                              bot, 
                              name = "checkmpd",
+                             delay = 5,
                              desc = desc)
 
     def action(self):

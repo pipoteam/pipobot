@@ -13,7 +13,8 @@ class AsyncReminder(AsyncModule):
         AsyncModule.__init__(self, 
                                 bot,  
                                 name = "remind_check",
-                                desc = desc)
+                                desc = desc
+                                delay = 10)
         self.lastcheck = time.time()
 
     def action(self):
@@ -33,4 +34,3 @@ class AsyncReminder(AsyncModule):
                 self.bot.session.delete(remind)
                 self.bot.session.commit()
         self.lastcheck = now
-        time.sleep(10)
