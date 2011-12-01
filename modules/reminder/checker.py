@@ -13,7 +13,7 @@ class AsyncReminder(AsyncModule):
         AsyncModule.__init__(self, 
                                 bot,  
                                 name = "remind_check",
-                                desc = desc
+                                desc = desc,
                                 delay = 10)
         self.lastcheck = time.time()
 
