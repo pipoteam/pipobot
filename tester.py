@@ -15,9 +15,17 @@ import lib.init_bot
 
 class Tester(bot_jabber.bot_jabber):
     def __init__(self):
-        bot_jabber.bot_jabber.__init__(self, "Tester", "pipo", "pipo@domain.std", "unknown@domain.std", "tester")
+        # the fake room we will work in
+        self.roomname = "unknown@domain.std"
+        # informations about the bot itself
+        self.nick_bot = "tester"
+        self.jid_bot = "bot@botdomain.std"
+        bot_jabber.bot_jabber.__init__(self, self.jid_bot, "secret_pwd", self.jid_bot, self.roomname, self.nick_bot)
+        self.add_user(self.nick_bot, self.jid_bot)
+        #informations about the user we will be using in the fake room
         self.username = "lambda"
         self.jid_frm = "lambda@domain.tld"
+        self.add_user(self.username, self.jid_frm)
 
     def connect(self):
         return True
@@ -36,12 +44,28 @@ class Tester(bot_jabber.bot_jabber):
 
     def loop(self):
         cmd = ""
+        self.add_user("blabla", "blabla@domain.std")
         while cmd != ":q":
             cmd = raw_input(">> ")
-            msg_frm = xmpp.JID(self.jid_frm)
-            m = xmpp.Message(frm = msg_frm, body = cmd, typ="groupchat")
-            self.message(None, m)
+            self.fake_msg(cmd)
 
+    def fake_msg(self, body):
+        m = xmpp.Message(frm = "%s/%s" % (self.roomname, self.username), 
+                         body = body, 
+                         to = self.jid_bot,
+                         typ = "groupchat")
+        self.message(None, m)
+
+
+    def add_user(self, name, jid, xmpp_client = "mcabber", affiliation = "none", role = "participant"):
+        msg_frm = xmpp.JID(jid = "%s/%s" % (self.roomname, name))
+        msg = xmpp.Presence(frm = msg_frm, to = self.roomname)
+        tag = msg.setTag("x")
+        tag.setTag("item")
+        tag.setTagAttr("item", "jid", "%s/%s" % (jid, xmpp_client))
+        tag.setTagAttr("item", "affiliation", affiliation)
+        tag.setTagAttr("item", "role", role)
+        self.presence(None, msg)
 
 if __name__ == '__main__':
     # Constants

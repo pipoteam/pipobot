@@ -19,7 +19,7 @@ class Occupants:
             pass
 
     def get_all(self, separator, exceptions = []):
-        return separator.join([user.nickname for user in self.users.itervalues() if user not in exceptions])
+        return separator.join([user.nickname for user in self.users.itervalues() if user.nickname not in exceptions])
         
     def pseudo_to_jid(self, pseudo):
         try:

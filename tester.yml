@@ -10,9 +10,25 @@ modules:
 
 groups:
     tous:
+        - bashfr
+        - bashorg
         - blague
+        - botanswers
+        - chuck
         - cmdalacon
         - date
+        - getjid
         - google
-        - url
+        - hg
+        - ola
+        - pendu
         - reminder
+        - rps
+        - spell
+        - todo
+        - tv
+        - unicode
+        - url
+        - vdm
+        - version
+        - xhtml
