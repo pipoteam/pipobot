@@ -2,5 +2,5 @@
 # -*- coding: UTF-8 -*-
 HOST = 'localhost'
 PORT = '6600'
-PASSWORD = 'secret'
-DATADIR = "/path/to/music"
+PASSWORD = 'pipopipo'
+DATADIR = "/mnt/datas/mpdzic"

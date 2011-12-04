@@ -3,21 +3,21 @@
 
 import threading
 from mpd import CommandError
+from lib.modules import AsyncModule
 from libmpd.BotMPD import BotMPD
-from libmpd.modules import AsyncModule
 
 try:
     import config
 except ImportError:
     raise NameError("MPD config not found, unable to start MPD module")
-    
+
 class AsyncMpd(AsyncModule):
     def __init__(self, bot):
         desc = "Display changes on the mpd server !"
-        AsyncModule.__init__(self, 
-                             bot, 
+        AsyncModule.__init__(self,
+                             bot,
                              name = "checkmpd",
-                             delay = 5,
+                             delay = 0,
                              desc = desc)
 
     def action(self):
@@ -46,7 +46,7 @@ class AsyncMpd(AsyncModule):
 |  ()  |
 |  ||  |
 |__/\__| """
-            if r is not None and 'player' in r and self.verbose:
+            if r is not None and 'player' in r and self.bot.mpd_verbose:
                 title = mpd.currentsongf()
                 self.bot.say("Nouvelle chanson : %s" % title)
                 for c in repDict:
@@ -54,4 +54,4 @@ class AsyncMpd(AsyncModule):
                         self.bot.say(repDict[c])
             mpd.disconnect()
         except:
-            continue
+            pass

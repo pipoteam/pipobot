@@ -30,7 +30,7 @@ class BotMPD(mpd.MPDClient):
     def current(self):
         song = self.currentsong()
         playlist = self.status()
-        
+
         res = self.currentsongf() + "\n"
         res += "[playing] #%s/%s"  % (song["pos"], playlist["playlistlength"])
         if 'time' in playlist.keys():

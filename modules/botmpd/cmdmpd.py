@@ -10,7 +10,7 @@ try:
     import config
 except ImportError:
     raise NameError("MPD config not found, unable to start MPD module")
-    
+
 class CmdMpd(SyncModule):
     def __init__(self, bot):
         desc = """Controle du mpd
@@ -25,12 +25,12 @@ class CmdMpd(SyncModule):
     mpd clean : pour retarder l'inévitable...
     mpd connected : pour consulter le nombre de personnes connectées sur icecast
     mpd settag [artist|title]=Nouvelle valeur"""
-        SyncModule.__init__(self, 
-                            bot, 
+        SyncModule.__init__(self,
+                            bot,
                             desc = desc,
                             pm_allowed = False,
                             command = "mpd")
-        self.verbose = False
+        self.bot.mpd_verbose = False
 
     #TODO passer les commandes de lib/ ici et utiliser les décorateurs
     @defaultcmd
@@ -65,16 +65,16 @@ class CmdMpd(SyncModule):
                 'connected': 'connected',
                }
         if cmd == "mute":
-            if self.verbose:
-                self.verbose = False
+            if self.bot.mpd_verbose:
+                self.bot.mpd_verbose = False
                 send = "Bon d'accord je me la ferme mais venez pas bouder après !"
             else:
                 send = "... Heu... c'est déjà le cas crétin..."
         elif cmd == "unmute":
-            if self.verbose:
+            if self.bot.mpd_verbose:
                 send = "T'es aveugle ou quoi ? Je parle déjà !"
             else:
-                self.verbose = True
+                self.bot.mpd_verbose = True
                 send = "C'est vrai je peux ? Vous allez SOUFFRIR !"
         elif cmds.has_key(cmd):
             try:
