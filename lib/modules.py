@@ -207,7 +207,7 @@ class AsyncModule(BotModule, threading.Thread) :
     daemon thread. Typically for waiting for asynchronous event
     such as mail, etc... """
     
-    def __init__(self, bot, name, desc, delay = 0) :
+    def __init__(self, bot, name, desc, delay = 0, pm_allowed=True) :
         threading.Thread.__init__(self)
         BotModule.__init__(self, bot, desc)
 
@@ -218,6 +218,8 @@ class AsyncModule(BotModule, threading.Thread) :
         # How many seconds between two calls to module's 'action' method
         self.delay = delay
         self.name = name
+
+        self.pm_allowed = pm_allowed
 
     def is_concerned(self, command) :
         return False
@@ -240,9 +242,10 @@ class ListenModule(BotModule) :
     the message sent on the chatroom and call answer
     on it. Be careful with those modules"""
 
-    def __init__(self, bot, name, desc) :
+    def __init__(self, bot, name, desc, pm_allowed=True) :
         BotModule.__init__(self, bot, desc)
         self.name = name
+        self.pm_allowed = pm_allowed
 
     def is_concerned(self, command) :
         return True
