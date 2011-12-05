@@ -55,12 +55,13 @@ if "extra_modules" in settings["config"] :
 bots = []
 for salon in settings["rooms"] :
     bot = bot_jabber.bot_jabber(salon["login"], salon["passwd"], salon["ressource"], salon["chan"], salon["nick"], xmpp_log)
-    classes_salon = lib.init_bot.read_modules(salon["modules"], settings)
+    classes_salon, module_path = lib.init_bot.read_modules(salon["modules"], settings)
     if engine:
         #Configuring database
         db_session = lib.init_bot.configure_db(engine, src)
         bot.session = db_session
 
+    bot.module_path = module_path
     bot.add_commands(classes_salon)
     bot.start()
     bots.append(bot)

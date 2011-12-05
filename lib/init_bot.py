@@ -84,6 +84,7 @@ def configure_db(engine, src):
 
 def read_modules(salon_config, settings):
     classes_salon = []
+    module_path = {}
     for module_name in salon_config:
         if module_name.startswith('_') :
             group = settings["groups"][module_name[1:]]
@@ -92,10 +93,13 @@ def read_modules(salon_config, settings):
 
         for module in group:
             module_class =__import__(module)
+            path = module_class.__path__
+            module_path[module] = path[0]
+
             classes = [getattr(module_class, class_name) for class_name in dir(module_class)]
             #XXX Quick FIX → all these classes are subclasses of BotModule too…
             except_list = [lib.modules.SyncModule, lib.modules.AsyncModule, lib.modules.MultiSyncModule, lib.modules.BotModule, lib.modules.ListenModule]
             for classe in [c for c in classes if type(c) == type and issubclass(c, lib.modules.BotModule) and c not in except_list]:
                 classes_salon.append(classe)
     classes_salon.append(lib.modules.Help)
-    return classes_salon
+    return classes_salon, module_path
