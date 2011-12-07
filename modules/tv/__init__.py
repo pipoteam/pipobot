@@ -5,7 +5,10 @@ from lib.modules import SyncModule, defaultcmd, answercmd
 
 class CmdTv(SyncModule):
     def __init__(self, bot):
-        desc = "tv\nDonne les programmes tv de la soirée\n Les chaînes disponibles sont les suivantes :\n%s"%(", ".join(sorted(extract(requete.TNT).keys())))
+        desc = """tv
+Donne les programmes tv de la soirée
+Les chaînes disponibles sont les suivantes :
+%s""" % (", ".join(sorted(extract(requete.TNT).keys())))
         SyncModule.__init__(self, 
                                 bot, 
                                 desc = desc,

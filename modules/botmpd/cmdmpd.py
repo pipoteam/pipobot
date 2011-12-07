@@ -13,18 +13,20 @@ except ImportError:
 
 class CmdMpd(SyncModule):
     def __init__(self, bot):
-        desc = """Controle du mpd
-    mpd current : chanson actuelle
-    mpd next/prev/play: c'est assez explicite
-    mpd shuffle : fait un shuffle sur la playlist
-    mpd list [n] : liste les [n] chansons suivantes
-    mpd clear : vide la playlist (ou pas)
-    mpd search (Artist|Title) requete : cherche toutes les pistes d'Artiste/Titre correspondant à la requête
-    mpd setnext [i] : place la chanson à la position [i] dans la playlist après la chanson courante (enfin elle court pas vraiment)
-    mpd nightmare [i] : les [i] prochaines chansons vont vous faire souffrir (plus que le reste)
-    mpd clean : pour retarder l'inévitable...
-    mpd connected : pour consulter le nombre de personnes connectées sur icecast
-    mpd settag [artist|title]=Nouvelle valeur"""
+        desc = {"" : "Controle du mpd",
+                "current" : "mpd current : chanson actuelle",
+                "next" : "mpd next : chanson suivante",
+                "prev" : "mpd prev : chanson précédente",
+                "shuffle" : "mpd shuffle : fait un shuffle sur la playlist",
+                "list" : "mpd list [n] : liste les [n] chansons suivantes",
+                "clear" : "mpd clear : vide la playlist (ou pas)",
+                "search" : "mpd search (Artist|Title) requete : cherche toutes les pistes d'Artiste/Titre correspondant à la requête",
+                "setnext" : "mpd setnext [i] : place la chanson à la position [i] dans la playlist après la chanson courante (enfin elle court pas vraiment)",
+                "nightmare" : "mpd nightmare [i] : les [i] prochaines chansons vont vous faire souffrir (plus que le reste)",
+                "clean" : "mpd clean : pour retarder l'inévitable...",
+                "connected" : "mpd connected : pour voir qui écoute le mpd",
+                "settag" : "mpd settag [artist|title]=Nouvelle valeur",
+                }
         SyncModule.__init__(self,
                             bot,
                             desc = desc,

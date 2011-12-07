@@ -8,12 +8,13 @@ from model import Todo
 class CmdTodo(SyncModule):
     """ Gestion de TODO-lists """
     def __init__(self, bot):
-        desc = """
-    todo list : affiche la liste des todolist existantes.
-    todo list [name] : affiche la liste des todo de la liste [name]
-    todo add [name] [msg] : crée le nouveau todo [msg] dans la liste [name]
-    todo remove [n,...] : supprime les todos d'id [n,...]
-    todo search [element]: recherche un TODO qui contient [element] """
+        desc = {"" : "Gestion des TODO-lists",
+                "list": """todo list : affiche la liste des todolist existantes.
+todo list [name] : affiche les todo de la liste [name]""",
+                "add" : "todo add [name] [msg] : crée le nouveau todo [msg] dans la liste [name]",
+                "remove" : "todo remove [n,...] : supprime les todos d'id [n,...]",
+                "search" : "todo search [element]: recherche un TODO qui contient [element]",
+                }
         SyncModule.__init__(self,   
                                 bot, 
                                 desc = desc,

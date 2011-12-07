@@ -8,12 +8,13 @@ from parsedates import parseall, ParseExcept
 
 class CmdReminder(SyncModule):
     def __init__(self, bot):
-        desc = """Un module pour se souvenir de choses
-    remind list : affiche les personnes qui ont des alertes prévues.
-    remind list [name] : affiche la liste des alertes pour [name]
-    remind list all : affiche toutes les alertes
-    remind add [owner] [date] [desc] : crée une alerte pour [owner] à la date au format [01/01/01,01h01] décrite par [desc]
-    remind delete/remove [n,...] : supprime les alertes d'id [n,...] """
+        desc = {"" : "Un module pour se souvenir de choses",
+                "list" : """remind list : affiche les personnes qui ont des alertes prévues.
+remind list [name] : affiche la liste des alertes pour [name]
+remind list all : affiche toutes les alertes""",
+                "add" : "remind add [owner] [date] [desc] : crée une alerte pour [owner] à la date au format [01/01/01,01h01] décrite par [desc]",
+                "remove" : "remind delete/remove [n,...] : supprime les alertes d'id [n,...] ",
+                }
         SyncModule.__init__(self, bot,  
                                 desc = desc,
                                 command = "remind")
