@@ -272,24 +272,25 @@ class Help(SyncModule):
             res = self.compact_help_content
         elif args == "all":
             res = self.all_help_content
-        args = args.split()
-        for cmd in self.bot.modules:
-            hlp = cmd.help(args[0])
-            if hlp is not None:
-                res = hlp
-                if type(hlp) == dict:
-                    available_subcoms = ", ".join(sorted([key for key in hlp.keys() if key != ""])) 
-                    desc = " : %s" % hlp[""] if "" in hlp else ""
-                    general_msg = "%s%s\nSous-commandes : %s" % (args[0], desc, available_subcoms)
-                    if len(args) > 1:
-                        subcom = args[1]
-                        try:
-                            res = hlp[subcom]
-                        except KeyError:
+        else:
+            args = args.split()
+            for cmd in self.bot.modules:
+                hlp = cmd.help(args[0])
+                if hlp is not None:
+                    res = hlp
+                    if type(hlp) == dict:
+                        available_subcoms = ", ".join(sorted([key for key in hlp.keys() if key != ""])) 
+                        desc = " : %s" % hlp[""] if "" in hlp else ""
+                        general_msg = "%s%s\nSous-commandes : %s" % (args[0], desc, available_subcoms)
+                        if len(args) > 1:
+                            subcom = args[1]
+                            try:
+                                res = hlp[subcom]
+                            except KeyError:
+                                res = general_msg
+                        else:
                             res = general_msg
-                    else:
-                        res = general_msg
-                break
+                    break
         return {"text" : res, "monospace" : True}
 
     def genHelp(self):
