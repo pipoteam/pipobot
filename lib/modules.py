@@ -297,6 +297,7 @@ class Help(SyncModule):
         sync_lst = []
         listen_lst = []
         multi_lst = []
+        pres_lst = []
         for cmd in self.bot.modules:
             if isinstance(cmd, SyncModule):
                 sync_lst.append(cmd.command)
@@ -304,11 +305,14 @@ class Help(SyncModule):
                 listen_lst.append(cmd.name)
             elif isinstance(cmd, MultiSyncModule):
                 multi_lst.extend(cmd.commands.keys())
+            elif isinstance(cmd, PresenceModule):
+                pres_lst.append(cmd.name)
         delim = "*"*10
         sync = "%s[Sync commands]%s\n%s" % (delim, delim, Help.genString(sorted(sync_lst)))
         listen = "%s[Listen commands]%s\n%s" % (delim, delim, Help.genString(sorted(listen_lst)))
         multi = "%s[Multi commands]%s\n%s" % (delim, delim, Help.genString(sorted(multi_lst)))
-        self.all_help_content = "\n%s\n%s\n %s" % (sync, listen, multi)
+        pres = "%s[Presence commands]%s\n%s" % (delim, delim, Help.genString(sorted(pres_lst)))
+        self.all_help_content = "\n%s\n%s\n%s\n%s" % (sync, listen, multi, pres)
         allcmds = sync_lst + multi_lst
         self.compact_help_content = "Votre serviteur peut exécuter : \n%s" % Help.genString(sorted(allcmds))
 
@@ -333,3 +337,46 @@ class Help(SyncModule):
         if i == len(l):
             send = send[0:-1]
         return send
+
+
+###############################################################################################
+##################################  PRESENCE MODULES  #########################################
+###############################################################################################
+
+class PresenceModule(BotModule):
+    def __init__(self, bot, name, desc, pm_allowed=True):
+        BotModule.__init__(self, bot, desc)
+        self.name = name
+        self.pm_allowed = pm_allowed
+
+    def help(self, body):
+        if body == self.name:
+            return self.desc
+
+
+class RecordUsers(PresenceModule):
+    def __init__(self, bot):
+        desc = "Recording users logins/logout"
+        PresenceModule.__init__(self,
+                                bot,
+                                name = "recordusers",
+                                desc = desc)
+
+    def do_answer(self, message):
+        role = ""
+        jid = ""
+
+        #Get the role of the participant
+        for xtag in message.getTags("x"):
+            if xtag.getTag("item"):
+                role = xtag.getTag("item").getAttr("role")
+
+        pseudo = message.getFrom().getResource()
+
+        #The user [pseudo] leaves the room
+        if message.getType() == 'unavailable':
+            self.bot.occupants.rm_user(pseudo)
+        else:
+            if message.getJid() is not None:
+                jid = message.getJid().split("/")[0]
+            self.bot.occupants.add_user(pseudo, jid, role)

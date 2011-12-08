@@ -101,5 +101,6 @@ def read_modules(salon_config, settings):
             except_list = [lib.modules.SyncModule, lib.modules.AsyncModule, lib.modules.MultiSyncModule, lib.modules.BotModule, lib.modules.ListenModule]
             for classe in [c for c in classes if type(c) == type and issubclass(c, lib.modules.BotModule) and c not in except_list]:
                 classes_salon.append(classe)
+    classes_salon.append(lib.modules.RecordUsers)
     classes_salon.append(lib.modules.Help)
     return classes_salon, module_path

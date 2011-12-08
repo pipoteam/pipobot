@@ -8,7 +8,7 @@ import traceback
 import threading
 import time
 import logging
-from lib.modules import ListenModule, AsyncModule, MultiSyncModule, SyncModule
+from lib.modules import ListenModule, AsyncModule, MultiSyncModule, SyncModule, PresenceModule
 from lib.user import Occupants, User
 logger = logging.getLogger('pipobot.bot_jabber') 
 
@@ -73,7 +73,8 @@ class bot_jabber(xmpp.Client, threading.Thread):
            or mess.getBody() == None :
                 return
         for module in self.modules :
-            module.do_answer(mess)
+            if not isinstance(module, PresenceModule):
+                module.do_answer(mess)
 
     def add_commands(self, classes):
         """Method called when we specify modules' classes, at the creation of bot's instance"""
@@ -132,23 +133,9 @@ class bot_jabber(xmpp.Client, threading.Thread):
     def presence(self, conn, mess):
         """Method called when the bot receives a presence message.
            Used to record users in the room, as well as their jid and rights"""
-        role = ""
-        jid = ""
-
-        #Get the role of the participant
-        for xtag in mess.getTags("x"):
-            if xtag.getTag("item"):
-                role = xtag.getTag("item").getAttr("role")
-
-        pseudo = mess.getFrom().getResource()
-        
-        #The user [pseudo] leaves the room
-        if mess.getType() == 'unavailable':
-            self.occupants.rm_user(pseudo)
-        else:
-            if mess.getJid() is not None:
-                jid = mess.getJid().split("/")[0]
-            self.occupants.add_user(pseudo, jid, role)
+        for module in self.modules:
+            if isinstance(module, PresenceModule):
+                module.do_answer(mess)
         
     def run(self):
         """Method called when the bot is ran"""
