@@ -4,7 +4,7 @@
 import time
 from lib.modules import SyncModule, answercmd
 from model import Remind
-from parsedates import parseall, ParseExcept
+from lib.parsedates import parseall, ParseExcept
 
 class CmdReminder(SyncModule):
     def __init__(self, bot):

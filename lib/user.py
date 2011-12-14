@@ -47,3 +47,4 @@ class User:
         self.nickname = nickname
         self.jid = jid
         self.role = role
+

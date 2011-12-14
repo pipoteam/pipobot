@@ -273,23 +273,33 @@ class Help(SyncModule):
         elif args == "all":
             res = self.all_help_content
         else:
-            args = args.split()
+            try:
+                cmd_name, subcoms = args.split(" ", 1)
+            except ValueError:  
+                cmd_name = args
+                subcoms = ""
             for cmd in self.bot.modules:
-                hlp = cmd.help(args[0])
+                hlp = cmd.help(cmd_name)
                 if hlp is not None:
-                    res = hlp
+                    #res = hlp
+                    res = ""
                     if type(hlp) == dict:
                         available_subcoms = ", ".join(sorted([key for key in hlp.keys() if key != ""])) 
                         desc = " : %s" % hlp[""] if "" in hlp else ""
-                        general_msg = "%s%s\nSous-commandes : %s" % (args[0], desc, available_subcoms)
-                        if len(args) > 1:
-                            subcom = args[1]
-                            try:
-                                res = hlp[subcom]
-                            except KeyError:
-                                res = general_msg
+                        general_msg = "%s%s\nSous-commandes : %s" % (cmd_name, desc, available_subcoms)
+                        if subcoms != "":
+                            res = []
+                            for subcom in subcoms.split(","):
+                                subcom = subcom.strip()
+                                try:
+                                    res.append(hlp[subcom])
+                                except KeyError:
+                                    pass
+                            res = "\n".join(res)
                         else:
                             res = general_msg
+                    else:
+                        res = hlp
                     break
         return {"text" : res, "monospace" : True}
 
