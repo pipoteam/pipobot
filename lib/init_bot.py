@@ -10,6 +10,7 @@ import yaml
 import lib.modules
 
 def conf_parser():
+    """Reads command-line parameters used to start the bot"""
     # Parametering options
     parser = OptionParser()
     parser.set_defaults(level=logging.INFO)
@@ -23,7 +24,7 @@ def conf_parser():
     return parser
 
 def read_yml(args, default_filename):
-    # Reading configuration file
+    """Reads yml configuration file and returns its content"""
     settings_filename = args[0] if args else default_filename
     s = open(settings_filename)
     settings = yaml.load(s)
@@ -32,7 +33,7 @@ def read_yml(args, default_filename):
 
 
 def conf_logging(level, settings, appli_name, default_log):
-    # Configuring logging
+    """Configuration of logging"""
     logger = logging.getLogger(appli_name)
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -42,7 +43,8 @@ def conf_logging(level, settings, appli_name, default_log):
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
 
-    log_filename = settings["config"]["logpath"] if "config" in settings and "logpath" in settings["config"] else default_log
+    log_filename = settings["config"]["logpath"] if "config" in settings and \
+                                                    "logpath" in settings["config"] else default_log
     file_handler = logging.FileHandler(log_filename)
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(formatter)
@@ -50,7 +52,8 @@ def conf_logging(level, settings, appli_name, default_log):
     return log_filename, logger
 
 def language(settings, logger, appli_name, default_lang):
-   # Configuring language
+    """ Configure language of the bot """
+    # Configuring language
     lang = settings["lang"] if "lang" in settings else default_lang
     logger.info("Language in config file : %s"%(lang))
     local_path = os.path.realpath(os.path.dirname(sys.argv[0]))
@@ -68,10 +71,10 @@ def language(settings, logger, appli_name, default_lang):
             raise
 
 def configure_db(engine, src):
+    """ Configure database for the application """
     if engine:
         from sqlalchemy import create_engine
         from sqlalchemy.orm import scoped_session, sessionmaker
-        from sqlalchemy.ext.declarative import declarative_base
         from lib.bdd import Base
 
         engine = create_engine('sqlite:///%s' % src, convert_unicode=True)
@@ -83,6 +86,9 @@ def configure_db(engine, src):
     return db_session
 
 def read_modules(salon_config, settings):
+    """ With the content of the configuration file, reads the 
+        list of modules to load, import all commands defined in them, 
+        and returns a list with all commands """
     classes_salon = []
     module_path = {}
     for module_name in salon_config:
@@ -92,15 +98,19 @@ def read_modules(salon_config, settings):
             group = [module_name]
 
         for module in group:
-            module_class =__import__(module)
+            module_class = __import__(module)
             path = module_class.__path__
             module_path[module] = path[0]
 
             classes = [getattr(module_class, class_name) for class_name in dir(module_class)]
             #XXX Quick FIX → all these classes are subclasses of BotModule too…
-            except_list = [lib.modules.SyncModule, lib.modules.AsyncModule, lib.modules.MultiSyncModule, lib.modules.BotModule, lib.modules.ListenModule]
-            for classe in [c for c in classes if type(c) == type and issubclass(c, lib.modules.BotModule) and c not in except_list]:
+            except_list = [lib.modules.SyncModule, lib.modules.AsyncModule, 
+                           lib.modules.MultiSyncModule, lib.modules.BotModule, lib.modules.ListenModule]
+            for classe in [c for c in classes if type(c) == type and \
+                                                 issubclass(c, lib.modules.BotModule) and  \
+                                                 c not in except_list]:
                 classes_salon.append(classe)
+    #Modules RecordUsers and Help are used by default (no need to add them to the configuration)
     classes_salon.append(lib.modules.RecordUsers)
     classes_salon.append(lib.modules.Help)
     return classes_salon, module_path

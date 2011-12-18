@@ -46,15 +46,16 @@ if "database" in settings:
     src = settings["database"]["src"]
 
 #Configuring path to find modules
-sys.path.insert(0,"modules/")
+sys.path.insert(0, "modules/")
 if "extra_modules" in settings["config"] :
     for module_path in settings["config"]["extra_modules"] :
-        sys.path.insert(0,module_path)
+        sys.path.insert(0, module_path)
 
 # Starting bots
 bots = []
 for salon in settings["rooms"] :
-    bot = bot_jabber.bot_jabber(salon["login"], salon["passwd"], salon["ressource"], salon["chan"], salon["nick"], xmpp_log)
+    bot = bot_jabber.bot_jabber(salon["login"], salon["passwd"], salon["ressource"], 
+                                salon["chan"], salon["nick"], xmpp_log)
     classes_salon, module_path = lib.init_bot.read_modules(salon["modules"], settings)
     if engine:
         #Configuring database

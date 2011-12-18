@@ -1,5 +1,7 @@
 #! /usr/bin/env python2
 #-*- coding: utf-8 -*-
+""" This module contains all interfaces and general code 
+    for modules """
 
 import threading
 import logging
@@ -20,6 +22,7 @@ def answercmd(*args):
     return wrapper
 
 class ModuleException(Exception) :
+    """ A general exception that modules will be able to raise """
 
     def __init__(self, desc) :
         self.desc = desc
@@ -31,37 +34,47 @@ class BotModule(object) :
     """ Defines a basic bot module. Will be subclassed by different types
     of modules than will then by subclassed by actual modules """
     
-
     def __init__(self, bot, desc) :
         self.bot = bot
         self.desc = desc
         self.prefixs = ['!', ':', self.bot.name+':', self.bot.name+',']
 
     def do_answer(self, mess) :
+        """ With an xmpp message `mess`, checking if this module is concerned
+            by it, and if so get the result of the module and make the bot
+            say it """
+
         msg_body = mess.getBody().lstrip()
         sender = mess.getFrom().getResource()
-
+        
+        #The bot does not answer to itself (important to avoid some loops !)
         if sender == self.bot.name:
             return
-        
+       
+        #Check if the message is related to this module
         if not self.is_concerned(msg_body) :
             return
-
+        
+        #If `mess` is a private message but privmsg are not allowed for the module
         if mess.getType() == "chat" and not self.pm_allowed :
             return
 
         try :
             #Calling the answer method of the module
             if isinstance(self, SyncModule)  :
+                # Separates command/args and get answer from module
                 command, args =  self.parse(msg_body, self.prefixs)
                 send = self._answer(sender, args)
             elif isinstance(self, ListenModule) :
+                # In a Listen module the name of the command is not specified 
+                # so nothing to parse
                 send = self.answer(sender, msg_body)
-            elif isinstance(self, MultiSyncModule)  :
+            elif isinstance(self, MultiSyncModule) :
+                # Separates command/args and get answer from module
                 command, args =  SyncModule.parse(msg_body, self.prefixs)
                 send = self._answer(sender, command, args)
             else :
-                # ???
+                # A not specified module type !
                 return
 
             #If the method is just a string, it will be the bot's answer
@@ -92,6 +105,13 @@ class BotModule(object) :
             logger.error(_("Error from module %s : %s") % (self.__class__, traceback.format_exc()))
 
     def _dict_messages(self, send, mess, priv=None) :
+        """ Creates messages with a dictionnary described as :
+               {"text": raw_message,    # Text message, transform XHTML if empty
+                "xhtml" : xhtml_message # XHTML message
+                "monospace" : True      # XHTML message is the text with monospace
+                "users" : { "pseudo1" : {...} } # Send the same type of dictionnary
+                                                  in private to the users
+               }"""
         if "xhtml" in send and "text" in send:
             self.bot.say_xhtml(send["text"], send["xhtml"], priv=priv, in_reply_to=mess)
         elif "text" in send and "monospace" in send and send["monospace"]:
@@ -354,6 +374,9 @@ class Help(SyncModule):
 ###############################################################################################
 
 class PresenceModule(BotModule):
+    """ Defines a bot module that will receive all
+    the presence sent on the chatroom and call answer
+    on it. Be careful with those modules"""
     def __init__(self, bot, name, desc, pm_allowed=True):
         BotModule.__init__(self, bot, desc)
         self.name = name
@@ -390,3 +413,18 @@ class RecordUsers(PresenceModule):
             if message.getJid() is not None:
                 jid = message.getJid().split("/")[0]
             self.bot.occupants.add_user(pseudo, jid, role)
+
+###############################################################################################
+##################################  PRESENCE MODULES  #########################################
+###############################################################################################
+
+class IQModule(BotModule):
+    def __init__(self, bot, name, desc, pm_allowed=True):
+        BotModule.__init__(self, bot, desc)
+        self.name = name
+        self.pm_allowed = pm_allowed
+
+    def help(self, body):
+        if body == self.name:
+            return self.desc
+
