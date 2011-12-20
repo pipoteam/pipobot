@@ -14,3 +14,4 @@ modules/belote/belote/
 modules/bourse/*.csv
 modules/belote/png/
 settings.yml
+doc/build/*
