@@ -61,8 +61,8 @@ said in the room, but without an explicit call of a command, as in : ::
     <user> Here is an awesome link : http://pipobot.xouillet.info !
     <bot> [Lien] Titre : Forge xouillet
 
-Every message in a room can be analysed by the bot, and he can reacts if the message 
-matches some criteria (contains an url for instance).
+Every message in a room can be analysed by the bot, and he can react if the message 
+matches some criteria (contains a URL for instance).
 
 For more details, see :ref:`listen_module`.
 
@@ -149,3 +149,9 @@ Example:
              "user2" : { "text" : "raw message for user2", 
                          "xhtml" : "<p> an <b> XHTML </b> message for user2 </p>"}
             }
+
+Nothing, None or ""
+^^^^^^^^^^^^^^^^^^^
+
+If a module has no return statement, returns None or "", then
+the bot will simply not say anything.

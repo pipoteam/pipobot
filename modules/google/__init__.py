@@ -3,6 +3,7 @@
 import urllib
 import simplejson
 from lib.modules import SyncModule, defaultcmd
+import lib.utils
 
 class CmdGoogle(SyncModule):
     def __init__(self, bot):
@@ -28,9 +29,8 @@ class CmdGoogle(SyncModule):
             for i in results:
                 ans += '\n' + i['url'] + ' --- ' + i['title']
                 ans_xhtml += '<br/>\n<a href="' + i['url'] + '" >' + i['title'] + '</a>'
-                ans = ans.replace("b>", "strong>")
                 ans_xhtml = ans_xhtml.replace("b>", "strong>")
             rep = {}
-            rep["text"] = ans
+            rep["text"] = lib.utils.xhtml2text(ans)
             rep["xhtml"] = ans_xhtml
             return rep
