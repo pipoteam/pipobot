@@ -55,6 +55,3 @@ class AsyncMail(AsyncModule):
             self.mfrom = ""
             self.msubject = ""
             self.spam = -1
-
-    def stop(self):
-        self.alive = False
