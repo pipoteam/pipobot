@@ -281,6 +281,9 @@ class Help(SyncModule):
 
     def __init__(self, bot):
         desc = "!help name : display the help for the module `name`"
+        desc = {"" : "Display help for modules", 
+                "module" : "help [module] : show the full help for a module",
+                "subcom" : "help module [subcom] : show the help for a sub-command of a module"}
         SyncModule.__init__(self, bot, desc, "help")
         self.compact_help_content = ""
         self.genHelp()
@@ -304,10 +307,13 @@ class Help(SyncModule):
                     #res = hlp
                     res = ""
                     if type(hlp) == dict:
-                        available_subcoms = ", ".join(sorted([key for key in hlp.keys() if key != ""])) 
-                        desc = " : %s" % hlp[""] if "" in hlp else ""
-                        general_msg = "%s%s\nSous-commandes : %s" % (cmd_name, desc, available_subcoms)
-                        if subcoms != "":
+                        if subcoms == "subcom":
+                            available_subcoms = ", ".join(sorted([key for key in hlp.keys() if key != ""])) 
+                            desc = " : %s" % hlp[""] if "" in hlp else ""
+                            res = "%s%s\nSous-commandes : %s" % (cmd_name, desc, available_subcoms)
+                        elif subcoms == "":
+                            res = '\n'.join(["%s : %s" % (key, val) for key, val in hlp.iteritems() if key != ""])
+                        else:
                             res = []
                             for subcom in subcoms.split(","):
                                 subcom = subcom.strip()
@@ -316,8 +322,6 @@ class Help(SyncModule):
                                 except KeyError:
                                     pass
                             res = "\n".join(res)
-                        else:
-                            res = general_msg
                     else:
                         res = hlp
                     break
