@@ -5,7 +5,7 @@ import urllib
 import threading
 import lib.utils
 from BeautifulSoup import BeautifulSoup
-from lib.modules import SyncModule, defaultcmd
+from lib.modules import SyncModule, defaultcmd, answercmd
 
 class CmdBashfr(SyncModule):
     def __init__(self, bot):
@@ -22,21 +22,33 @@ bashfr [n] : Affiche la quote [n] de bashfr"""
     def enable(self):
         self.bot.bashfrlock = False
             
-    @defaultcmd
+    #################################################################
+    #            PARSING ARGS                                       #
+    #################################################################
+
+    @answercmd(r"(?P<index>\d+)$")
+    def answer_int(self, sender, message):
+        """!bashfr [n]"""
+        index = message.groupdict()["index"]
+        page = 'http://danstonchat.com/%s.html'%(index)
+        return CmdBashfr.get_bashfr(page)
+
+
+    @answercmd(r"^$")
     def answer(self, sender, message):
-        if self.bot.bashfrlock:
-            return "Attends un peu !!"
-        self.bot.bashfrlock = True
-        t = threading.Timer(5, self.enable)
-        t.start()
-        if (not message.strip()):
-            url = urllib.urlopen('http://danstonchat.com/random.html')
-        elif message.isdigit():
-            url = urllib.urlopen('http://danstonchat.com/%s.html'%(message))
-        else:
-            return "Utilise un entier si tu veux une quote spécifique, ou rien si tu préfères aller à Toire"
-        contenu = url.read()
-        url.close()
+        """!bashfr"""
+        page = 'http://danstonchat.com/random.html'
+        return CmdBashfr.get_bashfr(page)
+
+
+    #################################################################
+    #            LIB                                                #
+    #################################################################
+    @staticmethod
+    def get_bashfr(url):
+        page = urllib.urlopen(url)
+        contenu = page.read()
+        page.close()
         soup = BeautifulSoup(contenu)
         if soup.find("h2", text = "Erreur 404"):
             return "La quote demandée n'existe pas. (Erreur 404)"
@@ -44,10 +56,7 @@ bashfr [n] : Affiche la quote [n] de bashfr"""
             sections = soup.findAll("p", { "class": "item-content" })
             choiced = random.randrange(len(sections))
             tableau = sections[choiced].a.contents
-            if message.isdigit():
-                nb = message
-            else:
-                nb = sections[choiced].a["href"].partition("/")[2].partition(".")[0]
+            nb = sections[choiced].a["href"].partition("/")[2].partition(".")[0]
             result = u""
             for i in tableau:
                 if unicode(i) == u"<br />":

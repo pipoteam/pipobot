@@ -8,6 +8,7 @@ import logging
 import traceback
 import time
 import inspect
+import re
 logger = logging.getLogger('pipobot.lib.modules') 
 
 def defaultcmd(f) :
@@ -163,23 +164,29 @@ class SyncModule(BotModule) :
         return SyncModule.parse(body, self.prefixs)[0] == self.command
 
     def _answer(self, sender, args) :
-        module_answer = "To be implemented"
+        # if this command is called by !cmd arg1 arg2 arg3 then args = 'arg1 arg2 arg3'
+        args = args.strip()
         splitted_args = args.split(" ", 1)
-        if splitted_args == []:
-            key = "default"
-            error_msg = "La commande %s nécessite des arguments !" % self.command
-        else:
-            key = splitted_args[0]
-            error_msg = "La commande %s n'existe pas pour %s" % (key, self.command)
-        cmd_args = splitted_args[1] if len(splitted_args) > 1 else ""
+        cmd_name = splitted_args[0].strip()
+        cmd_args = splitted_args[1].strip() if len(splitted_args) > 1 else ""
+
+        for key in self.fcts.keys():
+            # if in the module there is a method with @answercmd(cmd_name)
+            if key == cmd_name:
+                try:
+                    return self.fcts[cmd_name](sender, args)
+                except KeyError:
+                    return "La commande %s nécessite des arguments !" % self.command
+            else:
+                # We check if the method is not defined by a regexp matching cmd_name
+                s = re.match(key, args)
+                if s != None:
+                    return self.fcts[key](sender, s)
         try:
-            module_answer = self.fcts[key](sender, cmd_args)
+            return self.fcts["default"](sender, args)
         except KeyError:
-            try:
-                module_answer = self.fcts["default"](sender, args)
-            except KeyError:
-                return error_msg
-        return module_answer
+            return "La commande %s n'existe pas pour %s → !help %s pour plus d'information" %  \
+                        (cmd_name, self.command, self.command)
 
     def help(self, body):
         if body == self.command:
