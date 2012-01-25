@@ -134,7 +134,7 @@ class BotModule(object) :
 class SyncModule(BotModule) :
     """ Defines a bot module that will answer/execute an action
     after a command. This is the most common case """
-    def __init__(self, bot, desc, command, pm_allowed=True) :
+    def __init__(self, bot, desc, command, pm_allowed=True, lock_time = -1) :
         BotModule.__init__(self, bot, desc)
         self.command = command
         self.pm_allowed = pm_allowed
@@ -149,6 +149,10 @@ class SyncModule(BotModule) :
                     self.fcts[handlerarg] = method
             except AttributeError:
                 pass
+        if lock_time > 0:
+            self.lock_time = lock_time
+            self.lock_name = "%s_lock" % self.__class__.__name__
+            self.enable()
 
     @staticmethod
     def parse(body, prefixs) :
@@ -163,8 +167,20 @@ class SyncModule(BotModule) :
     def is_concerned(self, body) :
         return SyncModule.parse(body, self.prefixs)[0] == self.command
 
+    def enable(self):
+        setattr(self.bot, self.lock_name, False)
+
+    def disable(self):
+        setattr(self.bot, self.lock_name, True)
+        t = threading.Timer(self.lock_time, self.enable)
+        t.start()
+
     def _answer(self, sender, args) :
         # if this command is called by !cmd arg1 arg2 arg3 then args = 'arg1 arg2 arg3'
+        #if self.bot
+        if getattr(self.bot, self.lock_name):
+            return "Please do not flood !"
+        self.disable()
         args = args.strip()
         splitted_args = args.split(" ", 1)
         cmd_name = splitted_args[0].strip()

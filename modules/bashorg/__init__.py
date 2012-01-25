@@ -15,19 +15,11 @@ bashorg [n] : Show the quote [n] from bash.org"""
         SyncModule.__init__(self, bot,  
                         desc = desc,
                         command = "bashorg",
+                        lock_time = 2,
                         )
-        self.bot.bashorglock = False
-
-    def enable(self):
-        self.bot.bashorglock = False
 
     @defaultcmd 
     def answer(self, sender, message):
-        if self.bot.bashfrlock:
-            return "Please do not flood !"
-        self.bot.bashorglock = True
-        t = threading.Timer(5, self.enable)
-        t.start()
         if (not message.strip()):
             url = urllib.urlopen('http://bash.org/?random')
         elif message.isdigit():

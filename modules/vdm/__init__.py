@@ -17,6 +17,7 @@ vdm [n] : Affiche la vdm [n]"""
                             bot,  
                             desc = desc,
                             command = "vdm",
+                            lock_time = 2,
                             )
 
     @defaultcmd

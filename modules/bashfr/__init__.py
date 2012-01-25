@@ -16,12 +16,8 @@ bashfr [n] : Affiche la quote [n] de bashfr"""
                         bot,  
                         desc = desc,
                         command = "bashfr",
+                        lock_time = 2,
                         )
-        self.bot.bashfrlock = False
-
-    def enable(self):
-        self.bot.bashfrlock = False
-            
     #################################################################
     #            PARSING ARGS                                       #
     #################################################################
