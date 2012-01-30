@@ -178,9 +178,11 @@ class SyncModule(BotModule) :
     def _answer(self, sender, args) :
         # if this command is called by !cmd arg1 arg2 arg3 then args = 'arg1 arg2 arg3'
         #if self.bot
-        if getattr(self.bot, self.lock_name):
-            return "Please do not flood !"
-        self.disable()
+        if hasattr(self, "lock_name"):
+            if getattr(self.bot, self.lock_name):
+                return "Please do not flood !"
+            else:
+                self.disable()
         args = args.strip()
         splitted_args = args.split(" ", 1)
         cmd_name = splitted_args[0].strip()
