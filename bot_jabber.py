@@ -52,7 +52,8 @@ class bot_jabber(xmpp.Client, threading.Thread):
         self.alive = True 
         
         #The nickname the bot will use to join rooms
-        self.name = name
+        #This nickname will be set by the reception of a presence message after joining the room
+        self.name = ""
 
         #The room the bot will join
         self.chat = xmpp.protocol.JID(chat)
@@ -158,6 +159,9 @@ class bot_jabber(xmpp.Client, threading.Thread):
     def presence(self, conn, mess):
         """Method called when the bot receives a presence message.
            Used to record users in the room, as well as their jid and roles"""
+        if self.name == "" and mess.getStatusCode() == u'110':
+            self.name = mess.getFrom().getResource()
+
         for module in self.modules:
             if isinstance(module, PresenceModule):
                 module.do_answer(mess)

@@ -36,7 +36,7 @@ T'as pas l'impression de parler dans le vide ?
 Tu vois ça, c'est ta mère et ça, c'est ma bite.
 Hé les gars, qui a laissé entrer ce boulet ? """
 
-question = """ Oui oui oui !!!
+question = """Oui oui oui !!!
 Je ne sais pas du tout.
 Pourquoi tu me demandes à moi ? Tu sais bien que j'en sais autant que Charlie ! C'est-à-dire ...
 Dans tous les cas je suis du même avis que Fabien.
