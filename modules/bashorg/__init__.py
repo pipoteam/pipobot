@@ -5,7 +5,7 @@ import urllib
 import threading
 import lib.utils
 from BeautifulSoup import BeautifulSoup
-from lib.modules import SyncModule, defaultcmd
+from lib.modules import SyncModule, defaultcmd, answercmd
 
 class CmdBashorg(SyncModule):
     def __init__(self, bot):
@@ -18,14 +18,32 @@ bashorg [n] : Show the quote [n] from bash.org"""
                         lock_time = 2,
                         )
 
-    @defaultcmd 
-    def answer(self, sender, message):
-        if (not message.strip()):
-            url = urllib.urlopen('http://bash.org/?random')
-        elif message.isdigit():
-            url = urllib.urlopen('http://bash.org/?%s'%(message))
-        else:
-            return self.desc
+    #################################################################
+    #            PARSING ARGS                                       #
+    #################################################################
+
+    @answercmd(r"(?P<index>\d+)$")
+    def answer_int(self, sender, message):
+        """!bashorg [n]"""
+        index = message.groupdict()["index"]
+        page = 'http://bash.org/?quote=%s' % (index)
+        return CmdBashorg.get_bashorg(page)
+
+
+    @answercmd(r"^$")
+    def answer_empty(self, sender, message):
+        """!bashorg"""
+        page = 'http://bash.org/?random'
+        return CmdBashorg.get_bashorg(page)
+
+
+    #################################################################
+    #            LIB                                                #
+    #################################################################
+
+    @staticmethod
+    def get_bashorg(url):
+        url = urllib.urlopen(url)
         contenu = url.read()
         soup = BeautifulSoup(contenu)
         sections = soup.findAll("p", { "class": "qt" })

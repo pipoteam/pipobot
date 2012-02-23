@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
+
 import random
 import urllib
 import threading
@@ -18,6 +19,7 @@ bashfr [n] : Affiche la quote [n] de bashfr"""
                         command = "bashfr",
                         lock_time = 2,
                         )
+
     #################################################################
     #            PARSING ARGS                                       #
     #################################################################
@@ -36,10 +38,10 @@ bashfr [n] : Affiche la quote [n] de bashfr"""
         page = 'http://danstonchat.com/random.html'
         return CmdBashfr.get_bashfr(page)
 
-
     #################################################################
     #            LIB                                                #
     #################################################################
+
     @staticmethod
     def get_bashfr(url):
         page = urllib.urlopen(url)
