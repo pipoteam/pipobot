@@ -192,7 +192,7 @@ class SyncModule(BotModule) :
             # if in the module there is a method with @answercmd(cmd_name)
             if key == cmd_name:
                 try:
-                    return self.fcts[cmd_name](sender, args)
+                    return self.fcts[cmd_name](sender, cmd_args)
                 except KeyError:
                     return "La commande %s nécessite des arguments !" % self.command
             else:
