@@ -49,12 +49,10 @@ todo list [name] : affiche les todo de la liste [name]""",
                 return "TODO-list vide"
             return send
     
-    @answercmd("add")
+    @answercmd("add (?P<list_name>\S+) (?P<desc>.*)")
     def add(self, sender, args):
-        try:
-            liste, msg = args.split(' ', 1)
-        except ValueError:
-            return "usage: !todo add [une_liste] [un_todo]"
+        liste = args.group("list_name")
+        msg = args.group("desc")
         if liste == "all":
             return "On ne peut pas nommer une liste 'all'"
         todo = Todo(liste, msg, sender, time.time()) 
@@ -62,21 +60,16 @@ todo list [name] : affiche les todo de la liste [name]""",
         self.bot.session.commit()
         return "TODO ajouté"
 
-    @answercmd("search")
+    @answercmd("search (?P<query>.*)")
     def search(self, sender, args):
-        if len(args) < 1:
-            return "usage: !todo search [champ]"
-        else:
-            found = self.bot.session.query(Todo).filter(Todo.content.like("%" + args + "%"))
-            return "\n".join(map(str, found))
+        query = args.group("query")
+        found = self.bot.session.query(Todo).filter(Todo.content.like("%" + query + "%"))
+        return "\n".join(map(str, found))
 
-    @answercmd("remove", "delete")
+    @answercmd("(remove|delete) (?P<ids>(\d+,?)+)")
     def remove(self, sender, args):
         send = ""
-        if len(args) < 1:
-            return "usage !todo remove id1,id2,id3,…"
-        else:
-            arg = args.split(",")
+        arg = args.group("ids").split()
         for i in arg:
             n = int(i)
             deleted = self.bot.session.query(Todo).filter(Todo.id == n).all()

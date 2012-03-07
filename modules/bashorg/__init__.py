@@ -25,7 +25,7 @@ bashorg [n] : Show the quote [n] from bash.org"""
     @answercmd(r"(?P<index>\d+)$")
     def answer_int(self, sender, message):
         """!bashorg [n]"""
-        index = message.groupdict()["index"]
+        index = message.group("index")
         page = 'http://bash.org/?quote=%s' % (index)
         return CmdBashorg.get_bashorg(page)
 

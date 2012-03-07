@@ -27,16 +27,15 @@ vdm [n] : Affiche la vdm [n]"""
     @answercmd(r"(?P<index>\d+)$")
     def answer_int(self, sender, message):
         """!vdm [n]"""
-        index = message.groupdict()["index"]
-        page = urllib.urlopen('http://www.viedemerde.fr/travail/%s'%(index))
+        index = message.group("index")
+        page = 'http://www.viedemerde.fr/travail/%s'%(index)
         return CmdVdm.get_vdm(page)
-
 
     @answercmd(r"^$")
     def answer(self, sender, message):
         """!vdm"""
         page = 'http://www.viedemerde.fr/aleatoire'
-        return CmdBashfr.get_vdm(page)
+        return CmdVdm.get_vdm(page)
 
     #################################################################
     #            LIB                                                #

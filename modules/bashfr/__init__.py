@@ -27,7 +27,7 @@ bashfr [n] : Affiche la quote [n] de bashfr"""
     @answercmd(r"(?P<index>\d+)$")
     def answer_int(self, sender, message):
         """!bashfr [n]"""
-        index = message.groupdict()["index"]
+        index = message.group("index")
         page = 'http://danstonchat.com/%s.html'%(index)
         return CmdBashfr.get_bashfr(page)
 
