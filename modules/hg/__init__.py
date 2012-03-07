@@ -4,11 +4,12 @@ import os
 import yaml
 import hglib
 import mercurial
-from lib.modules import SyncModule, defaultcmd
+from lib.modules import SyncModule, answercmd
 
 class CmdHg(SyncModule):
     def __init__(self, bot):
-        self.readconf("modules/hg/config.yml")
+        config = os.path.join(bot.module_path["hg"], "config.yml")
+        self.readconf(config)
         desc = """hg : donne le dernier changement sur le repo %s
 hg repos : affiche la liste des repos disponibles
 hg [repo] : donne le dernier changement du repo [repo]
@@ -25,26 +26,23 @@ hg [repo] [rev] : affiche la révision [rev] du repo [repo]""" % (self.defaultre
         self.repos = settings["repos"]
         self.defaultrepo = settings["general"]["default"]
 
-    @defaultcmd
-    def answer(self, sender, message):
-        args = message.split(" ")
-        #!hg
-        if args[0] == "":
-            repo = self.defaultrepo
-            rev = -1
-        #!hg [repo]
-        elif len(args) == 1:
-            if args[0] == "repos":
-                return "Liste des repos : %s et par défaut : %s" % (", ".join(self.repos.keys()), self.defaultrepo)
-            repo = args[0]
-            rev = -1
-        #!hg [repo] [rev]
-        elif len(args) == 2:
-            repo = args[0]
-            rev = args[1]
-        else:
-            return "Trop d'arguments !"
+    @answercmd(r"^$")
+    def answer_default(self, sender, message):
+        repo = self.defaultrepo
+        return self.get_log(repo, -1)
 
+    @answercmd(r"^(?P<name>\w+)$")
+    def answer_repo(self, sender, message):
+        repo = message.group("name")
+        return self.get_log(repo, -1)
+
+    @answercmd(r"^(?P<name>\w+)\s+(?P<rev>\d+)$")
+    def answer_repo_rev(self, sender, message):
+        repo = message.group("name")
+        rev = message.group("rev")
+        return self.get_log(repo, rev)
+
+    def get_log(self, repo, rev):
         if not repo in self.repos:
             return "Le repo %s n'existe pas" % repo
         try:
