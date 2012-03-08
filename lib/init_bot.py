@@ -8,6 +8,7 @@ import sys
 import yaml
 
 import lib.modules
+import lib.abstract_modules
 
 def conf_parser():
     """Reads command-line parameters used to start the bot"""
@@ -105,7 +106,8 @@ def read_modules(salon_config, settings):
             classes = [getattr(module_class, class_name) for class_name in dir(module_class)]
             #XXX Quick FIX → all these classes are subclasses of BotModule too…
             except_list = [lib.modules.SyncModule, lib.modules.AsyncModule, 
-                           lib.modules.MultiSyncModule, lib.modules.BotModule, lib.modules.ListenModule]
+                           lib.modules.MultiSyncModule, lib.modules.BotModule, lib.modules.ListenModule,
+                           lib.abstract_modules.FortuneModule]
             for classe in [c for c in classes if type(c) == type and \
                                                  issubclass(c, lib.modules.BotModule) and  \
                                                  c not in except_list]:

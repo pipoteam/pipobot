@@ -1,51 +1,25 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
-import random
-import urllib
-import threading
-import lib.utils
-from BeautifulSoup import BeautifulSoup
-from lib.modules import SyncModule, defaultcmd, answercmd
 
-class CmdBashorg(SyncModule):
+import lib.utils
+from lib.abstract_modules import FortuneModule
+
+class CmdBashorg(FortuneModule):
     def __init__(self, bot):
         desc = """To read quotes from bash.org
 bashorg : Returns a random quote from bash.org.
 bashorg [n] : Show the quote [n] from bash.org"""
-        SyncModule.__init__(self, bot,  
+        FortuneModule.__init__(self,
+                        bot,  
                         desc = desc,
                         command = "bashorg",
+                        url_random = "http://bash.org/?random",
+                        url_indexed = 'http://bash.org/?quote=%s',
                         lock_time = 2,
                         )
 
-    #################################################################
-    #            PARSING ARGS                                       #
-    #################################################################
 
-    @answercmd(r"(?P<index>\d+)$")
-    def answer_int(self, sender, message):
-        """!bashorg [n]"""
-        index = message.group("index")
-        page = 'http://bash.org/?quote=%s' % (index)
-        return CmdBashorg.get_bashorg(page)
-
-
-    @answercmd(r"^$")
-    def answer_empty(self, sender, message):
-        """!bashorg"""
-        page = 'http://bash.org/?random'
-        return CmdBashorg.get_bashorg(page)
-
-
-    #################################################################
-    #            LIB                                                #
-    #################################################################
-
-    @staticmethod
-    def get_bashorg(url):
-        url = urllib.urlopen(url)
-        contenu = url.read()
-        soup = BeautifulSoup(contenu)
+    def extract_data(self, soup):
         sections = soup.findAll("p", { "class": "qt" })
         centers = soup.findAll("center")
         if sections == []:

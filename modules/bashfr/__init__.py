@@ -2,52 +2,24 @@
 #-*- coding: utf-8 -*-
 
 import random
-import urllib
-import threading
 import lib.utils
-from BeautifulSoup import BeautifulSoup
-from lib.modules import SyncModule, defaultcmd, answercmd
+from lib.abstract_modules import FortuneModule
 
-class CmdBashfr(SyncModule):
+class CmdBashfr(FortuneModule):
     def __init__(self, bot):
         desc = """Pour lire des quotes bashfr
 bashfr : Retourne une quote aléatoire de bashfr.
 bashfr [n] : Affiche la quote [n] de bashfr"""
-        SyncModule.__init__(self, 
+        FortuneModule.__init__(self,
                         bot,  
                         desc = desc,
                         command = "bashfr",
+                        url_random = "http://danstonchat.com/random.html",
+                        url_indexed = 'http://danstonchat.com/%s.html',
                         lock_time = 2,
                         )
 
-    #################################################################
-    #            PARSING ARGS                                       #
-    #################################################################
-
-    @answercmd(r"(?P<index>\d+)$")
-    def answer_int(self, sender, message):
-        """!bashfr [n]"""
-        index = message.group("index")
-        page = 'http://danstonchat.com/%s.html'%(index)
-        return CmdBashfr.get_bashfr(page)
-
-
-    @answercmd(r"^$")
-    def answer(self, sender, message):
-        """!bashfr"""
-        page = 'http://danstonchat.com/random.html'
-        return CmdBashfr.get_bashfr(page)
-
-    #################################################################
-    #            LIB                                                #
-    #################################################################
-
-    @staticmethod
-    def get_bashfr(url):
-        page = urllib.urlopen(url)
-        contenu = page.read()
-        page.close()
-        soup = BeautifulSoup(contenu)
+    def extract_data(self, soup):
         if soup.find("h2", text = "Erreur 404"):
             return "La quote demandée n'existe pas. (Erreur 404)"
         else:
