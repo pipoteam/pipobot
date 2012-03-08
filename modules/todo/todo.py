@@ -69,7 +69,7 @@ todo list [name] : affiche les todo de la liste [name]""",
     @answercmd("(remove|delete) (?P<ids>(\d+,?)+)")
     def remove(self, sender, args):
         send = ""
-        arg = args.group("ids").split()
+        arg = args.group("ids").split(",")
         for i in arg:
             n = int(i)
             deleted = self.bot.session.query(Todo).filter(Todo.id == n).all()

@@ -203,8 +203,8 @@ class SyncModule(BotModule) :
         try:
             return self.fcts["default"](sender, args)
         except KeyError:
-            return "La commande %s n'existe pas pour %s → !help %s pour plus d'information" %  \
-                        (cmd_name, self.command, self.command)
+            return "La commande %s n'existe pas pour %s ou la syntaxe de !%s %s est incorrecte → !help %s pour plus d'information" %  \
+                        (cmd_name, self.command, self.command, cmd_name, self.command)
 
     def help(self, body):
         if body == self.command:
