@@ -16,7 +16,7 @@ class CmdBot(ListenModule):
             return
         if message == "":
             return
-        if message[0] == "!":
+        if message[0] in ["!", ":"]:
             return
         if re.search("^"+self.bot.name.lower()+"(\W|$)", message.lower()):
             if '?' in message:
