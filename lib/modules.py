@@ -444,7 +444,7 @@ class RecordUsers(PresenceModule):
             self.bot.occupants.add_user(pseudo, jid, role)
 
 ###############################################################################################
-##################################  PRESENCE MODULES  #########################################
+########################################  IQ MODULES  #########################################
 ###############################################################################################
 
 class IQModule(BotModule):
@@ -456,4 +456,3 @@ class IQModule(BotModule):
     def help(self, body):
         if body == self.name:
             return self.desc
-

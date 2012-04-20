@@ -107,7 +107,7 @@ def read_modules(salon_config, settings):
             #XXX Quick FIX → all these classes are subclasses of BotModule too…
             except_list = [lib.modules.SyncModule, lib.modules.AsyncModule, 
                            lib.modules.MultiSyncModule, lib.modules.BotModule, lib.modules.ListenModule,
-                           lib.abstract_modules.FortuneModule]
+                           lib.abstract_modules.FortuneModule, lib.abstract_modules.NotifyModule]
             for classe in [c for c in classes if type(c) == type and \
                                                  issubclass(c, lib.modules.BotModule) and  \
                                                  c not in except_list]:

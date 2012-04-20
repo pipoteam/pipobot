@@ -3,7 +3,7 @@
 
 import urllib
 from BeautifulSoup import BeautifulSoup
-from lib.modules import SyncModule, defaultcmd, answercmd
+from lib.modules import AsyncModule, SyncModule, defaultcmd, answercmd
 
 class AppURLopener(urllib.FancyURLopener):
     def prompt_user_passwd(self, host, realm):
@@ -43,3 +43,26 @@ class FortuneModule(SyncModule):
 
     def extract_data(self, soup):
         return "You must override extract_data for %s !!!" % self.command
+
+class NotifyModule(SyncModule, AsyncModule):
+    """A NotifyModule is an AsyncModule that you can also control with synchronous commands"""
+    def __init__(self, bot, desc, command, pm_allowed=True, lock_time=0, delay=0):
+        AsyncModule.__init__(self, bot, command, desc, delay, pm_allowed)
+        SyncModule.__init__(self, bot, desc, command, pm_allowed, lock_time)
+        self.mute = False
+
+    @answercmd("mute")
+    def mute(self, sender, message):
+        self.mute = True
+        return "%s mute !" % self.command
+
+    @answercmd("unmute")
+    def unmute(self, sender, message):
+        self.mute = False
+        if hasattr(self, "update"):
+            self.update()
+        return "%s unmute !" % self.command
+
+    def action(self):
+        if not self.mute:
+            self.do_action()
