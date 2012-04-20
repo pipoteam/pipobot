@@ -54,15 +54,17 @@ class NotifyModule(SyncModule, AsyncModule):
     @answercmd("mute")
     def mute(self, sender, message):
         self.mute = True
-        return "%s mute !" % self.command
+        return "Notifications supprimées pour la commande %s !" % self.command
 
     @answercmd("unmute")
     def unmute(self, sender, message):
         self.mute = False
-        if hasattr(self, "update"):
-            self.update()
-        return "%s unmute !" % self.command
+        self.update(silent = True)
+        return "Notifications activées pour la commande %s !" % self.command
 
     def action(self):
         if not self.mute:
             self.do_action()
+
+    def update(self, silent = False):
+        return "not implemented"
