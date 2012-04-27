@@ -2,14 +2,21 @@
 #-*- coding: utf8 -*-
 """This file contains the class 'bot_jabber' wich is a bot for jabber MUC"""
 
-import xmpp
-import sys
-import threading
 import logging
+import threading
+import xmpp
+import xml.parsers.expat
 from lib.modules import AsyncModule, PresenceModule, IQModule
 from lib.user import Occupants
 logger = logging.getLogger('pipobot.bot_jabber') 
 
+class XMPPException(Exception):
+    """ For errors due to XMPP (conflict, connection/authentification failed, …) """
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg
 
 XML_NAMESPACE = 'http://www.w3.org/1999/xhtml'
 
@@ -40,12 +47,12 @@ class bot_jabber(xmpp.Client, threading.Thread):
         con = self.connect()
         if not con:
             logger.error(_("Unable to connect !"))
-            sys.exit()
+            raise XMPPException(_("Unable to connect !"))
         #Authenticating
         auth = self.auth(jid.getNode(), passwd, resource=res)
         if not auth:
             logger.error(_("Unable to authenticate !"))
-            sys.exit()
+            raise XMPPException(_("Unable to authenticate !"))
 
         self.modules = []
 
@@ -115,7 +122,10 @@ class bot_jabber(xmpp.Client, threading.Thread):
         self.say(_("I've been asked to leave you"))
         #The bot leaves the room
         logger.info("Killing %s" % self.chatname)
-        self.disconnect()
+        try:
+            self.disconnect()
+        except xml.parsers.expat.ExpatError:
+            pass
 
     def forge_message(self, mess, priv=None, in_reply_to=None):
         """Method used to send a message in a the room"""
@@ -179,7 +189,12 @@ class bot_jabber(xmpp.Client, threading.Thread):
         
         #client's loop, exited only when self.alive has been set to False
         while self.alive:
-            self.Process(1)
+            try:
+                self.Process(1)
+            except xmpp.protocol.Conflict:
+                msg = _("The ressource defined for the bot in %s is already used" % (self.chatname))
+                logger.error(msg)
+                raise XMPPException(msg)
 
         #When bot's killed, every asynchronous module must be killed too
         for module in self.modules:
@@ -187,9 +202,8 @@ class bot_jabber(xmpp.Client, threading.Thread):
                 module.stop()
 
     def restart(self):
-        logger.info("bot_jabber.restart()")
+        """ Will ask the manager to restart this room """
         self.manager.restart(self.chatname)
-        logger.info("end bot_jabber.restart()")
 
     def disable_mute(self):
         """To give the bot its voice again"""
@@ -199,4 +213,4 @@ class bot_jabber(xmpp.Client, threading.Thread):
         """Method called when the bot receives an IQ message"""
         for module in self.modules:
             if isinstance(module, IQModule):
-                module.do_answer(mess)
+                module.do_answer(iqdata)

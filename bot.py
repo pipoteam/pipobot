@@ -28,6 +28,16 @@ DEFAULT_LANG = "en"
 APP_NAME = "pipobot"
 DEFAULT_FILENAME = os.path.join(os.path.dirname(globals()["__file__"]),'settings.yml')
 
+class ConfigException(Exception):
+    """ A general exception raised when the configuration file is not valid """
+
+    def __init__(self, desc):
+        self.desc = desc
+
+    def __str__(self):
+        return self.desc
+
+
 class bot_manager:
     """ This is a class to configure, create, restart, manage bots """
     def __init__(self, settings_file):
@@ -39,6 +49,8 @@ class bot_manager:
 
     def init_bots(self):
         """ This method will initialize all bots thanks to self.settings and start them """
+        if "rooms" not in self.settings:
+            raise ConfigException("You must have a 'rooms' section in your configuration file")
         for room in self.settings["rooms"]:
             self.create_bot(room)
         try:
@@ -46,7 +58,8 @@ class bot_manager:
                 continue
         except KeyboardInterrupt:
             logger.info(_("Ctrl-c signal !"))
-        for bot in self.bots.values():
+        for bot_room, bot in self.bots.iteritems():
+            logger.info("Killing bot from %s" % bot_room)
             bot.kill()
         sys.exit()
 
@@ -70,15 +83,25 @@ class bot_manager:
         """ With the content of the configuration file, reads the
             list of modules to load, import all commands defined in them,
             and returns a list with all commands """
+        if "modules" not in room:
+            raise ConfigException("The room %s has no modules configured in %s" % (room["chan"], self.settings_file))
         classes_salon = []
         module_path = {}
         for module_name in room["modules"]:
             if module_name.startswith('_') :
-                group = self.settings["groups"][module_name[1:]]
+                try:
+                    group = self.settings["groups"][module_name[1:]]
+                except KeyError as e:
+                    raise ConfigException("Your configuration file must have a 'groups' section with the group %s required by the room %s" %
+                                                (module_name[1:], room["chan"]))
+
             else :
                 group = [module_name]
             for module in group:
-                module_class = __import__(module)
+                try:
+                    module_class = __import__(module)
+                except ImportError as e:
+                    raise ConfigException("The module %s selected for %s cannot be found" % (module, room["chan"]))
                 path = module_class.__path__
                 module_path[module] = path[0]
 
@@ -112,8 +135,15 @@ class bot_manager:
         """ Create a bot.
             `room` : an excerpt of the yaml structure generated with the configuration file
         """
-        bot = bot_jabber.bot_jabber(room["login"], room["passwd"], room["ressource"],
-                                    room["chan"], room["nick"], self.xmpp_log, self)
+        try:
+            bot = bot_jabber.bot_jabber(room["login"], room["passwd"], room["ressource"],
+                                        room["chan"], room["nick"], self.xmpp_log, self)
+        except KeyError as e:
+            if "chan" in room:
+                msg = _("Your room %s has no parameter %s in %s" % (room["chan"], str(e), self.settings_file))
+            else:
+                msg = _("One of your room has no 'chan' parameter in %s" % self.settings_file)
+            raise ConfigException(msg)
 
         classes_room, module_path = self.read_modules(room)
         if self.db_session is not None:
@@ -142,7 +172,10 @@ if __name__ == "__main__":
         settings_filename = sys.argv[1] if sys.argv else DEFAULT_FILENAME
 
     with open(settings_filename) as s:
-        settings = yaml.load(s)
+        try:
+            settings = yaml.load(s)
+        except (yaml.scanner.ScannerError, yaml.parser.ParserError):
+            raise ConfigException("The configuration file %s is not a valid yaml file" % settings_filename)
 
     #Creation of bot_manager
     manager = bot_manager(settings_filename)
@@ -179,20 +212,24 @@ if __name__ == "__main__":
             current_l = gettext.translation(APP_NAME, local_path, languages=[DEFAULT_LANG])
             current_l.install()
         except IOError:
-            logger.error("Error loading english translations : no translation will be used")
-            raise
+            logger.error("Error loading english translation")
+            logger.error("You must generate translation files by using scripts present in the 'translation' directory")
+            raise ConfigException("Error loading english translation")
 
     # Configuring database
     engine = ""
     src = ""
     if "database" in settings:
-        engine = settings["database"]["engine"]
-        src = settings["database"]["src"]
-        manager.configure_db(engine, src)
+        try:
+            engine = settings["database"]["engine"]
+            src = settings["database"]["src"]
+            manager.configure_db(engine, src)
+        except KeyError as e:
+            raise ConfigException(_("Your database section must contain parameters 'engine' and 'src'"))
 
     # Configuring path to find modules
     sys.path.insert(0, "modules/")
-    if "extra_modules" in settings["config"] :
+    if "config" in settings and "extra_modules" in settings["config"] :
         for module_path in settings["config"]["extra_modules"] :
             sys.path.insert(0, module_path)
 
