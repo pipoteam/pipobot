@@ -11,6 +11,7 @@ sys.setdefaultencoding('utf8')
 import yaml
 
 #Bot jabber imports
+import lib.abstract_modules
 import lib.modules
 import bot_jabber
 
@@ -18,7 +19,6 @@ import bot_jabber
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from lib.bdd import Base
-import lib.abstract_modules
 
 
 # DEFAULT Constants
@@ -29,6 +29,7 @@ APP_NAME = "pipobot"
 DEFAULT_FILENAME = os.path.join(os.path.dirname(globals()["__file__"]),'settings.yml')
 
 class bot_manager:
+    """ This is a class to configure, create, restart, manage bots """
     def __init__(self, settings_file):
         self.settings_file = settings_file
         self.bots = {}
@@ -37,6 +38,7 @@ class bot_manager:
         self.xmpp_log = self.settings["config"]["xmpplog"] if "config" in self.settings and "xmpplog" in self.settings["config"] else DEFAULT_XMPPLOG
 
     def init_bots(self):
+        """ This method will initialize all bots thanks to self.settings and start them """
         for room in self.settings["rooms"]:
             self.create_bot(room)
         try:
@@ -49,9 +51,9 @@ class bot_manager:
         sys.exit()
 
     def update_config(self):
+        """ Reads again the configuration file and update settings """
         with open(self.settings_file) as f:
-            settings = yaml.load(f)
-        self.settings = settings
+            self.settings = yaml.load(f)
 
     def configure_db(self, engine, src):
         """ Configure database for bots,
@@ -64,8 +66,7 @@ class bot_manager:
         Base.metadata.create_all(bind=engine)
         self.db_session = db_session
 
-    @staticmethod
-    def read_modules(room):
+    def read_modules(self, room):
         """ With the content of the configuration file, reads the
             list of modules to load, import all commands defined in them,
             and returns a list with all commands """
@@ -96,6 +97,8 @@ class bot_manager:
         return classes_salon, module_path
 
     def restart(self, bot_room):
+        """ Restart the bot that is currently present in the room `bot_room` after
+            having reading the configuration file again """
         self.update_config()
         for room in self.settings["rooms"]:
             if room["chan"] == bot_room:
@@ -106,10 +109,13 @@ class bot_manager:
                 self.create_bot(room)
 
     def create_bot(self, room):
+        """ Create a bot.
+            `room` : an excerpt of the yaml structure generated with the configuration file
+        """
         bot = bot_jabber.bot_jabber(room["login"], room["passwd"], room["ressource"],
                                     room["chan"], room["nick"], self.xmpp_log, self)
 
-        classes_room, module_path = bot_manager.read_modules(room)
+        classes_room, module_path = self.read_modules(room)
         if self.db_session is not None:
             #TODO use manager attribute for that
             bot.session = self.db_session
@@ -168,9 +174,9 @@ if __name__ == "__main__":
         current_l = gettext.translation(APP_NAME, local_path, languages=[lang])
         current_l.install()
     except IOError:
-        logger.error("The language %s is not supported, using %s instead"%(lang, default_lang))
+        logger.error("The language %s is not supported, using %s instead"%(lang, DEFAULT_LANG))
         try:
-            current_l = gettext.translation(appli_name, local_path, languages=[default_lang])
+            current_l = gettext.translation(APP_NAME, local_path, languages=[DEFAULT_LANG])
             current_l.install()
         except IOError:
             logger.error("Error loading english translations : no translation will be used")
