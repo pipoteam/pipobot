@@ -19,6 +19,7 @@ import bot_jabber
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from lib.bdd import Base
+from lib.exceptions import ConfigException
 
 
 # DEFAULT Constants
@@ -27,16 +28,6 @@ DEFAULT_XMPPLOG = None #default = no log of xmpp messages
 DEFAULT_LANG = "en"
 APP_NAME = "pipobot"
 DEFAULT_FILENAME = os.path.join(os.path.dirname(globals()["__file__"]),'settings.yml')
-
-class ConfigException(Exception):
-    """ A general exception raised when the configuration file is not valid """
-
-    def __init__(self, desc):
-        self.desc = desc
-
-    def __str__(self):
-        return self.desc
-
 
 class bot_manager:
     """ This is a class to configure, create, restart, manage bots """
@@ -86,7 +77,6 @@ class bot_manager:
         if "modules" not in room:
             raise ConfigException("The room %s has no modules configured in %s" % (room["chan"], self.settings_file))
         classes_salon = []
-        module_path = {}
         for module_name in room["modules"]:
             if module_name.startswith('_') :
                 try:
@@ -102,8 +92,6 @@ class bot_manager:
                     module_class = __import__(module)
                 except ImportError as e:
                     raise ConfigException("The module %s selected for %s cannot be found" % (module, room["chan"]))
-                path = module_class.__path__
-                module_path[module] = path[0]
 
                 classes = [getattr(module_class, class_name) for class_name in dir(module_class)]
                 #XXX Quick FIX → all these classes are subclasses of BotModule too…
@@ -117,7 +105,7 @@ class bot_manager:
         #Modules RecordUsers and Help are used by default (no need to add them to the configuration)
         classes_salon.append(lib.modules.RecordUsers)
         classes_salon.append(lib.modules.Help)
-        return classes_salon, module_path
+        return classes_salon
 
     def restart(self, bot_room):
         """ Restart the bot that is currently present in the room `bot_room` after
@@ -138,6 +126,7 @@ class bot_manager:
         try:
             bot = bot_jabber.bot_jabber(room["login"], room["passwd"], room["ressource"],
                                         room["chan"], room["nick"], self.xmpp_log, self)
+            bot.settings = self.settings
         except KeyError as e:
             if "chan" in room:
                 msg = _("Your room %s has no parameter %s in %s" % (room["chan"], str(e), self.settings_file))
@@ -145,12 +134,11 @@ class bot_manager:
                 msg = _("One of your room has no 'chan' parameter in %s" % self.settings_file)
             raise ConfigException(msg)
 
-        classes_room, module_path = self.read_modules(room)
+        classes_room = self.read_modules(room)
         if self.db_session is not None:
             #TODO use manager attribute for that
             bot.session = self.db_session
 
-        bot.module_path = module_path
         bot.add_commands(classes_room)
         bot.start()
         self.bots[room["chan"]] = bot

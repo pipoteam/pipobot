@@ -5,26 +5,24 @@ import yaml
 import hglib
 import mercurial
 from lib.modules import SyncModule, answercmd
+from lib.exceptions import ConfigException
 
 class CmdHg(SyncModule):
     def __init__(self, bot):
-        config = os.path.join(bot.module_path["hg"], "config.yml")
-        self.readconf(config)
+        settings = bot.settings
+        try:
+            self.repos = settings["modules"]["hg"]["repos"]
+            self.defaultrepo = settings["modules"]["hg"]["default"]
+        except KeyError as e:
+            raise ConfigException("Missing section %s in configuration file for module mercurial" % e)
+
         desc = """hg : donne le dernier changement sur le repo %s
-hg repos : affiche la liste des repos disponibles
 hg [repo] : donne le dernier changement du repo [repo]
 hg [repo] [rev] : affiche la révision [rev] du repo [repo]""" % (self.defaultrepo)
         SyncModule.__init__(self, 
                             bot, 
                             desc = desc,
                             command = "hg")
-
-    def readconf(self, filename):
-        f = open(filename, "r")
-        settings = yaml.load(f)
-        f.close()
-        self.repos = settings["repos"]
-        self.defaultrepo = settings["general"]["default"]
 
     @answercmd(r"^$")
     def answer_default(self, sender, message):

@@ -5,11 +5,7 @@ from mpd import CommandError
 from lib.modules import defaultcmd
 from lib.abstract_modules import NotifyModule
 from libmpd.BotMPD import BotMPD
-
-try:
-    import config
-except ImportError:
-    raise NameError("MPD config not found, unable to start MPD module")
+import lib.exceptions
 
 class CmdMpd(NotifyModule):
     def __init__(self, bot):
@@ -33,15 +29,25 @@ class CmdMpd(NotifyModule):
                              pm_allowed = False,
                              command = "mpd",
                              delay = 0)
+        settings = self.bot.settings
+        try:
+            self.host = settings["modules"]["botmpd"]["host"]
+            self.port = settings["modules"]["botmpd"]["port"]
+            self.pwd = settings["modules"]["botmpd"]["pwd"]
+        except KeyError as e:
+            raise lib.exceptions.ConfigException("Missing section %s in configuration file for module botmpd!" % e)
+
+        if "datadir" in settings["modules"]["botmpd"]:
+            self.datadir = settings["modules"]["botmpd"]["datadir"]
         self.mute = True
 
     #TODO passer les commandes de lib/ ici et utiliser les décorateurs
     @defaultcmd
     def answer(self, sender, message):
-        if hasattr(config, "DATADIR"):
-            mpd = BotMPD(config.HOST, config.PORT, config.PASSWORD, config.DATADIR)
+        if hasattr(self, "datadir"):
+            mpd = BotMPD(self.host, self.port, self.pwd, self.datadir)
         else:
-            mpd = BotMPD(config.HOST, config.PORT, config.PASSWORD)
+            mpd = BotMPD(self.host, self.port, self.pwd)
         try:
             cmd, arg = message.split(' ', 1)
         except:
@@ -86,7 +92,7 @@ class CmdMpd(NotifyModule):
         # This is due to the fact that the "async" part here is handled by the idle()
         # function of the mpd library and not by a loop with sleep(delay) as usual
         try:
-            mpd = BotMPD(config.HOST, config.PORT, config.PASSWORD)
+            mpd = BotMPD(self.host, self.port, self.pwd)
             mpd.send_idle()
             r = mpd.fetch_idle()
             repDict = {"The Who - Baba O`riley":"La musique des experts !!!",

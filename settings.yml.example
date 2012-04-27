@@ -44,3 +44,16 @@ groups:
         - url
         - vdm
         - xhtml
+
+modules:
+    botmpd:
+        host: localhost
+        port: 6600
+        pwd: *secret*
+        datador: /path/to/music
+    hg:
+        default: plong
+        repos:
+            repo1: /path/to/repo1
+            repo2: /path/to/repo2
+            repo3: /path/to/repo3

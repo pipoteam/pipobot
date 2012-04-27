@@ -1,6 +1,0 @@
-general:
-    default: repo1
-repos:
-    repo1: /somewhere/a/repo/
-    repo2: /somewhere/another/repo/
-    repo3: /somewhere/anotheragain/repo/
