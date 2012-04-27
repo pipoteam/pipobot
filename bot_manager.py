@@ -39,6 +39,14 @@ class bot_manager:
     def init_bots(self):
         for room in self.settings["rooms"]:
             self.create_bot(room["chan"])
+        try:
+            while raw_input("") != "q":
+                continue
+        except KeyboardInterrupt:
+            logger.info(_("Ctrl-c signal !"))
+        for bot in self.bots.values():
+            bot.kill()
+        sys.exit()
 
     def update_config(self):
         with open(self.settings_file) as f:
@@ -111,17 +119,6 @@ class bot_manager:
         bot.start()
         self.bots[room["chan"]] = bot
 
-    def loop(self):
-        try:
-            while raw_input("") != "q":
-                continue
-        except KeyboardInterrupt:
-            logger.info(_("Ctrl-c signal !"))
-        for bot in self.bots.values():
-            bot.kill()
-        sys.exit()
-
-
 if __name__ == "__main__":
     #Parametring options
     parser = OptionParser()
@@ -193,7 +190,4 @@ if __name__ == "__main__":
         for module_path in settings["config"]["extra_modules"] :
             sys.path.insert(0, module_path)
 
-    for room in settings["rooms"]:
-        manager.create_bot(room)
-
-    manager.loop()
+    manager.init_bots()
