@@ -81,7 +81,10 @@ class CmdMpd(NotifyModule):
         mpd.disconnect()
         return send
 
-    def do_action(self):
+    def action(self):
+        # Here we redefine action (and not do_action as we are supposed to)
+        # This is due to the fact that the "async" part here is handled by the idle()
+        # function of the mpd library and not by a loop with sleep(delay) as usual
         try:
             mpd = BotMPD(config.HOST, config.PORT, config.PASSWORD)
             mpd.send_idle()

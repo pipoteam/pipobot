@@ -168,8 +168,7 @@ if __name__ == "__main__":
                       help="Print debugs")
     (options, args) = parser.parse_args()
 
-    if len(sys.argv) > 0:
-        settings_filename = sys.argv[1] if sys.argv else DEFAULT_FILENAME
+    settings_filename = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_FILENAME
 
     with open(settings_filename) as s:
         try:
