@@ -46,6 +46,7 @@ if __name__ == '__main__':
     if "database" in settings:
         engine = settings["database"]["engine"]
         src = settings["database"]["src"]
+        db_session = lib.init_bot.configure_db(engine, src)
 
     #Configuring path to find modules
     sys.path.insert(0, "modules/")
@@ -61,7 +62,6 @@ if __name__ == '__main__':
         classes_salon, module_path = lib.init_bot.read_modules(salon["modules"], settings)
         if engine:
             #Configuring database
-            db_session = lib.init_bot.configure_db(engine, src)
             bot.session = db_session
 
         bot.module_path = module_path
