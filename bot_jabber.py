@@ -16,7 +16,9 @@ XML_NAMESPACE = 'http://www.w3.org/1999/xhtml'
 class bot_jabber(xmpp.Client, threading.Thread):
     """The implementation of a bot for jabber MUC"""
     
-    def __init__(self, login, passwd, res, chat, name, xmpp_log = None):
+    def __init__(self, login, passwd, res, chat, name, xmpp_log = None, manager = None):
+        self.chatname = chat
+        self.manager = manager
 
         #Definition of an XMPP client
         self.Namespace, self.DBG = 'jabber:client', xmpp.DBG_CLIENT
@@ -106,12 +108,13 @@ class bot_jabber(xmpp.Client, threading.Thread):
 
     def kill(self):
         """Method used to kill the bot"""
-        
+
         #We kill the thread
         self.alive = False
         #The bot says goodbye
         self.say(_("I've been asked to leave you"))
         #The bot leaves the room
+        logger.info("Killing %s" % self.chatname)
         self.disconnect()
 
     def forge_message(self, mess, priv=None, in_reply_to=None):
@@ -182,6 +185,11 @@ class bot_jabber(xmpp.Client, threading.Thread):
         for module in self.modules:
             if type(module) == AsyncModule :
                 module.stop()
+
+    def restart(self):
+        logger.info("bot_jabber.restart()")
+        self.manager.restart(self.chatname)
+        logger.info("end bot_jabber.restart()")
 
     def disable_mute(self):
         """To give the bot its voice again"""
