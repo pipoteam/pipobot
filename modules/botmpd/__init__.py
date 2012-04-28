@@ -1,11 +1,13 @@
 #! /usr/bin/python2
 # -*- coding: utf-8 -*-
 
-from mpd import CommandError
+from mpd import CommandError, ConnectionError
 from lib.modules import defaultcmd
 from lib.abstract_modules import NotifyModule
 from libmpd.BotMPD import BotMPD
 import lib.exceptions
+import logging
+logger = logging.getLogger("pipobot.botmpd")
 
 class CmdMpd(NotifyModule):
     def __init__(self, bot):
@@ -40,14 +42,20 @@ class CmdMpd(NotifyModule):
         if "datadir" in settings["modules"]["botmpd"]:
             self.datadir = settings["modules"]["botmpd"]["datadir"]
         self.mute = True
+        # To limit flood in logs : if the bot can't connect to the server, it will only be notified
+        # once in the logfile
+        self.error_notified = False
 
     #TODO passer les commandes de lib/ ici et utiliser les décorateurs
     @defaultcmd
     def answer(self, sender, message):
-        if hasattr(self, "datadir"):
-            mpd = BotMPD(self.host, self.port, self.pwd, self.datadir)
-        else:
-            mpd = BotMPD(self.host, self.port, self.pwd)
+        try:
+            if hasattr(self, "datadir"):
+                mpd = BotMPD(self.host, self.port, self.pwd, self.datadir)
+            else:
+                mpd = BotMPD(self.host, self.port, self.pwd)
+        except ConnectionError:
+            return "Can't connect to mpd server"
         try:
             cmd, arg = message.split(' ', 1)
         except:
@@ -93,6 +101,8 @@ class CmdMpd(NotifyModule):
         # function of the mpd library and not by a loop with sleep(delay) as usual
         try:
             mpd = BotMPD(self.host, self.port, self.pwd)
+            self.error_notified = False
+            self.delay = 0
             mpd.send_idle()
             r = mpd.fetch_idle()
             repDict = {"The Who - Baba O`riley":"La musique des experts !!!",
@@ -123,6 +133,9 @@ class CmdMpd(NotifyModule):
                     if c in title:
                         self.bot.say(repDict[c])
             mpd.disconnect()
-        except:
-            pass
-        
+        except ConnectionError:
+            if not self.error_notified:
+                logger.error(_("Can't connect to server %s:%s") % (self.host, self.port))
+                self.error_notified = True
+                #The module will check again in `self.delay` seconds
+                self.delay = 10
