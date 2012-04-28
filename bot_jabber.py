@@ -62,7 +62,6 @@ class bot_jabber(xmpp.Client, threading.Thread):
         
         #The nickname the bot will use to join rooms
         #This nickname will be set by the reception of a presence message after joining the room
-#        self.name = ""
         self.name = name
 
         #The room the bot will join

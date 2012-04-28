@@ -77,6 +77,7 @@ class bot_manager:
         if "modules" not in room:
             raise ConfigException("The room %s has no modules configured in %s" % (room["chan"], self.settings_file))
         classes_salon = []
+        module_path = {}
         for module_name in room["modules"]:
             if module_name.startswith('_') :
                 try:
@@ -84,7 +85,6 @@ class bot_manager:
                 except KeyError as e:
                     raise ConfigException("Your configuration file must have a 'groups' section with the group %s required by the room %s" %
                                                 (module_name[1:], room["chan"]))
-
             else :
                 group = [module_name]
             for module in group:
@@ -92,6 +92,8 @@ class bot_manager:
                     module_class = __import__(module)
                 except ImportError as e:
                     raise ConfigException("The module %s selected for %s cannot be found" % (module, room["chan"]))
+                path = module_class.__path__
+                module_path[module] = path[0]
 
                 classes = [getattr(module_class, class_name) for class_name in dir(module_class)]
                 #XXX Quick FIX → all these classes are subclasses of BotModule too…
@@ -105,7 +107,7 @@ class bot_manager:
         #Modules RecordUsers and Help are used by default (no need to add them to the configuration)
         classes_salon.append(lib.modules.RecordUsers)
         classes_salon.append(lib.modules.Help)
-        return classes_salon
+        return classes_salon, module_path
 
     def restart(self, bot_room):
         """ Restart the bot that is currently present in the room `bot_room` after
@@ -134,11 +136,12 @@ class bot_manager:
                 msg = _("One of your room has no 'chan' parameter in %s" % self.settings_file)
             raise ConfigException(msg)
 
-        classes_room = self.read_modules(room)
+        classes_room, module_path = self.read_modules(room)
         if self.db_session is not None:
             #TODO use manager attribute for that
             bot.session = self.db_session
 
+        bot.module_path = module_path
         bot.add_commands(classes_room)
         bot.start()
         self.bots[room["chan"]] = bot
