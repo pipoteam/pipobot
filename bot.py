@@ -59,10 +59,10 @@ class bot_manager:
         with open(self.settings_file) as f:
             self.settings = yaml.load(f)
 
-    def configure_db(self, engine, src):
+    def configure_db(self):
         """ Configure database for bots,
             Create the 'db_session' that modules will use to access to the db """
-        engine = create_engine('sqlite:///%s' % src, convert_unicode=True)
+        engine = create_engine('%s:///%s' % (self.db_engine, self.db_src), convert_unicode=True)
         db_session = scoped_session(sessionmaker(autocommit=False,
                                                  autoflush=False,
                                                  bind=engine))
@@ -137,6 +137,7 @@ class bot_manager:
             raise ConfigException(msg)
 
         classes_room, module_path = self.read_modules(room)
+        self.configure_db()
         if self.db_session is not None:
             #TODO use manager attribute for that
             bot.session = self.db_session
@@ -213,7 +214,8 @@ if __name__ == "__main__":
         try:
             engine = settings["database"]["engine"]
             src = settings["database"]["src"]
-            manager.configure_db(engine, src)
+            manager.db_engine = engine
+            manager.db_src = src
         except KeyError as e:
             raise ConfigException(_("Your database section must contain parameters 'engine' and 'src'"))
 

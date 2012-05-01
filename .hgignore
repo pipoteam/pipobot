@@ -6,7 +6,7 @@ syntax:glob
 *.swp
 *.mo
 *.log
-bdd/*.db
+bdd/*
 modules/who/ldap_pass.py
 modules/trac/mount
 modules/trac/trac.db
