@@ -45,6 +45,13 @@ Some internal modules
 
    internal_modules
 
+Some "High-level" modules
+-------------------------
+.. toctree::
+   :maxdepth: 3
+   :numbered:
+
+   high_level
 
 Indices and tables
 ==================

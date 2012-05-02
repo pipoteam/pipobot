@@ -1,3 +1,4 @@
+.. _modules_presentation:
 .. _sync_module:
 
 SyncModule
@@ -30,8 +31,7 @@ For instance a command can take several subcommands as in this example: ::
     <bot> The todo 'I have TODO this !' has been successfully added to 'some_list'
 
 *list* and *add* are subcommands for the main **todo** command.
-The first call with no arguments will be referenced as *default* subcommand.
-To each subcommand you want to define, you have to write add a handler 
+To each subcommand you want to define, you have to write a handler
 to the module class.
 
 A handler is a Python method with this signature: ::
@@ -62,11 +62,6 @@ For instance the skeleton of the **todo** module will be:
             command_name = "todo"
             SyncModule.__init__(self, bot, desc, command_name)
 
-        @defaultcmd
-        def default(self, sender, message):
-            #what to do with !todo
-            pass
-
         @answercmd("add")
         def add(self, sender, args):
             #what to do with !todo add some other args
@@ -81,7 +76,86 @@ For instance the skeleton of the **todo** module will be:
         def rm(self, sender, args):
             #what to do with !todo rm or !todo del  some other args
             pass
+
+        @defaultcmd
+        def default(self, sender, message):
+            #In any other case this will be called
+            pass
+
+The ``@defaultcmd`` decorator specify the method that will be called when *no other method* corresponds
+to user's input.
+For instance in this example, all these calls will be handled by the `default` method: ::
+
+    !todo
+    !todo should RTFM
+    !todo don't know what i am doing
+
+This behaviour is interesting if you want to handle errors yourself : any use of the command that is not conform
+to the syntax defined by other decorators will be handled by the ``default`` method.
+
+Finally you can use regular expressions in decorators to filter subcommands differently.
+For instance we can re-write the **todo** module like this:
+
+.. code-block:: python
     
+    class CmdTodo(SyncModule):
+        def __init__(self, bot):
+            pass
+
+        @answercmd("^$")
+        def empty(self, sender, args):
+            pass
+
+        @answercmd("list"):
+        def list(self, sender, args):
+            pass
+
+        @answercmd("add (?P<list_name>\S+) (?P<desc>.*)"=
+        def add(self, sender, args):
+            liste = args.group("list_name")
+            desc = args.group("desc")
+
+        @answercmd("(remove|delete) (?P<ids>(\d+,?)+)")
+        def remove(self, sender, args):
+            ids = args.group("ids").split(",")
+
+As you can see in this example, with this syntax you can do a lot of work to filter commands directly in the
+decorator.
+In the previous example, a call like : ::
+
+!todo add somelist a new todo to add
+
+will be handled by the ``add`` method, and a call like : ::
+
+!todo remove 1,2,3
+
+will be handled by the ``remove`` method.
+
+Empty call like : ::
+
+!todo
+
+will be handled by the ``empty`` method.
+
+Finally any other syntax will raise an error so the bot will return a message recommending to read
+the manual of the command since no ``@defaultcmd`` is provided.
+
+You can use in a given module regular expression-based decorators and "classic" decorators.
+Just be careful of the behaviour if for instance some regular expressions are to permissive.
+
+*WARNING*: Be careful not to use too permissive pattern in ``@answercmd`` decorator.
+For instance if you use this set of decorators :
+
+.. code-block:: python
+
+    @anwsercmd("add (?P<list_name>\S+) (?P<desc>.*)")
+    @answercmd("search (?P<query>.*)")
+    @answercmd("(remove|delete) (?P<ids>(\d+,?)+)")
+    @answercmd("")
+
+*ANY* call to the corresponding command will be caught by the last one since an empty regular
+expression matches *a lot* of things !!
+If you want to define the `empty` subcommand, just use ``@answercmd("^$")``.
 
 .. _multisync_module:
 

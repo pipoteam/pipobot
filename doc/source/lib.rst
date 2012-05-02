@@ -9,10 +9,10 @@ lib Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`init_bot` Module
------------------------
+:mod:`exceptions` Module
+---------------------
 
-.. automodule:: lib.init_bot
+.. automodule:: lib.exceptions
     :members:
     :undoc-members:
     :show-inheritance:
@@ -21,6 +21,14 @@ lib Package
 ---------------------
 
 .. automodule:: lib.modules
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`abstract_modules` Module
+------------------------------
+
+.. automodule:: lib.abstract_modules
     :members:
     :undoc-members:
     :show-inheritance:
