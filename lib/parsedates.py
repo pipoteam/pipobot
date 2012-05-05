@@ -103,7 +103,7 @@ def parseall(datehour):
         parsed_hour  = parsehour(h)
         #date or hour are invalid
         if parsed_date is None or parsed_hour is None:
-            raise ParseExcept("La date %s n'est pas valide !"%(datehour))
+            raise ParseExcept(_("The date %s is not valid !")% datehour)
         #We have date combining parsed date and hour
         final_date = datetime.datetime(parsed_date.tm_year, parsed_date.tm_mon, parsed_date.tm_mday, 
                                        parsed_hour.hour, parsed_hour.minute)

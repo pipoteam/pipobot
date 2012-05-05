@@ -20,7 +20,7 @@ msgstr ""
 msgid "Connecting to %s"
 msgstr "Connexion à %s"
 
-#: ../bot.py:102 ../bot.py:139
+#: ../bot.py:102 ../bot.py:139 ../bot.py:51
 msgid "Ctrl-c signal !"
 msgstr "Signal Ctrl-c reçu"
 
@@ -38,15 +38,15 @@ msgstr "Authentification impossible"
 
 #: ../bot_jabber.py:62 ../bot_jabber.py:67
 msgid "Hello everyone !"
-msgstr "Bojour à tous !"
+msgstr "Bonjour à tous !"
 
 #: ../bot_jabber.py:141 ../bot_jabber.py:144 ../bot_jabber.py:163
-#: ../bot_jabber.py:166
+#: ../bot_jabber.py:166 ../lib/modules.py:103 ../lib/modules.py:106
 #, python-format
 msgid "Error from module %s : %s"
 msgstr "Erreur dans le module %s : %s"
 
-#: ../bot_jabber.py:143 ../bot_jabber.py:165
+#: ../bot_jabber.py:143 ../bot_jabber.py:165 ../lib/modules.py:105
 msgid "Error !"
 msgstr "Erreur !"
 
@@ -60,7 +60,7 @@ msgid "Message sent to %s, type %s"
 msgstr "Message envoyé à %s, type %s"
 
 #: ../bot_jabber.py:264 ../bot_jabber.py:272 ../bot_jabber.py:287
-#: ../bot_jabber.py:295
+#: ../bot_jabber.py:295 ../lib/user.py:28 ../lib/user.py:35
 #, python-format
 msgid "The user %s is not in the room !"
 msgstr "L'utilisateur %s n'est pas dans le salon !"
@@ -79,3 +79,159 @@ msgstr "L'utilisateur %s quitte le salon sans y être entré !"
 #: ../bot_jabber.py:230 ../bot_jabber.py:253
 msgid "I can't read JID in this room !"
 msgstr "Je ne peux pas lire les JID dans ce salon !"
+
+#: ../bot.py:44
+msgid "You must have a 'rooms' section in your configuration file"
+msgstr ""
+"Vous devez avoir une section 'rooms' dans votre fichier de configuration"
+
+#: ../bot.py:53
+#, python-format
+msgid "Killing bot from %s"
+msgstr "Arrêt du bot du salon %s"
+
+#: ../bot.py:78
+#, python-format
+msgid "The room %s has no modules configured in %s"
+msgstr "Le salon %s n'a pas de modules configuré pour %s"
+
+#: ../bot.py:86
+#, python-format
+msgid ""
+"Your configuration file must have a 'groups' section with the group %s "
+"required by the room %s"
+msgstr ""
+"Votre fichier de configuration doit avoir une section 'group' contenant %s "
+"pour le salon %s"
+
+#: ../bot.py:94
+#, python-format
+msgid "The module %s selected for %s cannot be found"
+msgstr "Le module %s sélectionné pour %s est introuvable"
+
+#: ../bot.py:134 ../bot.py:135
+#, python-format
+msgid "Your room %s has no parameter %s in %s"
+msgstr "Le salon %s n'a pas le paramètre %s dans %s"
+
+#: ../bot.py:136 ../bot.py:137
+#, python-format
+msgid "One of your room has no 'chan' parameter in %s"
+msgstr "Un des salons n'a pas de paramêtre 'chan' dans %s"
+
+#: ../bot.py:220 ../bot.py:223
+msgid "Your database section must contain parameters 'engine' and 'src'"
+msgstr ""
+"La section database du fichier de configuration doit contenir les paramètres "
+"'engine' et 'src'"
+
+#: ../lib/user.py:42
+#, python-format
+msgid "The user with jid %s is not in the room !"
+msgstr "L'utilisateur de jid %s n'est pas dans le salon !"
+
+#: ../modules/botmpd/__init__.py:138
+#, python-format
+msgid "Can't connect to server %s:%s"
+msgstr "Impossible de se connecter au serveur %s:%s"
+
+#: ../lib/abstract_modules.py:45
+#, python-format
+msgid "You must override extract_data for %s !!!"
+msgstr "Vous devez surcharger extract_data dans %s !!!"
+
+#: ../lib/abstract_modules.py:57
+#, python-format
+msgid "Disabling notifications for command %s"
+msgstr "Suppression des notifications pour la commande %s"
+
+#: ../lib/abstract_modules.py:63
+#, python-format
+msgid "Enabling notifications for command %s"
+msgstr "Actication des notifications pour la commande %s"
+
+#: ../lib/abstract_modules.py:70
+msgid "Not implemented"
+msgstr "Non implémentée"
+
+#: ../lib/parsedates.py:106
+#, python-format
+msgid "The date %s is not valid !"
+msgstr "La date %s n'est pas valide !"
+
+#: ../lib/modules.py:183
+msgid "Please do not flood !"
+msgstr "Veuillez ne pas flooder !"
+
+#: ../lib/modules.py:197
+#, python-format
+msgid "The %s command requires args"
+msgstr "La commande %s nécessite des arguments"
+
+#: ../lib/modules.py:239
+#, python-format
+msgid "Command %s not handled by this module"
+msgstr "La commande %s n'est pas gérée par ce module"
+
+#: ../lib/modules.py:309
+msgid "Display help for modules"
+msgstr "Affiche l'aide des modules"
+
+#: ../lib/modules.py:310
+msgid "help [module] : show the full help for a module"
+msgstr "help [module] : affiche l'aide complète pour un module"
+
+#: ../lib/modules.py:311
+msgid "help module [subcom] : show the help for a sub-command of a module"
+msgstr "help module [sous_commande] : affiche l'aide pour la sous-commande d'un module"
+
+#: ../lib/modules.py:318
+#, python-format
+msgid "The command %s does not exist"
+msgstr "La commande %s n'existe pas"
+
+#: ../lib/modules.py:338
+#, python-format
+msgid ""
+"%s%s\n"
+"Sub-commands : %s"
+msgstr "%s%s\nSous-commande: %s"
+
+#: ../lib/modules.py:370
+#, python-format
+msgid ""
+"%s[Sync commands]%s\n"
+"%s"
+msgstr "%s[Commandes synchrones]%s\n%s"
+
+#: ../lib/modules.py:371
+#, python-format
+msgid ""
+"%s[Listen commands]%s\n"
+"%s"
+msgstr "%s[Commande passives]%s\n%s"
+
+#: ../lib/modules.py:372
+#, python-format
+msgid ""
+"%s[Multi commands]%s\n"
+"%s"
+msgstr "%s[Commandes multiples]%s\n%s"
+
+#: ../lib/modules.py:373
+#, python-format
+msgid ""
+"%s[Presence commands]%s\n"
+"%s"
+msgstr "%s[Commande présence]%s\n%s"
+
+#: ../lib/modules.py:376
+#, python-format
+msgid ""
+"I can execute : \n"
+"%s"
+msgstr "Je peux exécuter : \n%s"
+
+#: ../lib/modules.py:421
+msgid "Recording users logins/logout"
+msgstr "Enregistre les connexions/déconnexions des utilisateurs"

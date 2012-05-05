@@ -41,7 +41,7 @@ class bot_manager:
     def init_bots(self):
         """ This method will initialize all bots thanks to self.settings and start them """
         if "rooms" not in self.settings:
-            raise ConfigException("You must have a 'rooms' section in your configuration file")
+            raise ConfigException(_("You must have a 'rooms' section in your configuration file"))
         for room in self.settings["rooms"]:
             self.create_bot(room)
         try:
@@ -50,7 +50,7 @@ class bot_manager:
         except KeyboardInterrupt:
             logger.info(_("Ctrl-c signal !"))
         for bot_room, bot in self.bots.iteritems():
-            logger.info("Killing bot from %s" % bot_room)
+            logger.info(_("Killing bot from %s" % bot_room))
             bot.kill()
         sys.exit()
 
@@ -75,7 +75,7 @@ class bot_manager:
             list of modules to load, import all commands defined in them,
             and returns a list with all commands """
         if "modules" not in room:
-            raise ConfigException("The room %s has no modules configured in %s" % (room["chan"], self.settings_file))
+            raise ConfigException(_("The room %s has no modules configured in %s") % (room["chan"], self.settings_file))
         classes_salon = []
         module_path = {}
         for module_name in room["modules"]:
@@ -83,7 +83,7 @@ class bot_manager:
                 try:
                     group = self.settings["groups"][module_name[1:]]
                 except KeyError as e:
-                    raise ConfigException("Your configuration file must have a 'groups' section with the group %s required by the room %s" %
+                    raise ConfigException(_("Your configuration file must have a 'groups' section with the group %s required by the room %s") %
                                                 (module_name[1:], room["chan"]))
             else :
                 group = [module_name]
@@ -91,7 +91,7 @@ class bot_manager:
                 try:
                     module_class = __import__(module)
                 except ImportError as e:
-                    raise ConfigException("The module %s selected for %s cannot be found" % (module, room["chan"]))
+                    raise ConfigException(_("The module %s selected for %s cannot be found") % (module, room["chan"]))
                 path = module_class.__path__
                 module_path[module] = path[0]
 

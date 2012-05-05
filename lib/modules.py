@@ -180,7 +180,7 @@ class SyncModule(BotModule) :
         #if self.bot
         if hasattr(self, "lock_name"):
             if getattr(self.bot, self.lock_name):
-                return "Please do not flood !"
+                return _("Please do not flood !")
             else:
                 self.disable()
         args = args.strip()
@@ -194,7 +194,7 @@ class SyncModule(BotModule) :
                 try:
                     return self.fcts[cmd_name](sender, cmd_args)
                 except KeyError:
-                    return "La commande %s nécessite des arguments !" % self.command
+                    return _("The %s command requires args") % self.command
             else:
                 # We check if the method is not defined by a regexp matching cmd_name
                 s = re.match(key, args)
@@ -236,7 +236,7 @@ class MultiSyncModule(BotModule) :
 
     def _answer(self, sender, command, args) :
         if command not in self.commands :
-            raise ModuleException("Command %s not handled by this module" % command)
+            raise ModuleException(_("Command %s not handled by this module") % command)
 
         module_answer = self.fcts["default"](command, sender, args)
         return module_answer
@@ -306,16 +306,16 @@ class Help(SyncModule):
 
     def __init__(self, bot):
         desc = "!help name : display the help for the module `name`"
-        desc = {"" : "Display help for modules", 
-                "module" : "help [module] : show the full help for a module",
-                "subcom" : "help module [subcom] : show the help for a sub-command of a module"}
+        desc = {"" : _("Display help for modules"), 
+                "module" : _("help [module] : show the full help for a module"),
+                "subcom" : _("help module [subcom] : show the help for a sub-command of a module")}
         SyncModule.__init__(self, bot, desc, "help")
         self.compact_help_content = ""
         self.genHelp()
 
     @defaultcmd
     def answer(self, sender, args) :
-        res = "La commande %s n'existe pas" % args
+        res = _("The command %s does not exist") % args
         if args == "":
             res = self.compact_help_content
         elif args == "all":
@@ -335,7 +335,7 @@ class Help(SyncModule):
                         if subcoms == "subcom":
                             available_subcoms = ", ".join(sorted([key for key in hlp.keys() if key != ""])) 
                             desc = " : %s" % hlp[""] if "" in hlp else ""
-                            res = "%s%s\nSous-commandes : %s" % (cmd_name, desc, available_subcoms)
+                            res = _("%s%s\nSub-commands : %s") % (cmd_name, desc, available_subcoms)
                         elif subcoms == "":
                             res = '\n'.join(["%s : %s" % (key, val) for key, val in hlp.iteritems() if key != ""])
                         else:
@@ -367,13 +367,13 @@ class Help(SyncModule):
             elif isinstance(cmd, PresenceModule):
                 pres_lst.append(cmd.name)
         delim = "*"*10
-        sync = "%s[Sync commands]%s\n%s" % (delim, delim, Help.genString(sorted(sync_lst)))
-        listen = "%s[Listen commands]%s\n%s" % (delim, delim, Help.genString(sorted(listen_lst)))
-        multi = "%s[Multi commands]%s\n%s" % (delim, delim, Help.genString(sorted(multi_lst)))
-        pres = "%s[Presence commands]%s\n%s" % (delim, delim, Help.genString(sorted(pres_lst)))
+        sync = _("%s[Sync commands]%s\n%s") % (delim, delim, Help.genString(sorted(sync_lst)))
+        listen = _("%s[Listen commands]%s\n%s") % (delim, delim, Help.genString(sorted(listen_lst)))
+        multi = _("%s[Multi commands]%s\n%s") % (delim, delim, Help.genString(sorted(multi_lst)))
+        pres = _("%s[Presence commands]%s\n%s") % (delim, delim, Help.genString(sorted(pres_lst)))
         self.all_help_content = "\n%s\n%s\n%s\n%s" % (sync, listen, multi, pres)
         allcmds = sync_lst + multi_lst
-        self.compact_help_content = "Votre serviteur peut exécuter : \n%s" % Help.genString(sorted(allcmds))
+        self.compact_help_content = _("I can execute : \n%s") % Help.genString(sorted(allcmds))
 
     @staticmethod
     def genString(l):
@@ -418,7 +418,7 @@ class PresenceModule(BotModule):
 
 class RecordUsers(PresenceModule):
     def __init__(self, bot):
-        desc = "Recording users logins/logout"
+        desc = _("Recording users logins/logout")
         PresenceModule.__init__(self,
                                 bot,
                                 name = "recordusers",

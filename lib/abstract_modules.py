@@ -42,7 +42,7 @@ class FortuneModule(SyncModule):
         return self.extract_data(soup)
 
     def extract_data(self, soup):
-        return "You must override extract_data for %s !!!" % self.command
+        return _("You must override extract_data for %s !!!") % self.command
 
 class NotifyModule(SyncModule, AsyncModule):
     """A NotifyModule is an AsyncModule that you can also control with synchronous commands"""
@@ -54,17 +54,17 @@ class NotifyModule(SyncModule, AsyncModule):
     @answercmd("mute")
     def mute(self, sender, message):
         self.mute = True
-        return "Notifications supprimées pour la commande %s !" % self.command
+        return _("Disabling notifications for command %s") % self.command
 
     @answercmd("unmute")
     def unmute(self, sender, message):
         self.mute = False
         self.update(silent = True)
-        return "Notifications activées pour la commande %s !" % self.command
+        return _("Enabling notifications for command %s")  % self.command
 
     def action(self):
         if not self.mute:
             self.do_action()
 
     def update(self, silent = False):
-        return "not implemented"
+        return _("Not implemented")
