@@ -1,20 +1,12 @@
 #! /bin/sh
-#
-# skeleton	example file to build /etc/init.d/ scripts.
-#		This file should be used to construct scripts for /etc/init.d.
-#
-#		Written by Miquel van Smoorenburg <miquels@cistron.nl>.
-#		Modified for Debian 
-#		by Ian Murdock <imurdock@gnu.ai.mit.edu>.
-#
-# Version:	@(#)skeleton  1.9  26-Feb-2001  miquels@cistron.nl
-#
 
-DIR=/usr/local/share/botnet7-ng
-EXEC=bot.py
+DIR=/usr/bin
+EXEC=pipobot
 DAEMON=$DIR/$EXEC
-NAME=botnet7-ng
-DESC=botnet7-ng
+NAME=pipobot
+DESC=pipobot
+USER=pipobot
+GROUP=pipobot
 CMDLINE=''
 
 set -e
@@ -23,7 +15,7 @@ case "$1" in
   start)
 	echo -n "Starting $DESC: "
 	export PID
-	start-stop-daemon -b -c bot:bot --start --quiet -n $EXEC\
+	start-stop-daemon -b -c $USER:$GROUP --start --quiet -n $EXEC\
 		--exec $DAEMON -- $CMDLINE
 	echo "$NAME."
 	;;
