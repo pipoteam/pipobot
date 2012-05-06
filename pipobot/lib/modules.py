@@ -365,14 +365,11 @@ class Help(SyncModule):
         pres_lst = []
         for cmd in self.bot.modules:
             if isinstance(cmd, SyncModule):
-                logging.error("JE SUIS UN SYNC !!!!!!!!!!!!!!!!!!")
                 sync_lst.append(cmd.command)
             elif isinstance(cmd, ListenModule):
                 listen_lst.append(cmd.name)
             elif isinstance(cmd, MultiSyncModule):
-                logging.error("JE SUIS UN MULTISYNC !!!!!!!!!!!!!!!!!!")
                 multi_lst.extend(cmd.commands.keys())
-                logging.error(str(cmd.commands.keys()))
             elif isinstance(cmd, PresenceModule):
                 pres_lst.append(cmd.name)
         delim = "*"*10
