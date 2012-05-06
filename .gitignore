@@ -1,0 +1,14 @@
+syntax:glob
+*.pyc
+*.pyo
+*.orig
+*.swp
+*.mo
+*.log
+bdd/*
+settings.yml
+doc/build/*
+build/*
+dist/*
+MANIFEST
+pipobot.egg-info/*
