@@ -101,7 +101,6 @@ class BotManager:
                 for c in classes :
                     if type(c) == type and issubclass(c, pipobot.lib.modules.BotModule) and \
                         not hasattr(c, '_%s__usable' % c.__name__) :
-                        logger.debug("Adding %s" % c.__name__) 
                         classes_salon.append(c)
         #Modules RecordUsers and Help are used by default (no need to add them to the configuration)
         classes_salon.append(pipobot.lib.modules.RecordUsers)
@@ -160,7 +159,7 @@ def main():
                       help="Print debugs")
     (options, args) = parser.parse_args()
 
-    settings_filename = args if len(args) > 1 else DEFAULT_FILENAME
+    settings_filename = args[0] if len(args) > 0 else DEFAULT_FILENAME
 
     with open(settings_filename) as s:
         try:
