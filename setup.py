@@ -21,4 +21,5 @@ setup(
     },
 
     install_requires=['distribute'],
+    requires=['BeautifulSoup'],
 )
