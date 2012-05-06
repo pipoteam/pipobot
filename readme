@@ -1,8 +1,1 @@
-pour faire marcher le bot (pas vraiment marcher en fait, fonctionner),
-modifier le settings.xml
-Les bots disponibles : 
-    -bot@jabber.sleduc.fr
-    -bot2@jabber.sleduc.fr
-Les mdp dans les 2 cas : ilovematlab
-Modifier aussi le nom  (botname)
-#Cette fois les mails vont marcher !
+Pipobot is a modular bot for jabber MUCs.
