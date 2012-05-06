@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup
 
 from pipobot import __version__
 
@@ -13,4 +13,12 @@ setup(
     packages = ['pipobot'],
 #   data_files = [],
 #   scripts = [],
+
+    entry_points = {
+        'console_scripts' : [
+            'pipobot = pipobot.bot:main',
+        ]
+    },
+
+    install_requires=['distribute'],
 )

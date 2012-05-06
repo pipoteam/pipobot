@@ -146,7 +146,7 @@ class BotManager:
         bot.start()
         self.bots[room["chan"]] = bot
 
-if __name__ == "__main__":
+def main():
     #Parametring options
     parser = OptionParser()
     parser.set_defaults(level=logging.INFO)
@@ -224,3 +224,6 @@ if __name__ == "__main__":
         modules_paths += settings["config"]["extra_modules"]
 
     manager.init_bots(modules_paths)
+
+if __name__ == '__main__':
+    main()
