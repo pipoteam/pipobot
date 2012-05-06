@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #-*- coding: utf8 -*-
-"""This file contains the class 'bot_jabber' wich is a bot for jabber MUC"""
+"""This file contains the class 'BotJabber' wich is a bot for jabber MUC"""
 
 import logging
 import threading
@@ -20,7 +20,7 @@ class XMPPException(Exception):
 
 XML_NAMESPACE = 'http://www.w3.org/1999/xhtml'
 
-class bot_jabber(xmpp.Client, threading.Thread):
+class BotJabber(xmpp.Client, threading.Thread):
     """The implementation of a bot for jabber MUC"""
     
     def __init__(self, login, passwd, res, chat, name, xmpp_log = None, manager = None):

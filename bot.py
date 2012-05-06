@@ -8,6 +8,7 @@ import os
 import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
+import imp
 import yaml
 
 #Bot jabber imports
@@ -29,7 +30,7 @@ DEFAULT_LANG = "en"
 APP_NAME = "pipobot"
 DEFAULT_FILENAME = os.path.join(os.path.dirname(globals()["__file__"]),'settings.yml')
 
-class bot_manager:
+class BotManager:
     """ This is a class to configure, create, restart, manage bots """
     def __init__(self, settings_file):
         self.settings_file = settings_file
@@ -38,12 +39,12 @@ class bot_manager:
         self.update_config()
         self.xmpp_log = self.settings["config"]["xmpplog"] if "config" in self.settings and "xmpplog" in self.settings["config"] else DEFAULT_XMPPLOG
 
-    def init_bots(self):
+    def init_bots(self, modules_paths):
         """ This method will initialize all bots thanks to self.settings and start them """
         if "rooms" not in self.settings:
             raise ConfigException(_("You must have a 'rooms' section in your configuration file"))
         for room in self.settings["rooms"]:
-            self.create_bot(room)
+            self.create_bot(room, modules_paths)
         try:
             while raw_input("") != "q":
                 continue
@@ -70,7 +71,7 @@ class bot_manager:
         Base.metadata.create_all(bind=engine)
         self.db_session = db_session
 
-    def read_modules(self, room):
+    def read_modules(self, room, modules_paths):
         """ With the content of the configuration file, reads the
             list of modules to load, import all commands defined in them,
             and returns a list with all commands """
@@ -89,21 +90,19 @@ class bot_manager:
                 group = [module_name]
             for module in group:
                 try:
-                    module_class = __import__(module)
+                    infos = imp.find_module(module, modules_paths)
+                    module_class = imp.load_module(module, *infos)
                 except ImportError as e:
-                    raise ConfigException(_("The module %s selected for %s cannot be found") % (module, room["chan"]))
+                    raise ConfigException(_("The module %s selected for %s cannot be loaded. Error was '%s'") % (module, room["chan"], str(e)))
                 path = module_class.__path__
                 module_path[module] = path[0]
 
                 classes = [getattr(module_class, class_name) for class_name in dir(module_class)]
-                #XXX Quick FIX → all these classes are subclasses of BotModule too…
-                except_list = [lib.modules.SyncModule, lib.modules.AsyncModule,
-                               lib.modules.MultiSyncModule, lib.modules.BotModule, lib.modules.ListenModule,
-                               lib.abstract_modules.FortuneModule, lib.abstract_modules.NotifyModule]
-                for classe in [c for c in classes if type(c) == type and \
-                                                     issubclass(c, lib.modules.BotModule) and  \
-                                                     c not in except_list]:
-                    classes_salon.append(classe)
+                for c in classes :
+                    if type(c) == type and issubclass(c, lib.modules.BotModule) and \
+                        not hasattr(c, '_%s__usable' % c.__name__) :
+                        logger.debug("Adding %s" % c.__name__) 
+                        classes_salon.append(c)
         #Modules RecordUsers and Help are used by default (no need to add them to the configuration)
         classes_salon.append(lib.modules.RecordUsers)
         classes_salon.append(lib.modules.Help)
@@ -121,13 +120,13 @@ class bot_manager:
                     pass
                 self.create_bot(room)
 
-    def create_bot(self, room):
+    def create_bot(self, room, modules_paths):
         """ Create a bot.
             `room` : an excerpt of the yaml structure generated with the configuration file
         """
         try:
-            bot = bot_jabber.bot_jabber(room["login"], room["passwd"], room["ressource"],
-                                        room["chan"], room["nick"], self.xmpp_log, self)
+            bot = bot_jabber.BotJabber(room["login"], room["passwd"], room["ressource"],
+                                       room["chan"], room["nick"], self.xmpp_log, self)
             bot.settings = self.settings
         except KeyError as e:
             if "chan" in room:
@@ -136,7 +135,7 @@ class bot_manager:
                 msg = _("One of your room has no 'chan' parameter in %s" % self.settings_file)
             raise ConfigException(msg)
 
-        classes_room, module_path = self.read_modules(room)
+        classes_room, module_path = self.read_modules(room, modules_paths)
         self.configure_db()
         if self.db_session is not None:
             #TODO use manager attribute for that
@@ -160,7 +159,7 @@ if __name__ == "__main__":
                       help="Print debugs")
     (options, args) = parser.parse_args()
 
-    settings_filename = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_FILENAME
+    settings_filename = args if len(args) > 1 else DEFAULT_FILENAME
 
     with open(settings_filename) as s:
         try:
@@ -168,8 +167,8 @@ if __name__ == "__main__":
         except (yaml.scanner.ScannerError, yaml.parser.ParserError):
             raise ConfigException("The configuration file %s is not a valid yaml file" % settings_filename)
 
-    #Creation of bot_manager
-    manager = bot_manager(settings_filename)
+    #Creation of BotManager
+    manager = BotManager(settings_filename)
 
     #Configuring logging
     logger = logging.getLogger(APP_NAME)
@@ -220,9 +219,8 @@ if __name__ == "__main__":
             raise ConfigException(_("Your database section must contain parameters 'engine' and 'src'"))
 
     # Configuring path to find modules
-    sys.path.insert(0, "modules/")
+    modules_paths = ["modules"]
     if "config" in settings and "extra_modules" in settings["config"] :
-        for module_path in settings["config"]["extra_modules"] :
-            sys.path.insert(0, module_path)
+        modules_paths += settings["config"]["extra_modules"]
 
-    manager.init_bots()
+    manager.init_bots(modules_paths)

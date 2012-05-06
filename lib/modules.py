@@ -255,6 +255,7 @@ class AsyncModule(BotModule, threading.Thread) :
     """ Defines a bot module that will be executed as a
     daemon thread. Typically for waiting for asynchronous event
     such as mail, etc... """
+    __usable = False
     
     def __init__(self, bot, name, desc, delay = 0, pm_allowed=True) :
         threading.Thread.__init__(self)

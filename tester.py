@@ -13,7 +13,7 @@ import lib
 import lib.init_bot
 
 
-class Tester(bot_jabber.bot_jabber):
+class Tester(bot_jabber.BotJabber):
     def __init__(self):
         # the fake room we will work in
         self.roomname = "unknown@domain.std"
