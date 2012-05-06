@@ -29,7 +29,6 @@ groups:
         - date
         - getjid
         - google
-        - lyrics
         - mail
         - mpd
         - nextprev

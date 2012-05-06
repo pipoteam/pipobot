@@ -159,7 +159,7 @@ if __name__ == "__main__":
                       help="Print debugs")
     (options, args) = parser.parse_args()
 
-    settings_filename = args if len(args) > 1 else DEFAULT_FILENAME
+    settings_filename = args[0] if len(args) > 0 else DEFAULT_FILENAME
 
     with open(settings_filename) as s:
         try:
