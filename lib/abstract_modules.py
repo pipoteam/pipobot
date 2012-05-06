@@ -12,6 +12,8 @@ class AppURLopener(urllib.FancyURLopener):
     version = "Mozilla/5.0 (X11; U; Linux; fr-fr) AppleWebKit/531+ (KHTML, like Gecko) Safari/531.2+ Midori/0.2"
 
 class FortuneModule(SyncModule):
+    __usable = False
+
     def __init__(self, bot, desc, command, url_random, url_indexed, lock_time = 2):
         SyncModule.__init__(self,
                             bot,
@@ -46,6 +48,8 @@ class FortuneModule(SyncModule):
 
 class NotifyModule(SyncModule, AsyncModule):
     """A NotifyModule is an AsyncModule that you can also control with synchronous commands"""
+    __usable = False
+
     def __init__(self, bot, desc, command, pm_allowed=True, lock_time=0, delay=0):
         AsyncModule.__init__(self, bot, command, desc, delay, pm_allowed)
         SyncModule.__init__(self, bot, desc, command, pm_allowed, lock_time)

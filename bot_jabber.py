@@ -6,7 +6,7 @@ import logging
 import threading
 import xmpp
 import xml.parsers.expat
-from lib.modules import AsyncModule, PresenceModule, IQModule
+from lib.modules import AsyncModule, ListenModule, PresenceModule, SyncModule, IQModule
 from lib.user import Occupants
 logger = logging.getLogger('pipobot.bot_jabber') 
 
@@ -100,7 +100,7 @@ class bot_jabber(xmpp.Client, threading.Thread):
         
         #We look for a module which is concerned by the message
         for module in self.modules :
-            if not isinstance(module, PresenceModule):
+            if isinstance(module, ListenModule) or isinstance(module, SyncModule):
                 module.do_answer(mess)
 
     def add_commands(self, classes):

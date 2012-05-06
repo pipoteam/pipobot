@@ -34,6 +34,7 @@ class ModuleException(Exception) :
 class BotModule(object) :
     """ Defines a basic bot module. Will be subclassed by different types
     of modules than will then by subclassed by actual modules """
+    __usable = False
     
     def __init__(self, bot, desc) :
         self.bot = bot
@@ -134,6 +135,8 @@ class BotModule(object) :
 class SyncModule(BotModule) :
     """ Defines a bot module that will answer/execute an action
     after a command. This is the most common case """
+    __usable = False
+
     def __init__(self, bot, desc, command, pm_allowed=True, lock_time = -1) :
         BotModule.__init__(self, bot, desc)
         self.command = command
@@ -213,6 +216,7 @@ class SyncModule(BotModule) :
 class MultiSyncModule(BotModule) :
     """ Defines a bot module that will answer/execute an action
     after a command defined in a list. """
+    __usable = False
 
     def __init__(self, bot, commands, pm_allowed=True) :
         BotModule.__init__(self, bot, '')
@@ -286,6 +290,7 @@ class ListenModule(BotModule) :
     """ Defines a bot module that will receive all
     the message sent on the chatroom and call answer
     on it. Be careful with those modules"""
+    __usable = False
 
     def __init__(self, bot, name, desc, pm_allowed=True) :
         BotModule.__init__(self, bot, desc)
@@ -406,6 +411,8 @@ class PresenceModule(BotModule):
     """ Defines a bot module that will receive all
     the presence sent on the chatroom and call answer
     on it. Be careful with those modules"""
+    __usable = False
+
     def __init__(self, bot, name, desc, pm_allowed=True):
         BotModule.__init__(self, bot, desc)
         self.name = name
@@ -448,6 +455,8 @@ class RecordUsers(PresenceModule):
 ###############################################################################################
 
 class IQModule(BotModule):
+    __usable = False
+
     def __init__(self, bot, name, desc, pm_allowed=True):
         BotModule.__init__(self, bot, desc)
         self.name = name
