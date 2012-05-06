@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
 
-import lib.utils
-from lib.abstract_modules import FortuneModule
+import pipobot.lib.utils
+from pipobot.lib.abstract_modules import FortuneModule
 
 class CmdChuck(FortuneModule):
     def __init__(self, bot):
@@ -21,5 +21,5 @@ chuck [n] : Affiche le fact [n]"""
     def extract_data(self, soup):
         fact = soup.findAll("div", {"class": "fact"})[0]
         index = fact.get("id").partition("fact")[2]
-        content = lib.utils.xhtml2text(fact.text)
+        content = pipobot.lib.utils.xhtml2text(fact.text)
         return "Fact #%s : %s"%(index, content)

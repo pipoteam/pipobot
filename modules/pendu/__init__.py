@@ -2,7 +2,7 @@
 #-*- coding: utf-8 -*-
 import random
 from pendu import Pendu
-from lib.modules import SyncModule, answercmd
+from pipobot.lib.modules import SyncModule, answercmd
 
 class CmdPendu(SyncModule):
     def __init__(self, bot):

@@ -1,7 +1,7 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 from parser import extract,requete
-from lib.modules import SyncModule, defaultcmd, answercmd
+from pipobot.lib.modules import SyncModule, defaultcmd, answercmd
 
 class CmdTv(SyncModule):
     def __init__(self, bot):

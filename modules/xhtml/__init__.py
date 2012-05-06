@@ -2,8 +2,8 @@
 #-*- coding: utf-8 -*-
 
 import re
-import lib.utils
-from lib.modules import SyncModule, defaultcmd
+import pipobot.lib.utils
+from pipobot.lib.modules import SyncModule, defaultcmd
 
 class CmdXhtml(SyncModule):
     def __init__(self, bot):
@@ -18,5 +18,5 @@ class CmdXhtml(SyncModule):
     def answer(self, sender, message):
         d = {}
         d["text"] = message
-        d["xhtml"] = lib.utils.xhtml2text(message)
+        d["xhtml"] = pipobot.lib.utils.xhtml2text(message)
         return d

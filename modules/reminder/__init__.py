@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import time
-from lib.modules import SyncModule, answercmd
-from lib.abstract_modules import NotifyModule
+from pipobot.lib.modules import SyncModule, answercmd
+from pipobot.lib.abstract_modules import NotifyModule
 from model import Remind
-from lib.parsedates import parseall, ParseExcept
+from pipobot.lib.parsedates import parseall, ParseExcept
 
 class CmdReminder(NotifyModule):
     def __init__(self, bot):

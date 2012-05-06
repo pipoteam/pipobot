@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
-from lib.modules import SyncModule, defaultcmd
+from pipobot.lib.modules import SyncModule, defaultcmd
 
 class CmdGetjid(SyncModule):
     def __init__(self, bot):

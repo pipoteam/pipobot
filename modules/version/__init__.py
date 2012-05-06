@@ -3,7 +3,7 @@
 from mercurial import ui, hg
 import time
 import os
-from lib.modules import SyncModule, defaultcmd
+from pipobot.lib.modules import SyncModule, defaultcmd
 
 class CmdVersion(SyncModule):
     def __init__(self, bot):

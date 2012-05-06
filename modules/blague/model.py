@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 from sqlalchemy import Column, Integer, String
-from lib.bdd import Base
+from pipobot.lib.bdd import Base
 
 class Blagueur(Base):
     __tablename__ = "blagues"

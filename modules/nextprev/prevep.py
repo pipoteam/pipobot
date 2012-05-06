@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
-from lib.modules import SyncModule, defaultcmd
+from pipobot.lib.modules import SyncModule, defaultcmd
 import core
 
 class CmdPrev(SyncModule):

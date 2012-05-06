@@ -2,8 +2,8 @@
 #-*- coding: utf8 -*-
 import urllib
 import simplejson
-from lib.modules import SyncModule, defaultcmd
-import lib.utils
+from pipobot.lib.modules import SyncModule, defaultcmd
+import pipobot.lib.utils
 
 class CmdGoogle(SyncModule):
     def __init__(self, bot):
@@ -31,6 +31,6 @@ class CmdGoogle(SyncModule):
                 ans_xhtml += '<br/>\n<a href="' + i['url'] + '" >' + i['title'] + '</a>'
                 ans_xhtml = ans_xhtml.replace("b>", "strong>")
             rep = {}
-            rep["text"] = lib.utils.xhtml2text(ans)
+            rep["text"] = pipobot.lib.utils.xhtml2text(ans)
             rep["xhtml"] = ans_xhtml
             return rep

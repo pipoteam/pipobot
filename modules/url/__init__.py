@@ -3,11 +3,11 @@
 import re
 import xmpp
 import urllib
-import lib.utils
+import pipobot.lib.utils
 import httplib
 from BeautifulSoup import BeautifulSoup, SoupStrainer
 from HTMLParser import HTMLParseError
-from lib.modules import ListenModule
+from pipobot.lib.modules import ListenModule
 
 class AppURLopener(urllib.FancyURLopener):
     def prompt_user_passwd(self, host, realm):
@@ -36,12 +36,12 @@ class CmdUrl(ListenModule):
                     title = 'Pas de titre'
                     html = o.read(1000000)
                     try:
-                        SoupList = BeautifulSoup(lib.utils.unescape(html), parseOnlyThese=SoupStrainer('title'))
+                        SoupList = BeautifulSoup(pipobot.lib.utils.unescape(html), parseOnlyThese=SoupStrainer('title'))
                     except UnicodeDecodeError:
-                        SoupList = BeautifulSoup(lib.utils.unescape(html.decode("latin1", "ignore")), parseOnlyThese=SoupStrainer('title'))
+                        SoupList = BeautifulSoup(pipobot.lib.utils.unescape(html.decode("latin1", "ignore")), parseOnlyThese=SoupStrainer('title'))
                     try:
                         titles = [title for title in SoupList]
-                        title = lib.utils.xhtml2text(titles[0].renderContents())
+                        title = pipobot.lib.utils.xhtml2text(titles[0].renderContents())
                     except IndexError:
                         title = "Pas de titre"
                     except HTMLParseError:

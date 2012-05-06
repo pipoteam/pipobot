@@ -6,7 +6,7 @@ import os
 import time 
 import sys
 import urllib
-from lib.modules import SyncModule, defaultcmd
+from pipobot.lib.modules import SyncModule, defaultcmd
 
 ROOT_URL = 'http://www.banque-france.fr/fileadmin/user_upload/banque_de_france/Economie_et_Statistiques/Changes_et_Taux/'
 CACHE_PATH = "/tmp"

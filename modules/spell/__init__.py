@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
 import enchant
-from lib.modules import SyncModule, defaultcmd
+from pipobot.lib.modules import SyncModule, defaultcmd
 
 class CmdSpell(SyncModule):
     def __init__(self, bot):

@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
 
-import lib.utils
-from lib.abstract_modules import FortuneModule
+import pipobot.lib.utils
+from pipobot.lib.abstract_modules import FortuneModule
 
 class CmdVdm(FortuneModule):
     def __init__(self, bot):
@@ -23,4 +23,4 @@ vdm [n] : Affiche la vdm [n]"""
         nb = a.get("href").split("/")[-1]
         content = a.text
         res = "VDM#%s : %s VDM"%(nb, content)
-        return lib.utils.xhtml2text(res)
+        return pipobot.lib.utils.xhtml2text(res)

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import time
 from sqlalchemy.orm.exc import NoResultFound
-from lib.modules import SyncModule, answercmd
+from pipobot.lib.modules import SyncModule, answercmd
 from model import Todo
 
 class CmdTodo(SyncModule):

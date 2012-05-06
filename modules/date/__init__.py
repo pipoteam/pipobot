@@ -2,7 +2,7 @@
 #-*- coding: utf-8 -*-
 
 import time
-from lib.modules import SyncModule, defaultcmd
+from pipobot.lib.modules import SyncModule, defaultcmd
 
 class CmdDate(SyncModule):
     def __init__(self, bot):

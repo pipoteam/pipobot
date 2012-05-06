@@ -5,7 +5,7 @@ import logging
 import os
 import random
 import re
-from lib.modules import MultiSyncModule, defaultcmd
+from pipobot.lib.modules import MultiSyncModule, defaultcmd
 
 def multiwordReplace(text, wordDic):
     """

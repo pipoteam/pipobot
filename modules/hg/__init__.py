@@ -4,8 +4,8 @@ import os
 import yaml
 import hglib
 import mercurial
-from lib.modules import SyncModule, answercmd
-from lib.exceptions import ConfigException
+from pipobot.lib.modules import SyncModule, answercmd
+from pipobot.lib.exceptions import ConfigException
 
 class CmdHg(SyncModule):
     def __init__(self, bot):

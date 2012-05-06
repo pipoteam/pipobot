@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
 import random
-from lib.modules import SyncModule, answercmd, defaultcmd
+from pipobot.lib.modules import SyncModule, answercmd, defaultcmd
 
 class CmdRPS(SyncModule):
     def __init__(self, bot):

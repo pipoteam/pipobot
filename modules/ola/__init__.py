@@ -2,7 +2,7 @@
 #-*- coding: utf-8 -*-
 import random
 import time
-from lib.modules import SyncModule, defaultcmd
+from pipobot.lib.modules import SyncModule, defaultcmd
 
 class Ola(SyncModule):
     def __init__(self, bot):

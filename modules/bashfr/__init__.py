@@ -2,8 +2,8 @@
 #-*- coding: utf-8 -*-
 
 import random
-import lib.utils
-from lib.abstract_modules import FortuneModule
+import pipobot.lib.utils
+from pipobot.lib.abstract_modules import FortuneModule
 
 class CmdBashfr(FortuneModule):
     def __init__(self, bot):
@@ -33,5 +33,5 @@ bashfr [n] : Affiche la quote [n] de bashfr"""
                     result += "\n"
                     pass
                 else:
-                    result = result + lib.utils.xhtml2text(unicode(i))
+                    result = result + pipobot.lib.utils.xhtml2text(unicode(i))
             return "bashfr #%s :\n%s"%(nb, result)

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from model import Blagueur
-from lib.modules import SyncModule, defaultcmd
+from pipobot.lib.modules import SyncModule, defaultcmd
 import time
 
 class CmdBlague(SyncModule):

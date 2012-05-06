@@ -5,7 +5,7 @@ import threading
 import traceback
 import time
 from email.header import decode_header
-from lib.modules import AsyncModule
+from pipobot.lib.modules import AsyncModule
 MAILFILE = '/var/mail/bot'
 
 def decode_header_str(header):

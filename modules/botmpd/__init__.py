@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 from mpd import CommandError, ConnectionError
-from lib.modules import defaultcmd
-from lib.abstract_modules import NotifyModule
+from pipobot.lib.modules import defaultcmd
+from pipobot.lib.abstract_modules import NotifyModule
 from libmpd.BotMPD import BotMPD
-import lib.exceptions
+import pipobot.lib.exceptions
 import logging
 logger = logging.getLogger("pipobot.botmpd")
 
@@ -37,7 +37,7 @@ class CmdMpd(NotifyModule):
             self.port = settings["modules"]["botmpd"]["port"]
             self.pwd = settings["modules"]["botmpd"]["pwd"]
         except KeyError as e:
-            raise lib.exceptions.ConfigException("Missing section %s in configuration file for module botmpd!" % e)
+            raise pipobot.lib.exceptions.ConfigException("Missing section %s in configuration file for module botmpd!" % e)
 
         if "datadir" in settings["modules"]["botmpd"]:
             self.datadir = settings["modules"]["botmpd"]["datadir"]

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from lib.modules import SyncModule, answercmd
+from pipobot.lib.modules import SyncModule, answercmd
 
 class Restart(SyncModule):
     """ A module to reload the config for a bot and restart it """

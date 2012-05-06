@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
 
-import lib.utils
-from lib.abstract_modules import FortuneModule
+import pipobot.lib.utils
+from pipobot.lib.abstract_modules import FortuneModule
 
 class CmdBashorg(FortuneModule):
     def __init__(self, bot):
@@ -29,8 +29,8 @@ bashorg [n] : Show the quote [n] from bash.org"""
         for elt in tables:
             p = elt.findAll("p", {"class": "qt"})
             if p != []:
-                content = lib.utils.xhtml2text(unicode(p[0]))
-                nb = lib.utils.xhtml2text(unicode(elt.findAll("b")[0].text))
+                content = pipobot.lib.utils.xhtml2text(unicode(p[0]))
+                nb = pipobot.lib.utils.xhtml2text(unicode(elt.findAll("b")[0].text))
                 break
 
         return "%s :\n %s"%(nb, content)
