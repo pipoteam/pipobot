@@ -101,7 +101,6 @@ class BotManager:
                 for c in classes :
                     if type(c) == type and issubclass(c, lib.modules.BotModule) and \
                         not hasattr(c, '_%s__usable' % c.__name__) :
-                        logger.debug("Adding %s" % c.__name__) 
                         classes_salon.append(c)
         #Modules RecordUsers and Help are used by default (no need to add them to the configuration)
         classes_salon.append(lib.modules.RecordUsers)

@@ -5,5 +5,5 @@ if [ $# = 0 ];then
     language=fr_FR
 fi
 msgfmt -o $language.mo $language.po
-mkdir -p ../locale/$language/LC_MESSAGES
-mv $language.mo ../locale/$language/LC_MESSAGES/pipobot.mo
+mkdir -p ../pipobot/locale/$language/LC_MESSAGES
+mv $language.mo ../pipobot/locale/$language/LC_MESSAGES/pipobot.mo

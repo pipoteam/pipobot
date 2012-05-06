@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 #-*- coding: utf-8 -*-
 import ConfigParser
+import logging
+import os
 import random
 import re
 from lib.modules import MultiSyncModule, defaultcmd
@@ -27,7 +29,7 @@ class ListConfigParser(ConfigParser.RawConfigParser):
 
 class CmdAlacon(MultiSyncModule):
     def __init__(self, bot):
-        commands = self.readconf()
+        commands = self.readconf(bot)
         MultiSyncModule.__init__(self, 
                         bot,
                         commands=commands)
@@ -41,14 +43,16 @@ class CmdAlacon(MultiSyncModule):
             v = [v]
         self.dico[cmd][value] = v
 
-    def readconf(self):
+    def readconf(self, bot):
         #name, description and actions associated to each command
         self.dico = {}
         #To initialize MultiSyncModule
         commands = {}
 
         config = ListConfigParser()
-        config.read('modules/cmdalacon/cmdlist.cfg')
+        config_dir = bot.module_path["cmdalacon"]
+        config_file = os.path.join(config_dir, "cmdlist.cfg")
+        config.read(config_file)
         for c in config.sections() :
             self.dico[c] = {}
             self.dico[c]['desc'] = config.get(c, 'desc') 
