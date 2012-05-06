@@ -28,7 +28,7 @@ DEFAULT_LOG = "/tmp/botjabber.log"
 DEFAULT_XMPPLOG = None #default = no log of xmpp messages
 DEFAULT_LANG = "en"
 APP_NAME = "pipobot"
-DEFAULT_FILENAME = os.path.join(os.path.dirname(globals()["__file__"]),'settings.yml')
+DEFAULT_FILENAME = '/etc/pipobot/settings.yml')
 
 class BotManager:
     """ This is a class to configure, create, restart, manage bots """
