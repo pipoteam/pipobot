@@ -10,6 +10,7 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 import imp
 import yaml
+import inspect
 
 #Bot jabber imports
 import pipobot.lib.abstract_modules
@@ -32,12 +33,13 @@ DEFAULT_FILENAME = '/etc/pipobot/settings.yml'
 
 class BotManager:
     """ This is a class to configure, create, restart, manage bots """
-    def __init__(self, settings_file):
+    def __init__(self, settings_file, logger):
         self.settings_file = settings_file
         self.bots = {}
         self.db_session = None
         self.update_config()
         self.xmpp_log = self.settings["config"]["xmpplog"] if "config" in self.settings and "xmpplog" in self.settings["config"] else DEFAULT_XMPPLOG
+        self.logger = logger
 
     def init_bots(self, modules_paths):
         """ This method will initialize all bots thanks to self.settings and start them """
@@ -49,9 +51,9 @@ class BotManager:
             while raw_input("") != "q":
                 continue
         except KeyboardInterrupt:
-            logger.info(_("Ctrl-c signal !"))
+            self.logger.info(_("Ctrl-c signal !"))
         for bot_room, bot in self.bots.iteritems():
-            logger.info(_("Killing bot from %s" % bot_room))
+            self.logger.info(_("Killing bot from %s" % bot_room))
             bot.kill()
         sys.exit()
 
@@ -97,11 +99,13 @@ class BotManager:
                 path = module_class.__path__
                 module_path[module] = path[0]
 
-                classes = [getattr(module_class, class_name) for class_name in dir(module_class)]
-                for c in classes :
-                    if type(c) == type and issubclass(c, pipobot.lib.modules.BotModule) and \
-                        not hasattr(c, '_%s__usable' % c.__name__) :
-                        classes_salon.append(c)
+                classes = inspect.getmembers(module_class, predicate=lambda c: \
+                          inspect.isclass(c) \
+                          and issubclass(c, pipobot.lib.modules.BotModule) \
+                          and not hasattr(c, '_%s__usable' % c.__name__))
+                self.logger.debug("Classes for %s : %s" % (module, classes))
+                classes_salon += [c for n,c in classes]
+
         #Modules RecordUsers and Help are used by default (no need to add them to the configuration)
         classes_salon.append(pipobot.lib.modules.RecordUsers)
         classes_salon.append(pipobot.lib.modules.Help)
@@ -164,11 +168,8 @@ def main():
     with open(settings_filename) as s:
         try:
             settings = yaml.load(s)
-        except (yaml.scanner.ScannerError, yaml.parser.ParserError):
-            raise ConfigException("The configuration file %s is not a valid yaml file" % settings_filename)
-
-    #Creation of BotManager
-    manager = BotManager(settings_filename)
+        except (yaml.scanner.ScannerError, yaml.parser.ParserError) as e:
+            raise ConfigException("The configuration file %s is not a valid yaml file. Error was '%s'" % (settings_filename, str(e)))
 
     #Configuring logging
     logger = logging.getLogger(APP_NAME)
@@ -187,7 +188,6 @@ def main():
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
 
-
     # Configuring language
     lang = settings["lang"] if "lang" in settings else DEFAULT_LANG
     logger.info("Language in config file : %s"%(lang))
@@ -205,6 +205,9 @@ def main():
             logger.error("Error loading english translation")
             logger.error("You must generate translation files by using scripts present in the 'translation' directory")
             raise ConfigException("Error loading english translation")
+
+    #Creation of BotManager
+    manager = BotManager(settings_filename, logger)
 
     # Configuring database
     engine = ""

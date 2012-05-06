@@ -160,12 +160,11 @@ class SyncModule(BotModule) :
     @staticmethod
     def parse(body, prefixs) :
         command = None
-        spl = body.split(" ")
         for prefix in prefixs :
             if body.startswith(prefix) :
-                command = spl[0][len(prefix):].strip()
+                command = body[len(prefix):].strip()
                 break
-        return command, " ".join(spl[1:])
+        return command.partition(' ')[::2] if command is not None else (None, None)
     
     def is_concerned(self, body) :
         return SyncModule.parse(body, self.prefixs)[0] == self.command
