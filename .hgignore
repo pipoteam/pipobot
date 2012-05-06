@@ -18,3 +18,4 @@ doc/build/*
 build/*
 dist/*
 MANIFEST
+pipobot.egg-info/*
