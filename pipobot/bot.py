@@ -12,15 +12,15 @@ import imp
 import yaml
 
 #Bot jabber imports
-import lib.abstract_modules
-import lib.modules
-import bot_jabber
+import pipobot.lib.abstract_modules
+import pipobot.lib.modules
+import pipobot.bot_jabber
 
 #Database imports
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-from lib.bdd import Base
-from lib.exceptions import ConfigException
+from pipobot.lib.bdd import Base
+from pipobot.lib.exceptions import ConfigException
 
 
 # DEFAULT Constants
@@ -99,13 +99,13 @@ class BotManager:
 
                 classes = [getattr(module_class, class_name) for class_name in dir(module_class)]
                 for c in classes :
-                    if type(c) == type and issubclass(c, lib.modules.BotModule) and \
+                    if type(c) == type and issubclass(c, pipobot.lib.modules.BotModule) and \
                         not hasattr(c, '_%s__usable' % c.__name__) :
                         logger.debug("Adding %s" % c.__name__) 
                         classes_salon.append(c)
         #Modules RecordUsers and Help are used by default (no need to add them to the configuration)
-        classes_salon.append(lib.modules.RecordUsers)
-        classes_salon.append(lib.modules.Help)
+        classes_salon.append(pipobot.lib.modules.RecordUsers)
+        classes_salon.append(pipobot.lib.modules.Help)
         return classes_salon, module_path
 
     def restart(self, bot_room):
@@ -125,8 +125,9 @@ class BotManager:
             `room` : an excerpt of the yaml structure generated with the configuration file
         """
         try:
-            bot = bot_jabber.BotJabber(room["login"], room["passwd"], room["ressource"],
-                                       room["chan"], room["nick"], self.xmpp_log, self)
+            bot = pipobot.bot_jabber.BotJabber(room["login"], room["passwd"],
+                                               room["ressource"], room["chan"],
+                                               room["nick"], self.xmpp_log, self)
             bot.settings = self.settings
         except KeyError as e:
             if "chan" in room:

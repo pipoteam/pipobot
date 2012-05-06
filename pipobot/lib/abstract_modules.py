@@ -3,7 +3,7 @@
 
 import urllib
 from BeautifulSoup import BeautifulSoup
-from lib.modules import AsyncModule, SyncModule, defaultcmd, answercmd
+from pipobot.lib.modules import AsyncModule, SyncModule, defaultcmd, answercmd
 
 class AppURLopener(urllib.FancyURLopener):
     def prompt_user_passwd(self, host, realm):

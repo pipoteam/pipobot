@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 from pipobot import __version__
 
@@ -10,7 +10,7 @@ setup(
     author_email = 'pipoteam@xouillet.info',
 #   url = '',
 
-    packages = ['pipobot'],
+    packages = find_packages(exclude=["modules*"]),
 #   data_files = [],
 #   scripts = [],
 

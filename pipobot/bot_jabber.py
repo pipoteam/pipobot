@@ -6,8 +6,10 @@ import logging
 import threading
 import xmpp
 import xml.parsers.expat
-from lib.modules import AsyncModule, ListenModule, PresenceModule, SyncModule, IQModule
-from lib.user import Occupants
+
+from pipobot.lib.modules import AsyncModule, ListenModule, PresenceModule, SyncModule, IQModule
+from pipobot.lib.user import Occupants
+
 logger = logging.getLogger('pipobot.bot_jabber') 
 
 class XMPPException(Exception):
