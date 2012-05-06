@@ -15,3 +15,6 @@ modules/bourse/*.csv
 modules/belote/png/
 settings.yml
 doc/build/*
+build/*
+dist/*
+MANIFEST
