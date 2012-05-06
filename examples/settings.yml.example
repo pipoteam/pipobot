@@ -2,10 +2,10 @@ config:
     logpath: /tmp/testbot.log
 
 database:
-    engine: sqlite3
+    engine: sqlite
     src: bdd/database.db
 
-lang: en
+lang: fr
 
 rooms:
   -
@@ -30,7 +30,7 @@ groups:
         - getjid
         - google
         - mail
-        - mpd
+        - botmpd
         - nextprev
         - ola
         - pendu
@@ -49,9 +49,9 @@ modules:
         host: localhost
         port: 6600
         pwd: *secret*
-        datador: /path/to/music
+        datadir: /path/to/music
     hg:
-        default: plong
+        default: repo2
         repos:
             repo1: /path/to/repo1
             repo2: /path/to/repo2
