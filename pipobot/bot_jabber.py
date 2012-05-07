@@ -1,5 +1,5 @@
 #!/usr/bin/python
-#-*- coding: utf8 -*-
+#-*- coding: utf-8 -*-
 """This file contains the class 'BotJabber' wich is a bot for jabber MUC"""
 
 import logging
