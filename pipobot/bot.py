@@ -147,7 +147,6 @@ class BotManager:
 
         bot.module_path = module_path
         bot.add_commands(classes_room)
-        bot.start()
         self.bots[room["chan"]] = bot
 
 def main():

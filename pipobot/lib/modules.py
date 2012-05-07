@@ -46,8 +46,8 @@ class BotModule(object) :
             by it, and if so get the result of the module and make the bot
             say it """
 
-        msg_body = mess.getBody().lstrip()
-        sender = mess.getFrom().getResource()
+        msg_body = mess["body"].lstrip()
+        sender = mess["mucknick"]
         
         #The bot does not answer to itself (important to avoid some loops !)
         if sender == self.bot.name:
@@ -58,9 +58,8 @@ class BotModule(object) :
             return
         
         #If `mess` is a private message but privmsg are not allowed for the module
-        if mess.getType() == "chat" and not self.pm_allowed :
+        if mess["type"] == "chat" and not self.pm_allowed :
             return
-
         try :
             #Calling the answer method of the module
             if isinstance(self, SyncModule)  :
@@ -103,8 +102,8 @@ class BotModule(object) :
                 if send is not None:
                     self.bot.say(_("Error from module %s : %s") % (command, send))
         except:
-            self.bot.say(_("Error !"))
             logger.error(_("Error from module %s : %s") % (self.__class__, traceback.format_exc()))
+            self.bot.say(_("Error !"))
 
     def _dict_messages(self, send, mess, priv=None) :
         """ Creates messages with a dictionnary described as :

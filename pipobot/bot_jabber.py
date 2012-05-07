@@ -4,7 +4,7 @@
 
 import logging
 import threading
-import xmpp
+import sleekxmpp
 import xml.parsers.expat
 
 from pipobot.lib.modules import AsyncModule, ListenModule, MultiSyncModule, PresenceModule, SyncModule, IQModule
@@ -22,39 +22,37 @@ class XMPPException(Exception):
 
 XML_NAMESPACE = 'http://www.w3.org/1999/xhtml'
 
-class BotJabber(xmpp.Client, threading.Thread):
+class BotJabber(sleekxmpp.ClientXMPP):
     """The implementation of a bot for jabber MUC"""
     
     def __init__(self, login, passwd, res, chat, name, xmpp_log = None, manager = None):
         self.chatname = chat
         self.manager = manager
+        self.register_plugin('xep_0030')
+        self.register_plugin('xep_0004')
+        self.register_plugin('xep_0199')
 
-        #Definition of an XMPP client
-        self.Namespace, self.DBG = 'jabber:client', xmpp.DBG_CLIENT
-
-        jid = xmpp.protocol.JID(login)
-
-        if xmpp_log is not None:
-            #Write all XMPP messages seen by the bot to a log file
-            f = open(xmpp_log, "a")
-            xmpp.Client.__init__(self, jid.getDomain(), debug=f)
-            self._DEBUG._fh = f
-        else:
-            #No debug
-            xmpp.Client.__init__(self, jid.getDomain(), debug = [])
-        threading.Thread.__init__(self)
+        sleekxmpp.ClientXMPP.__init__(self, login, passwd, ssl = True)
 
         logger.info(_("Connecting to %s") % chat)
         #Connecting
-        con = self.connect()
+        con = self.connect(reattempt = False)
         if not con:
             logger.error(_("Unable to connect !"))
             raise XMPPException(_("Unable to connect !"))
-        #Authenticating
-        auth = self.auth(jid.getNode(), passwd, resource=res)
-        if not auth:
-            logger.error(_("Unable to authenticate !"))
-            raise XMPPException(_("Unable to authenticate !"))
+
+        self.registerPlugin("xep_0045")
+
+        #When the session start (bot connected) the connect_muc method will be called
+        self.add_event_handler("session_start", self.connect_muc)
+
+        #sleekxmpp handlers to XMPP stanzas
+        self.add_event_handler("message", self.message)
+        self.add_event_handler("disconnected", self.disconnected)
+        self.add_event_handler("groupchat_presence", self.presence)
+
+#        #xmpppy handlers to XMPP stanzas
+#        self.RegisterHandler('iq', self.iq)
 
         self.modules = []
 
@@ -66,42 +64,40 @@ class BotJabber(xmpp.Client, threading.Thread):
         #This nickname will be set by the reception of a presence message after joining the room
         self.name = name
 
-        #The room the bot will join
-        self.chat = xmpp.protocol.JID(chat)
-        
         #We will stock in it informations about users that join/leave
         self.occupants = Occupants()
 
-        #xmpppy handlers to XMPP stanzas
-        self.RegisterHandler('message', self.message)
-        self.RegisterHandler('presence', self.presence)
-        self.RegisterHandler('iq', self.iq)
-
-        #Joins the room : sends initial presence
-        chatpres = xmpp.protocol.JID(chat+"/"+name)
-        pres = xmpp.Presence(to=chatpres)
-        pres.setTag('x', namespace=xmpp.NS_MUC)
-        #To avoid getting the history of messages when connecting
-        pres.getTag('x').addChild('history', {'maxchars':'0'})
-        self.send(pres)
+        for module in self.modules:
+            if isinstance(module, AsyncModule):
+                module.start()
         
-        #Saying hello to the room !
-        self.say(_("Hello everyone !"))
+        self.process(threaded = True)
 
-    def message(self, conn, mess):
+    def connect_muc(self, event):
+        self.send_presence()
+        muc = self.plugin["xep_0045"]
+        join = muc.joinMUC(self.chatname, self.name)
+        hello_msg = _("Hello everyone !")
+        self.send_message(mto = self.chatname, mbody = hello_msg, mtype = "groupchat")
+
+    def disconnected(self, event):
+        for module in self.modules:
+            if type(module) == AsyncModule:
+                module.stop()
+
+    def message(self, mess):
         """Method called when the bot receives a message"""
         #We ignore messages in some cases : 
         #   - it has a subject (change of room topic for instance)
         #   - it is a 'delay' message (backlog at room join)
         #   - the message is empty
         if self.mute                         \
-           or mess.getSubject() is not None  \
-           or mess.getTag('delay')           \
-           or mess.getBody() == None :
+           or mess["subject"] != ""  \
+           or mess["body"] == "" :
                 return
         
         #We look for a module which is concerned by the message
-        for module in self.modules :
+        for module in self.modules:
             if isinstance(module, ListenModule) or isinstance(module, SyncModule) or isinstance(module, MultiSyncModule):
                 module.do_answer(mess)
 
@@ -120,7 +116,7 @@ class BotJabber(xmpp.Client, threading.Thread):
         #We kill the thread
         self.alive = False
         #The bot says goodbye
-        self.say(_("I've been asked to leave you"))
+#        self.say(_("I've been asked to leave you"))
         #The bot leaves the room
         logger.info("Killing %s" % self.chatname)
         try:
@@ -131,19 +127,18 @@ class BotJabber(xmpp.Client, threading.Thread):
     def forge_message(self, mess, priv=None, in_reply_to=None):
         """Method used to send a message in a the room"""
 
-        message = xmpp.Message(self.chat, mess, typ="groupchat")
-        if in_reply_to:
-            message.setType( in_reply_to.getType() )
-            if in_reply_to.getType() == "chat":
-                message.setTo( in_reply_to.getFrom() )
-
-        #If the bot answers in private
+        mto = self.chatname
+        mtyp = "groupchat"
         if priv:
-            message.setTo("%s/%s" % (self.chat, priv))
-            message.setType("chat")
+            mto = "%s/%s" % (self.chatname, priv)
+            mtyp = "chat"
 
-        return message
+        if in_reply_to:
+            mtyp = in_reply_to["type"]
+            if mtyp == "chat":
+                mto = in_reply_to["from"]
 
+        return mto, mess, mtyp
 
     def forge_xhtml(self, mess, mess_xhtml, priv=None, in_reply_to=None):
         """Sending an xhtml message in the room"""
@@ -163,7 +158,8 @@ class BotJabber(xmpp.Client, threading.Thread):
         """The method to call to make the bot sending messages"""
         #If the bot has not been disabled
         if not self.mute:
-            self.send(self.forge_message(*args, **kwargs))
+            mto, mbody, mtype = self.forge_message(*args, **kwargs)
+            self.send_message(mto = mto, mbody = mbody, mtype = mtype)
 
     def say_xhtml(self, *args, **kwargs) :
         """Method to talk in xhtml"""
@@ -171,11 +167,11 @@ class BotJabber(xmpp.Client, threading.Thread):
         if not self.mute:
             self.send(self.forge_xhtml(*args, **kwargs))
 
-    def presence(self, conn, mess):
+    def presence(self, mess):
         """Method called when the bot receives a presence message.
            Used to record users in the room, as well as their jid and roles"""
-        if mess.getStatusCode() == u'110':
-            self.name = mess.getFrom().getResource()
+#        if mess.getStatusCode() == u'110':
+#            self.name = mess.getFrom().getResource()
 
         for module in self.modules:
             if isinstance(module, PresenceModule):
@@ -184,23 +180,15 @@ class BotJabber(xmpp.Client, threading.Thread):
     def run(self):
         """Method called when the bot is ran"""
         #We start dameons for asynchronous methods
-        for module in self.modules:
-            if isinstance(module, AsyncModule):
-                module.start()
-        
-        #client's loop, exited only when self.alive has been set to False
-        while self.alive:
-            try:
-                self.Process(1)
-            except xmpp.protocol.Conflict:
-                msg = _("The ressource defined for the bot in %s is already used" % (self.chatname))
-                logger.error(msg)
-                raise XMPPException(msg)
-
-        #When bot's killed, every asynchronous module must be killed too
-        for module in self.modules:
-            if type(module) == AsyncModule :
-                module.stop()
+#            except xmpp.protocol.Conflict:
+#                msg = _("The ressource defined for the bot in %s is already used" % (self.chatname))
+#                logger.error(msg)
+#                raise XMPPException(msg)
+#
+#        #When bot's killed, every asynchronous module must be killed too
+#        for module in self.modules:
+#            if type(module) == AsyncModule :
+#                module.stop()
 
     def restart(self):
         """ Will ask the manager to restart this room """
