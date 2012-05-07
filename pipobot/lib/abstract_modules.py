@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import urllib
-from BeautifulSoup import BeautifulSoup
 from pipobot.lib.modules import AsyncModule, SyncModule, defaultcmd, answercmd
 
 class AppURLopener(urllib.FancyURLopener):
@@ -38,12 +37,11 @@ class FortuneModule(SyncModule):
     def retrieve_data(self, url):
         opener = AppURLopener()
         page = opener.open(url)
-        contenu = page.read()
+        content = page.read()
         page.close()
-        soup = BeautifulSoup(contenu)
-        return self.extract_data(soup)
+        return self.extract_data(content)
 
-    def extract_data(self, soup):
+    def extract_data(self, html_content):
         return _("You must override extract_data for %s !!!") % self.command
 
 class NotifyModule(SyncModule, AsyncModule):

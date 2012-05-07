@@ -2,6 +2,7 @@
 #-*- coding: utf-8 -*-
 
 import pipobot.lib.utils
+from BeautifulSoup import BeautifulSoup
 from pipobot.lib.abstract_modules import FortuneModule
 
 class CmdChuck(FortuneModule):
@@ -18,7 +19,8 @@ chuck [n] : Affiche le fact [n]"""
                             lock_time = 2,
                             )
 
-    def extract_data(self, soup):
+    def extract_data(self, html_content):
+        soup = BeautifulSoup(html_content)
         fact = soup.findAll("div", {"class": "fact"})[0]
         index = fact.get("id").partition("fact")[2]
         content = pipobot.lib.utils.xhtml2text(fact.text)
