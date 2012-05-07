@@ -3,6 +3,7 @@
 
 import random
 import pipobot.lib.utils
+from BeautifulSoup import BeautifulSoup
 from pipobot.lib.abstract_modules import FortuneModule
 
 class CmdBashfr(FortuneModule):
@@ -19,7 +20,8 @@ bashfr [n] : Affiche la quote [n] de bashfr"""
                         lock_time = 2,
                         )
 
-    def extract_data(self, soup):
+    def extract_data(self, html_content):
+        soup = BeautifulSoup(html_content)
         if soup.find("h2", text = "Erreur 404"):
             return "La quote demandée n'existe pas. (Erreur 404)"
         else:

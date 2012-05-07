@@ -2,6 +2,7 @@
 #-*- coding: utf-8 -*-
 
 import pipobot.lib.utils
+from BeautifulSoup import BeautifulSoup
 from pipobot.lib.abstract_modules import FortuneModule
 
 class CmdBashorg(FortuneModule):
@@ -19,7 +20,8 @@ bashorg [n] : Show the quote [n] from bash.org"""
                         )
 
 
-    def extract_data(self, soup):
+    def extract_data(self, html_content):
+        soup = BeautifulSoup(html_content)
         sections = soup.findAll("p", { "class": "qt" })
         centers = soup.findAll("center")
         if sections == []:
