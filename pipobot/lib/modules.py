@@ -430,12 +430,13 @@ class RecordUsers(PresenceModule):
                                 desc = desc)
 
     def do_answer(self, message):
+        pseudo = message["muc"]["nick"]
+
         #The user [pseudo] leaves the room
         if message["type"] == 'unavailable':
             self.bot.occupants.rm_user(pseudo)
         elif message["type"] == "available":
             role = message["muc"]['role']
-            pseudo = message["muc"]["nick"]
             try:
                 jid = message["muc"]["jid"].bare
             except AttributeError:

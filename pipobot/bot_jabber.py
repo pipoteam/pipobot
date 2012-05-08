@@ -29,9 +29,6 @@ class BotJabber(sleekxmpp.ClientXMPP):
     def __init__(self, login, passwd, res, chat, name, xmpp_log = None, manager = None):
         self.chatname = chat
         self.manager = manager
-        self.register_plugin('xep_0030')
-        self.register_plugin('xep_0004')
-        self.register_plugin('xep_0199')
 
         sleekxmpp.ClientXMPP.__init__(self, login, passwd, ssl = True)
 
@@ -68,9 +65,6 @@ class BotJabber(sleekxmpp.ClientXMPP):
         #We will stock in it informations about users that join/leave
         self.occupants = Occupants()
 
-        for module in self.modules:
-            if isinstance(module, AsyncModule):
-                module.start()
         
         self.process(threaded = True)
 
@@ -110,6 +104,8 @@ class BotJabber(sleekxmpp.ClientXMPP):
             logger.debug("Registering %s" % classe)
             objet = classe(self)
             self.modules.append(objet)
+            if isinstance(objet, AsyncModule):
+                objet.start()
 
     def kill(self):
         """Method used to kill the bot"""
@@ -117,7 +113,7 @@ class BotJabber(sleekxmpp.ClientXMPP):
         #We kill the thread
         self.alive = False
         #The bot says goodbye
-#        self.say(_("I've been asked to leave you"))
+        self.say(_("I've been asked to leave you"))
         #The bot leaves the room
         logger.info("Killing %s" % self.chatname)
         try:
@@ -130,6 +126,7 @@ class BotJabber(sleekxmpp.ClientXMPP):
 
         mto = self.chatname
         mtyp = "groupchat"
+
         if priv:
             mto = "%s/%s" % (self.chatname, priv)
             mtyp = "chat"
@@ -139,34 +136,34 @@ class BotJabber(sleekxmpp.ClientXMPP):
             if mtyp == "chat":
                 mto = in_reply_to["from"]
 
-        return mto, mess, mtyp
+        msg = self.make_message(mto, mbody = mess, mtype = mtyp)
+        return msg
 
     def forge_xhtml(self, mess, mess_xhtml, priv=None, in_reply_to=None):
         """Sending an xhtml message in the room"""
 
         #The message is created from mess, in case some clients does not support XHTML (xep-0071)
-        message = self.forge_message(mess, priv, in_reply_to)
+        msg = self.forge_message(mess, priv, in_reply_to)
         #We prepare the XHTML node
         if type(mess_xhtml) == unicode:
             mess_xhtml = mess_xhtml.encode("utf8")
-        payload = xmpp.simplexml.XML2Node('<body xmlns="%s">%s</body>' % (XML_NAMESPACE, mess_xhtml))
-        # We add the XHTML node to the message then send it
-        message.addChild('html', {}, [payload], xmpp.NS_XHTML_IM)
+        msg["html"]["body"] = mess_xhtml
 
-        return message
+        return msg
     
     def say(self, *args, **kwargs) :
         """The method to call to make the bot sending messages"""
         #If the bot has not been disabled
         if not self.mute:
-            mto, mbody, mtype = self.forge_message(*args, **kwargs)
-            self.send_message(mto = mto, mbody = mbody, mtype = mtype)
+            msg = self.forge_message(*args, **kwargs)
+            msg.send()
 
     def say_xhtml(self, *args, **kwargs) :
         """Method to talk in xhtml"""
         #If the bot has not been disabled
         if not self.mute:
-            self.send(self.forge_xhtml(*args, **kwargs))
+            msg = self.forge_xhtml(*args, **kwargs)
+            msg.send()
 
     def presence(self, mess):
         """Method called when the bot receives a presence message.
