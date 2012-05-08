@@ -5,6 +5,7 @@ syntax:glob
 *.swp
 *.mo
 *.log
+.DS_Store
 bdd/*
 settings.yml
 doc/build/*
