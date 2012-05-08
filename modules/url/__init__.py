@@ -9,6 +9,15 @@ from BeautifulSoup import BeautifulSoup, SoupStrainer
 from HTMLParser import HTMLParseError
 from pipobot.lib.modules import ListenModule
 
+try:
+    from hyperlinks_scanner import HyperlinksScanner
+except ImportError:
+    HyperlinksScanner = None
+
+
+URLS_RE = re.compile('http[s]?://(?:[a-zA-Z]|[0-9]|[$-/_=?:;]|[!*\(\),~@]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+
+
 class AppURLopener(urllib.FancyURLopener):
     def prompt_user_passwd(self, host, realm):
         return ('', '')
@@ -27,7 +36,14 @@ class CmdUrl(ListenModule):
             return
 
         send = []
-        urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-/_=?:;]|[!*\(\),~@]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', message)
+        urls = set()
+        
+        if HyperlinksScanner:
+            scanner = HyperlinksScanner(message, strict=True)
+            urls = set([link.url for link in scanner])
+        else:
+            urls = set(URLS_RE.findall(message))
+        
         for url in urls:
             try:
                 o=urllib.urlopen(url)
