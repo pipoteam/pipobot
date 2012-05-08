@@ -7,10 +7,10 @@ from sqlalchemy import Column, Integer, String
 class Remind(pipobot.lib.bdd.Base):
     __tablename__ = "remind"
     id = Column(Integer, primary_key = True, autoincrement = True)
-    owner = Column(String)
-    description = Column(String)
-    date = Column(Integer)
-    reporter = Column(String)
+    owner = Column(String(250))
+    description = Column(String(250))
+    date = Column(Integer(250))
+    reporter = Column(String(250))
 
     def __init__(self, owner, description, date, reporter):
         self.owner = owner

@@ -65,7 +65,7 @@ class BotManager:
     def configure_db(self):
         """ Configure database for bots,
             Create the 'db_session' that modules will use to access to the db """
-        engine = create_engine('%s:///%s' % (self.db_engine, self.db_src), convert_unicode=True)
+        engine = create_engine(self.db_url, convert_unicode=True)
         db_session = scoped_session(sessionmaker(autocommit=False,
                                                  autoflush=False,
                                                  bind=engine))
@@ -210,16 +210,36 @@ def main():
     manager = BotManager(settings_filename, logger)
 
     # Configuring database
-    engine = ""
-    src = ""
+    db_engine = ""
+    db_src = ""
+    db_user = ""
+    db_password = ""
+    db_name = ""
+    db_host = ""
     if "database" in settings:
         try:
-            engine = settings["database"]["engine"]
-            src = settings["database"]["src"]
-            manager.db_engine = engine
-            manager.db_src = src
+            db_engine = settings["database"]["engine"]
         except KeyError as e:
             raise ConfigException(_("Your database section must contain parameters 'engine' and 'src'"))
+        #dialect+driver://user:password@host/dbname
+        if db_engine == 'sqlite':
+            try:
+                db_src = settings["database"]["src"]
+            except KeyError as e:
+                raise ConfigException(_("For a SQLite engine, your database section must contain parameter 'src'"))
+            manager.db_url = '%s:///%s' % (db_engine, db_src)
+        elif db_engine == 'mysql':
+            try:
+                db_user = settings["database"]["user"]
+                db_password = settings["database"]["password"]
+                db_host = settings["database"]["host"]
+                db_name = settings["database"]["name"]
+            except KeyError:
+                raise ConfigException(_("For a MySQL engine, your database section must contain parameters 'user', 'password', 'host' and 'dbname'"))
+            manager.db_url = '%s://%s:%s@%s/%s' % (db_engine,db_user,db_password,db_host,db_name)
+            print manager.db_url
+        else:
+            raise ConfigException(_("The engine «%s» for the database is not yet implemented" % db_engine))
 
     # Configuring path to find modules
     modules_paths = ["modules"]

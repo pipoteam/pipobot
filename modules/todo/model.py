@@ -7,9 +7,9 @@ from pipobot.lib.bdd import Base
 class Todo(Base):
     __tablename__ = "todo"
     id = Column(Integer, primary_key = True, autoincrement = True)
-    name = Column(String)
-    content = Column(String)
-    reporter = Column(String)
+    name = Column(String(250))
+    content = Column(String(250))
+    reporter = Column(String(250))
     submission = Column(Integer)
 
     def __init__(self, name, content, reporter, submission):
