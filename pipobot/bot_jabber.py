@@ -21,6 +21,7 @@ class XMPPException(Exception):
         return self.msg
 
 XML_NAMESPACE = 'http://www.w3.org/1999/xhtml'
+_muc_xml = "{http://jabber.org/protocol/muc#user}status"
 
 class BotJabber(sleekxmpp.ClientXMPP):
     """The implementation of a bot for jabber MUC"""
@@ -170,26 +171,19 @@ class BotJabber(sleekxmpp.ClientXMPP):
     def presence(self, mess):
         """Method called when the bot receives a presence message.
            Used to record users in the room, as well as their jid and roles"""
-#        if mess.getStatusCode() == u'110':
-#            self.name = mess.getFrom().getResource()
+        try:
+            code = mess["muc"].find(_muc_xml).get("code")
+            code = int(code)
+            if code == 110:
+                self.name = mess["muc"]["nick"]
+        except AttributeError:
+            #No "status code" in the message
+            pass
 
         for module in self.modules:
             if isinstance(module, PresenceModule):
                 module.do_answer(mess)
         
-    def run(self):
-        """Method called when the bot is ran"""
-        #We start dameons for asynchronous methods
-#            except xmpp.protocol.Conflict:
-#                msg = _("The ressource defined for the bot in %s is already used" % (self.chatname))
-#                logger.error(msg)
-#                raise XMPPException(msg)
-#
-#        #When bot's killed, every asynchronous module must be killed too
-#        for module in self.modules:
-#            if type(module) == AsyncModule :
-#                module.stop()
-
     def restart(self):
         """ Will ask the manager to restart this room """
         self.manager.restart(self.chatname)

@@ -47,7 +47,7 @@ class BotModule(object) :
             say it """
 
         msg_body = mess["body"].lstrip()
-        sender = mess["mucknick"]
+        sender = mess["from"].resource
         
         #The bot does not answer to itself (important to avoid some loops !)
         if sender == self.bot.name:
@@ -421,7 +421,6 @@ class PresenceModule(BotModule):
         if body == self.name:
             return self.desc
 
-
 class RecordUsers(PresenceModule):
     def __init__(self, bot):
         desc = _("Recording users logins/logout")
@@ -431,22 +430,16 @@ class RecordUsers(PresenceModule):
                                 desc = desc)
 
     def do_answer(self, message):
-        role = ""
-        jid = ""
-
-        #Get the role of the participant
-        for xtag in message.getTags("x"):
-            if xtag.getTag("item"):
-                role = xtag.getTag("item").getAttr("role")
-
-        pseudo = message.getFrom().getResource()
-
         #The user [pseudo] leaves the room
-        if message.getType() == 'unavailable':
+        if message["type"] == 'unavailable':
             self.bot.occupants.rm_user(pseudo)
-        else:
-            if message.getJid() is not None:
-                jid = message.getJid().split("/")[0]
+        elif message["type"] == "available":
+            role = message["muc"]['role']
+            pseudo = message["muc"]["nick"]
+            try:
+                jid = message["muc"]["jid"].bare
+            except AttributeError:
+                jid = ""
             self.bot.occupants.add_user(pseudo, jid, role)
 
 ###############################################################################################
