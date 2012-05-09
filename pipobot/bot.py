@@ -163,8 +163,7 @@ def setup_lock_file():
             "background.")
 
     try:
-        fd = os.open("/var/run/pipobot.pid", os.O_WRONLY | os.O_CREAT |
-            os.O_TRUNC)
+        fd = os.open("/var/run/pipobot.pid", os.O_WRONLY | os.O_CREAT)
         fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except OSError, e:
         fatal(str(e))
@@ -183,6 +182,7 @@ def daemonize(fd):
 
     pid = os.fork()
     if pid != 0:
+        os.ftruncate(fd, 0)
         os.write(fd, str(pid))
         os._exit(0)
 
