@@ -4,7 +4,7 @@ import random
 import repartie
 import re
 from pipobot.lib.modules import ListenModule
-from lib import utils
+from pipobot.lib import utils
 
 class CmdBot(ListenModule):
     def __init__(self, bot):

@@ -2,9 +2,12 @@
 # -*- coding: utf-8 -*-
 
 from optparse import OptionParser
+import errno
+import fcntl
 import gettext
 import logging
 import os
+import pwd
 import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -150,18 +153,62 @@ class BotManager:
         bot.start()
         self.bots[room["chan"]] = bot
 
+def fatal(message, *args):
+    sys.stderr.write((message + "\n") % args)
+    sys.exit(1)
+
+def setup_lock_file():
+    if os.getuid() != 0:
+        fatal("This program must be started as root to work in the "
+            "background.")
+
+    try:
+        fd = os.open("/var/run/pipobot.pid", os.O_WRONLY | os.O_CREAT)
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError, e:
+        fatal(str(e))
+    except IOError, e:
+        if e.errno == errno.EACCES or e.errno == errno.EAGAIN:
+            fatal("Unable to lock the PID file, is the bot already running?")
+        else:
+            fatal(str(e))
+
+    return fd
+
+def daemonize(fd):
+    info = pwd.getpwnam('nobody')
+    os.setgid(info.pw_gid)
+    os.setuid(info.pw_uid)
+
+    pid = os.fork()
+    if pid != 0:
+        os.ftruncate(fd, 0)
+        os.write(fd, str(pid))
+        os._exit(0)
+
+    null = open(os.path.devnull)
+    for desc in ['stdin', 'stdout', 'stderr']:
+        getattr(sys, desc).close()
+        setattr(sys, desc, null)
+
 def main():
     #Parametring options
     parser = OptionParser()
-    parser.set_defaults(level=logging.INFO)
+    parser.set_defaults(level=logging.INFO, daemonize=False)
     parser.set_usage("usage: %prog [options] [confpath] ")
     parser.add_option("-q", "--quiet",
                       action="store_const", dest="level", const=logging.CRITICAL,
                       help="Just print critical errors in the terminal")
     parser.add_option("-d", "--debug",
                       action="store_const", dest="level", const=logging.DEBUG,
-                      help="Print debugs")
+                      help="Print debug information")
+    parser.add_option("-b", "--background",
+                      action="store_const", dest="daemonize", const=True,
+                      help="Run in background, with reduced privileges")
     (options, args) = parser.parse_args()
+
+    if options.daemonize:
+        lock_fd = setup_lock_file()
 
     settings_filename = args[0] if len(args) > 0 else DEFAULT_FILENAME
 
@@ -245,6 +292,9 @@ def main():
     modules_paths = ["modules"]
     if "config" in settings and "extra_modules" in settings["config"] :
         modules_paths += settings["config"]["extra_modules"]
+
+    if options.daemonize:
+        daemonize(lock_fd)
 
     manager.init_bots(modules_paths)
 
