@@ -28,11 +28,13 @@ from pipobot.lib.exceptions import ConfigException
 
 
 # DEFAULT Constants
-DEFAULT_LOG = "/tmp/botjabber.log"
+DEFAULT_LOG = "/tmp/pipobot.log"
 DEFAULT_XMPPLOG = None #default = no log of xmpp messages
 DEFAULT_LANG = "en"
 APP_NAME = "pipobot"
 DEFAULT_FILENAME = '/etc/pipobot/settings.yml'
+DEFAULT_USER = "nobody"
+DEFAULT_PIDFILE="/var/run/pipobot.pid"
 
 class BotManager:
     """ This is a class to configure, create, restart, manage bots """
@@ -157,13 +159,13 @@ def fatal(message, *args):
     sys.stderr.write((message + "\n") % args)
     sys.exit(1)
 
-def setup_lock_file():
+def setup_lock_file(pid_file):
     if os.getuid() != 0:
         fatal("This program must be started as root to work in the "
             "background.")
 
     try:
-        fd = os.open("/var/run/pipobot.pid", os.O_WRONLY | os.O_CREAT)
+        fd = os.open(pid_file, os.O_WRONLY | os.O_CREAT)
         fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except OSError, e:
         fatal(str(e))
@@ -175,8 +177,12 @@ def setup_lock_file():
 
     return fd
 
-def daemonize(fd):
-    info = pwd.getpwnam('nobody')
+def daemonize(fd, user):
+    try:
+        info = pwd.getpwnam(user)
+    except KeyError:
+        fatal("The user %s does not exist !" % user)
+
     os.setgid(info.pw_gid)
     os.setuid(info.pw_uid)
 
@@ -205,10 +211,14 @@ def main():
     parser.add_option("-b", "--background",
                       action="store_const", dest="daemonize", const=True,
                       help="Run in background, with reduced privileges")
+    parser.add_option("-u", "--user", dest="user", type="string", default=DEFAULT_USER,
+                      help="To which user the bot will lose its privileges")
+    parser.add_option("-p", "--pid", dest="pid_file", type="string", default=DEFAULT_PIDFILE,
+                      help="Specify a pid file")
     (options, args) = parser.parse_args()
 
     if options.daemonize:
-        lock_fd = setup_lock_file()
+        lock_fd = setup_lock_file(options.pid_file)
 
     settings_filename = args[0] if len(args) > 0 else DEFAULT_FILENAME
 
@@ -237,7 +247,6 @@ def main():
 
     # Configuring language
     lang = settings["lang"] if "lang" in settings else DEFAULT_LANG
-    logger.info("Language in config file : %s"%(lang))
     local_path = os.path.realpath(os.path.dirname(sys.argv[0]))
     local_path = os.path.join(local_path,"locale")
     try:
@@ -294,7 +303,7 @@ def main():
         modules_paths += settings["config"]["extra_modules"]
 
     if options.daemonize:
-        daemonize(lock_fd)
+        daemonize(lock_fd, options.user)
 
     manager.init_bots(modules_paths)
 
