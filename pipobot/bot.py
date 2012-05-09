@@ -165,7 +165,7 @@ def setup_lock_file():
     try:
         fd = os.open("/var/run/pipobot.pid", os.O_WRONLY | os.O_CREAT |
             os.O_TRUNC)
-        fcntl.lockf(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except OSError, e:
         fatal(str(e))
     except IOError, e:
