@@ -1,5 +1,7 @@
 config:
     logpath: /tmp/testbot.log
+    extra_modules:
+        - ../modules
 
 database:
     engine: sqlite
@@ -48,7 +50,7 @@ modules:
     botmpd:
         host: localhost
         port: 6600
-        pwd: *secret*
+        pwd: /secret/
         datadir: /path/to/music
     hg:
         default: repo2
