@@ -37,12 +37,9 @@ class CmdUrl(ListenModule):
         except KeyError:
             self.repost = False
         try:
-            ignore = settings['modules']['url']['repost-ignore'][0]
-            for i in settings['modules']['url']['repost-ignore'][1:]:
-                ignore = ignore + '|' + i
-            self.repost_ignore = re.compile(ignore,re.I)
+            self.repost_ignore = settings['modules']['url']['repost-ignore']
         except KeyError:
-            self.repost_ignore = False
+            self.repost_ignore = []
 
     def answer(self, sender, message):
         if type(message) not in (str, unicode):
@@ -59,7 +56,7 @@ class CmdUrl(ListenModule):
 
         for url in urls:
             if self.repost:
-                if not self.repost_ignore or not self.repost_ignore.search(url):
+                if not any(i in url for i in self.repost_ignore):
                     res = self.bot.session.query(RepostUrl).filter(RepostUrl.url == url).first()
                     if res:
                         send.append('OLD! ')
