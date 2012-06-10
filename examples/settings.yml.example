@@ -59,8 +59,5 @@ modules:
     url:
         repost: True
         repost-ignore:
-            - inpt.fr
-            - bde.inp-toulouse.fr
-            - bde.enseeiht.fr
-            - bde.ensat.fr
-            - bde.ensiacet.fr
+            - exemple.org
+            - sub.domain.net
