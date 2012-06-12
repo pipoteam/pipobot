@@ -8,6 +8,7 @@ import httplib
 from BeautifulSoup import BeautifulSoup, SoupStrainer
 from HTMLParser import HTMLParseError
 from pipobot.lib.modules import ListenModule
+from model import RepostUrl
 
 try:
     from hyperlinks_scanner import HyperlinksScanner
@@ -30,21 +31,51 @@ class CmdUrl(ListenModule):
     def __init__(self, bot):
         desc = "Extracting title of page from URL"
         ListenModule.__init__(self, bot,  name = "url", desc = desc)
-            
+        settings = self.bot.settings
+        try:
+            self.repost = settings['modules']['url']['repost']
+        except KeyError:
+            self.repost = False
+        try:
+            self.repost_ignore = settings['modules']['url']['repost-ignore']
+        except KeyError:
+            self.repost_ignore = []
+
     def answer(self, sender, message):
         if type(message) not in (str, unicode):
             return
 
         send = []
         urls = set()
-        
+
         if HyperlinksScanner:
             scanner = HyperlinksScanner(message, strict=True)
             urls = set([link.url for link in scanner])
         else:
             urls = set(URLS_RE.findall(message))
-        
+
         for url in urls:
+            if self.repost:
+                if not any(i in url for i in self.repost_ignore):
+                    res = self.bot.session.query(RepostUrl).filter(RepostUrl.url == url).first()
+                    if res:
+                        send.append('OLD! ')
+                        first = ''
+                        try:
+                            first = self.bot.occupants.jid_to_pseudo(res.jid)
+                        except KeyError:
+                            first = res.jid
+                        first_date = 'le ' + res.date.strftime('%x') + ' à ' + res.date.strftime('%X')
+                        if res.count == 1:
+                            send.append('Ce lien a déjà été posté %s par %s… '%(first_date,first))
+                        else:
+                            send.append('Ce lien a déjà été posté %s fois depuis que %s l’a découvert, %s… ' % (res.count,first,first_date))
+                        res.count += 1
+                    else:
+                        u = RepostUrl(url, self.bot.occupants.pseudo_to_jid(sender))
+                        self.bot.session.add(u)
+                    self.bot.session.commit()
+
             try:
                 o=urllib.urlopen(url)
                 ctype, clength = o.info().get("Content-Type"), o.info().get("Content-Length")
@@ -68,7 +99,7 @@ class CmdUrl(ListenModule):
                 o.close()
             except IOError as error:
                 if error[1] == 401:
-                    send.append("Je ne peux pas m'authentifier sur ce site :''(")
+                    send.append("Je ne peux pas m'authentifier sur ce site :'(")
                 elif error[1] == 404:
                     send.append("Cette page n'existe pas !")
                 elif error[1] == 403:
