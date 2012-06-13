@@ -16,7 +16,7 @@ class CmdBlame(AbstractBlague):
                         pm_allowed = False,
                         command = "blame",
                         )
-        self.aide = u"Enlevez un point blague à un ami ! écrivez !blague pseudo (10 s minimum d'intervalle)"
+        self.aide = u"Enlevez un point blague à un ami ! écrivez !blame pseudo (10 s minimum d'intervalle)"
         self.autocongratulation = u"Oui, c’est bien de reconnaitre ses erreurs. Mais tu ferais mieux de juste de taire ;)"
         self.premier = u"Ah, ben bravo %s, tu commences fort…"
         self.init = -1
