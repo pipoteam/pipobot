@@ -7,25 +7,23 @@ import time
 
 class AbstractBlague(SyncModule):
     """ Modifie les scores de blague """
-    def __init__(self, bot):
-        desc = "Classe abstraite sur les blagues"
+    def __init__(self, bot, desc, command, autocongratulation, premier, operation):
         SyncModule.__init__(self,
                         bot,
                         desc = desc,
                         pm_allowed = False,
-                        command = "abstractBlague",
+                        command = command,
                         )
-        self.aide = ""
-        self.autocongratulation = ""
-        self.premier = "" # S’utilise avec un %s pour le pseudo
-        self.init = 0
-        self.operation = operator.add
+        self.autocongratulation = autocongratulation
+        self.premier = premier # S’utilise avec un %s pour le pseudo
+        self.operation = operation
+        self.init = self.operation(0, 1)
 
     @defaultcmd
     def answer(self, sender, message):
         send = ''
         if message == '':
-            return self.aide
+            return self.desc
         sjid = self.bot.occupants.pseudo_to_jid(sender.strip())
         jid = self.bot.occupants.pseudo_to_jid(message)
         if jid == "":

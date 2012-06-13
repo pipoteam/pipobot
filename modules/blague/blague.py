@@ -9,18 +9,14 @@ import time, operator
 class CmdBlague(AbstractBlague):
     """ Ajoute un point-blague à un collègue blagueur compétent """
     def __init__(self, bot):
-        desc = "blague [pseudo]\nAjoute un point blague à [pseudo]"
-        SyncModule.__init__ (self,
-                        bot,
-                        desc = desc,
-                        pm_allowed = False,
-                        command = "blague",
-                        )
-        self.aide = u"Donnez un point blague à un ami ! écrivez !blague pseudo (10 s minimum d'intervalle)"
-        self.autocongratulation = "Un peu de modestie, merde"
-        self.premier = u"Félicitations %s, c'est ta première blague !"
-        self.init = 1
-        self.operation = operator.add
+        desc = u"Donnez un point blague à un ami ! écrivez !blague pseudo (10 s minimum d'intervalle)"
+        AbstractBlague.__init__(self,
+                                bot,
+                                desc = desc,
+                                command = "blague",
+                                autocongratulation = "Un peu de modestie, merde",
+                                premier = u"Félicitations %s, c'est ta première blague !",
+                                operation = operator.add)
 
     def cmd_score(self, sender, message):
         """Affiche les scores des blagueurs"""
