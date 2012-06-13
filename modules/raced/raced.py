@@ -1,10 +1,11 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
+
+from model import Racer
+from pipobot.lib.modules import SyncModule, defaultcmd
 import time
-from lib.modules import SyncModule, defaultcmd
 from sqlalchemy import func
 from sqlalchemy.sql.expression import desc
-from model import Racer
 
 class CmdRaced(SyncModule):
     """ Ajoute un point-raced à un collègue lent"""

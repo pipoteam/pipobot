@@ -1,12 +1,12 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 from sqlalchemy import Column, Integer, String
-import lib.bdd
+from pipobot.lib.bdd import Base
 
-class Racer(lib.bdd.Base):
+class Racer(Base):
     __tablename__ = "raced"
-    jid_from = Column(String, primary_key = True)
-    jid_to = Column(String, primary_key = True)
+    jid_from = Column(String(250), primary_key = True)
+    jid_to = Column(String(250), primary_key = True)
     score = Column(Integer)
     submission = Column(Integer)
 
