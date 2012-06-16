@@ -5,6 +5,7 @@ import xmpp
 import urllib
 import pipobot.lib.utils
 import httplib
+import sqlalchemy.exc
 from BeautifulSoup import BeautifulSoup, SoupStrainer
 from HTMLParser import HTMLParseError
 from pipobot.lib.modules import ListenModule
@@ -42,20 +43,28 @@ class CmdUrl(ListenModule):
             self.repost_ignore = []
 
     def answer(self, sender, message):
-        if type(message) not in (str, unicode):
-            return
-
-        send = []
-        urls = set()
-
         if HyperlinksScanner:
             scanner = HyperlinksScanner(message, strict=True)
             urls = set([link.url for link in scanner])
         else:
             urls = set(URLS_RE.findall(message))
 
-        for url in urls:
-            if self.repost:
+        try:
+            repost_msg = self.check_repost(sender, urls)
+        except sqlalchemy.exc.OperationalError:
+            self.bot.session.rollback()
+            repost_msg = []
+        except sqlalchemy.exc.InvalidRequestError:
+            repost_msg = []
+
+        title_page = self.get_title(urls)
+        send = repost_msg + title_page
+        return None if send == [] else "\n".join(send)
+
+    def check_repost(self, sender, urls):
+        send = []
+        if self.repost:
+            for url in urls:
                 if not any(i in url for i in self.repost_ignore):
                     res = self.bot.session.query(RepostUrl).filter(RepostUrl.url == url).first()
                     if res:
@@ -74,8 +83,12 @@ class CmdUrl(ListenModule):
                     else:
                         u = RepostUrl(url, self.bot.occupants.pseudo_to_jid(sender))
                         self.bot.session.add(u)
-                    self.bot.session.commit()
+                        self.bot.session.commit()
+        return send
 
+    def get_title(self, urls):
+        send = []
+        for url in urls:
             try:
                 o=urllib.urlopen(url)
                 ctype, clength = o.info().get("Content-Type"), o.info().get("Content-Length")
@@ -99,14 +112,13 @@ class CmdUrl(ListenModule):
                 o.close()
             except IOError as error:
                 if error[1] == 401:
-                    send.append("Je ne peux pas m'authentifier sur ce site :'(")
+                    send.append("Je ne peux pas m'authentifier sur %s :'(" % url)
                 elif error[1] == 404:
-                    send.append("Cette page n'existe pas !")
+                    send.append("%s n'existe pas !" % url)
                 elif error[1] == 403:
-                    send.append("Il est interdit d'accéder à cette page !")
+                    send.append("Il est interdit d'accéder à %s !" % url)
                 else:
-                    send.append("Erreur %s sur cette page"%(error[1]))
+                    send.append("Erreur %s sur %s"%(error[1], url))
             except httplib.InvalidURL:
-                send.append("L'URL n'est pas valide !")
-
-        return None if send == [] else "\n".join(send)
+                send.append("L'URL %s n'est pas valide !" % url)
+        return send
