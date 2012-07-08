@@ -8,6 +8,9 @@ class Occupants:
         self.logger = logging.getLogger("pipobot.users")
     
     def add_user(self, nickname, jid, role):
+        if not jid:
+            jid = "%s@chat.invalid" % nickname
+    
         u = User(nickname, jid, role)
         self.users[nickname] = u
 
