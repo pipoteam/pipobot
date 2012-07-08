@@ -7,11 +7,15 @@ import pwd
 import signal
 import sys
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+
 from pipobot._version import __version__
 from pipobot.config import get_configuration
-from pipobot.translation import setup_i18n
-from pipobot.bot_jabber import XMPPBot, XMPPException
+from pipobot.lib.bdd import Base
 from pipobot.modules import BotModuleLoader
+from pipobot.translation import setup_i18n
+from pipobot.bot_jabber import Botjabber, XMPPException
 
 LOGGER = logging.getLogger('pipobot.manager')
 
@@ -21,9 +25,11 @@ class PipoBotManager(object):
     Object managing all bot instances.
     """
 
-    __slots__ = ('_config', 'is_running')
+    __slots__ = ('_config', '_db_session', 'is_running')
 
     def __init__(self):
+
+    
         self.is_running = True    
         self._config = get_configuration()
 
@@ -53,7 +59,21 @@ class PipoBotManager(object):
         file_handler.setLevel(self._config.log_level)
         file_handler.setFormatter(formatter)
         root_logger.addHandler(file_handler)
-
+    
+    def _configure_database(self):
+        kwargs = {}
+        if self._config.database.startswith('mysql'):
+            kwargs['pool_recycle'] = 3600
+    
+        engine = create_engine(self._config.database, convert_unicode=True,
+            **kwargs)
+        db_session = scoped_session(sessionmaker(autocommit=False,
+                                                 autoflush=False,
+                                                 bind=engine))
+        Base.query = db_session.query_property()
+        Base.metadata.create_all(bind=engine)
+        self._db_session = db_session
+    
     def _signal_handler(self, signum, _):
         self.is_running = False
 
@@ -98,12 +118,18 @@ class PipoBotManager(object):
             lock_fd = self._setup_lock_file()
         
         bots = []
-        loader = BotModuleLoader(self._config.extra_modules)
+        loader = BotModuleLoader(self._config.extra_modules,
+            self._config.modules_conf)
+        
+        modules = {}
         for room in self._config.rooms:
-            modules = loader.get_modules(room.modules)
+            modules[room] = loader.get_modules(room.modules)
+        self._configure_database()
+        
+        for room in self._config.rooms:
             try:
                 bot = BotJabber(room.login, room.passwd, room.resource,
-                    room.ident, room.nick, modules, xmpp_log=None)
+                    room.ident, room.nick, modules, self._db_session,  xmpp_log=None)
             except XMPPException, exc:
                 LOGGER.error("Unable to join room '%s': %s", room.ident,
                     exc)

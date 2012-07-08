@@ -25,7 +25,8 @@ XML_NAMESPACE = 'http://www.w3.org/1999/xhtml'
 class BotJabber(xmpp.Client, threading.Thread):
     """The implementation of a bot for jabber MUC"""
     
-    def __init__(self, login, passwd, res, chat, name, modules, xmpp_log=None):
+    def __init__(self, login, passwd, res, chat, name, modules, session,
+        xmpp_log=None):
         self.chatname = chat
 
         #Definition of an XMPP client
@@ -64,6 +65,8 @@ class BotJabber(xmpp.Client, threading.Thread):
             logger.debug("Registering %s", classes)
             obj = classe(self)
             self.modules.append(obj)
+        
+        self.session = session
 
         #If set to True, the bot will not be able to send messages
         self.mute = False

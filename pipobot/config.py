@@ -27,7 +27,8 @@ class Configuration(object):
     """
 
     __slots__ = ('log_level', 'daemonize', 'user', 'pid_file', 'rooms',
-        'log_path', 'xmpp_log_path', 'database', 'lang', 'extra_modules')
+        'log_path', 'xmpp_log_path', 'database', 'lang', 'extra_modules',
+        'modules_conf')
 
     # Default values
     DEFAULT_CONF_FILE = "/etc/pipobot.conf.yml"
@@ -145,6 +146,13 @@ class Configuration(object):
                     modules |= conf_module
 
             self.rooms.append(Room(**kwargs))
+            
+        # Module parameters
+        modules_conf = data.get('modules_config')
+        if modules_conf is None:
+            modules_conf = {}
+        
+        self.modules_conf = modules_conf
 
 
 class Room(object):
