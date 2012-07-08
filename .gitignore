@@ -3,7 +3,6 @@ syntax:glob
 *.pyo
 *.orig
 *.swp
-*.mo
 *.log
 .DS_Store
 bdd/*
