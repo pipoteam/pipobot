@@ -53,6 +53,14 @@ Some "High-level" modules
 
    high_level
 
+Internationalisation and Localisation
+-------------------------------------
+.. toctree::
+   :maxdepth: 3
+   :numbered:
+
+   internat_loc
+
 Indices and tables
 ==================
 
