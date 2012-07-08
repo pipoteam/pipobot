@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import urllib
-from pipobot.lib.modules import AsyncModule, SyncModule, defaultcmd, answercmd
+from pipobot.modules import AsyncModule, SyncModule, defaultcmd, answercmd
 
 class AppURLopener(urllib.FancyURLopener):
     def prompt_user_passwd(self, host, realm):

@@ -103,10 +103,10 @@ class BotModule(object) :
             else:
                 #In any other case, an error has occured in the module
                 if send is not None:
-                    self.bot.say(_("Error from module %s : %s") % (command, send))
+                    self.bot.say("Error from module %s: %s" % (command, send))
         except:
             self.bot.say(_("Error !"))
-            logger.error(_("Error from module %s : %s") % (self.__class__, traceback.format_exc()))
+            logger.error("Error from module %s: %s" % (self.__class__, traceback.format_exc()))
 
     def _dict_messages(self, send, mess, priv=None) :
         """ Creates messages with a dictionnary described as :
@@ -452,6 +452,7 @@ class RecordUsers(PresenceModule):
                 jid = message.getJid().split("/")[0]
             self.bot.occupants.add_user(pseudo, jid, role)
 
+
 ###############################################################################################
 ########################################  IQ MODULES  #########################################
 ###############################################################################################
@@ -470,12 +471,13 @@ class IQModule(BotModule):
 
 
 class BotModuleLoader(object):
-    def __init__(self, extra_modules_paths=None):
+    def __init__(self, extra_modules_paths=None, module_settings=None):
         self._paths = list(__path__)
         
         if extra_modules_paths:
             self._paths.extend(extra_modules_paths)
         
+        self._module_settings = module_settings or {}
         self._module_cache = {}
     
     @staticmethod
@@ -502,9 +504,21 @@ class BotModuleLoader(object):
                 sys.stderr.write("Module ‘%s’ was not found.\n" % name)
                 sys.exit(1)
             
-            module_data = imp.load_module(name, *module_info)
+            try:
+                module_data = imp.load_module(name, *module_info)
+            except Exception as exc:
+                sys.stderr.write("Module ‘%s’ failed to load.\n" % name)
+                traceback.print_exc()
+                sys.exit(1)
+            
             bot_modules = inspect.getmembers(module_data, self.is_bot_module)
             bot_modules = [item[1] for item in bot_modules]
+            
+            if name in self._module_settings:
+                logger.debug("Configuration for ‘%s’: %s", name,
+                    self._module_settings[name])
+                for module in bot_modules:
+                    module._settings = self._module_settings[name]
             
             logger.debug("Bot modules for ‘%s’ : %s", name, bot_modules)
             
