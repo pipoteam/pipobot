@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 #-*- coding: utf8 -*-
 import urllib
-import simplejson
 from pipobot.modules import SyncModule, defaultcmd
 import pipobot.lib.utils
+
+try:
+    import simplejson
+except ImportError:
+    import json as simplejson
 
 class CmdGoogle(SyncModule):
     def __init__(self, bot):

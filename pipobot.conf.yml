@@ -3,7 +3,7 @@ log_path: /var/log/pipobot.log
 # Optional; used for debugging XMPP messages
 #xmpp_log_path: /var/log/pipobot_xmpp.log
 
-database: sqlite://pipobot.sqlite3
+database: sqlite:////usr/share/pipobot/pipobot.sqlite3
 #database: mysql://user:password@server/db_name
 #extra_modules:
 #   - /path/to/modules/directory
