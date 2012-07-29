@@ -1,0 +1,147 @@
+# Translations template for PipoBot.
+# Copyright (C) 2012 Pipoteam
+# This file is distributed under the same license as the PipoBot project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2012.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PipoBot 1.0\n"
+"Report-Msgid-Bugs-To: pipoteam@xouillet.info\n"
+"POT-Creation-Date: 2012-07-08 23:23+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 0.9.6\n"
+
+#: pipobot/user.py:31 pipobot/user.py:38
+#, python-format
+msgid "The user %s is not in the room !"
+msgstr ""
+
+#: pipobot/user.py:45
+#, python-format
+msgid "The user with jid %s is not in the room !"
+msgstr ""
+
+#: pipobot/xmpp_bot.py:99
+msgid "Hello everyone!"
+msgstr ""
+
+#: pipobot/xmpp_bot.py:124
+msgid "I’ve been asked to leave you"
+msgstr ""
+
+#: pipobot/lib/abstract_modules.py:45
+#, python-format
+msgid "You must override extract_data for %s !!!"
+msgstr ""
+
+#: pipobot/lib/abstract_modules.py:59
+#, python-format
+msgid "Disabling notifications for command %s"
+msgstr ""
+
+#: pipobot/lib/abstract_modules.py:65
+#, python-format
+msgid "Enabling notifications for command %s"
+msgstr ""
+
+#: pipobot/lib/abstract_modules.py:72
+msgid "Not implemented"
+msgstr ""
+
+#: pipobot/lib/parsedates.py:106
+#, python-format
+msgid "The date %s is not valid !"
+msgstr ""
+
+#: pipobot/modules/__init__.py:108
+msgid "Error !"
+msgstr ""
+
+#: pipobot/modules/__init__.py:187
+msgid "Please do not flood !"
+msgstr ""
+
+#: pipobot/modules/__init__.py:201
+#, python-format
+msgid "The %s command requires args"
+msgstr ""
+
+#: pipobot/modules/__init__.py:244
+#, python-format
+msgid "Command %s not handled by this module"
+msgstr ""
+
+#: pipobot/modules/__init__.py:316
+msgid "Display help for modules"
+msgstr ""
+
+#: pipobot/modules/__init__.py:317
+msgid "help [module] : show the full help for a module"
+msgstr ""
+
+#: pipobot/modules/__init__.py:318
+msgid "help module [subcom] : show the help for a sub-command of a module"
+msgstr ""
+
+#: pipobot/modules/__init__.py:325
+#, python-format
+msgid "The command %s does not exist"
+msgstr ""
+
+#: pipobot/modules/__init__.py:345
+#, python-format
+msgid ""
+"%s%s\n"
+"Sub-commands : %s"
+msgstr ""
+
+#: pipobot/modules/__init__.py:377
+#, python-format
+msgid ""
+"%s[Sync commands]%s\n"
+"%s"
+msgstr ""
+
+#: pipobot/modules/__init__.py:378
+#, python-format
+msgid ""
+"%s[Listen commands]%s\n"
+"%s"
+msgstr ""
+
+#: pipobot/modules/__init__.py:379
+#, python-format
+msgid ""
+"%s[Multi commands]%s\n"
+"%s"
+msgstr ""
+
+#: pipobot/modules/__init__.py:380
+#, python-format
+msgid ""
+"%s[Presence commands]%s\n"
+"%s"
+msgstr ""
+
+#: pipobot/modules/__init__.py:383
+#, python-format
+msgid ""
+"I can execute: \n"
+"%s"
+msgstr ""
+
+#: pipobot/modules/__init__.py:430
+msgid "Recording users logins/logout"
+msgstr ""
+
+#: pipobot/modules/botmpd/__init__.py:144
+#, python-format
+msgid "Can't connect to server %s:%s"
+msgstr ""
+

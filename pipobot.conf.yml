@@ -1,0 +1,63 @@
+log_path: /var/log/pipobot.log
+
+# Optional; used for debugging XMPP messages
+#xmpp_log_path: /var/log/pipobot_xmpp.log
+
+database: sqlite:////usr/share/pipobot/pipobot.sqlite3
+#database: mysql://user:password@server/db_name
+#extra_modules:
+#   - /path/to/modules/directory
+lang: en
+
+rooms:
+    test@example.org:
+        login: login@example.org
+        passwd: verysecret
+        resource: pipobot
+        nick: Pipobot
+        modules:
+            - _all
+
+groups:
+    all:
+        - bashfr
+        - bashorg
+        - blague
+        - botanswers
+        - bourse
+        - chuck
+        - cmdalacon
+        - date
+        - getjid
+        - google
+        - mail
+        - nextprev
+        - ola
+        - pendu
+        - reminder
+        - rps
+        - spell
+        - todo
+        - tv
+        - unicode
+        - url
+        - vdm
+        - xhtml
+
+modules_config:
+    botmpd:
+        host: localhost
+        port: 6600
+        pwd: /secret/
+        datadir: /path/to/music
+    hg:
+        default: repo2
+        repos:
+            repo1: /path/to/repo1
+            repo2: /path/to/repo2
+            repo3: /path/to/repo3
+    url:
+        respost: True
+        repost-ignore:
+            - exemple.org
+            - sub.domain.net
