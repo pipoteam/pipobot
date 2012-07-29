@@ -147,12 +147,16 @@ class PipoBotManager(object):
                     exc)
                 continue
                 
-            bot.start()
             bots.append(bot)
         
         if self._config.daemonize:
             lock_fh = self._daemonize(lock_fd)
         
+        # For some reason, the xmpppy bots do not work correctly after a
+        # fork(), so we only start them at this point
+        for bot in bots:
+            bot.start()
+
         del loader
         del self._config
         
