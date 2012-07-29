@@ -1,0 +1,17 @@
+Source: pipobot
+Section: net
+Priority: optional
+Maintainer: Vincent Duvert (VinDuv) <vincent@duvert.net>
+Build-Depends: debhelper (>=8.0.0), python, cdbs (>=0.4.49)
+Build-Depends-Indep: python-support (>= 0.6)
+Standards-Version: 3.9.1
+
+Package: pipobot
+Architecture: all
+Homepage: http://github.com/pipoteam/pipobot/
+Depends: ${misc:Depends}, ${python:Depends}, python-yaml, python-xmpp, python-sqlalchemy
+Recommends: python-beautifulsoup, python-enchant
+Description: Bot for XMPP chatrooms
+ Pipobot is a modular Python-based bot for XMPP chat rooms. It provides
+ modules which can react on specific commands from the room participants or
+ on any text sent.
