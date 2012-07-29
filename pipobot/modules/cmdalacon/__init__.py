@@ -18,7 +18,7 @@ def multiwordReplace(text, wordDic):
     return rc.sub(translate, text)
 
 
-class ListConfigParser(ConfigParser.RawConfigParser):   
+class ListConfigParser(ConfigParser.RawConfigParser):
     def get(self, section, option):
         "Redéfinition du get pour gérer les listes"
         value = ConfigParser.RawConfigParser.get(self, section, option)
@@ -30,10 +30,10 @@ class ListConfigParser(ConfigParser.RawConfigParser):
 class CmdAlacon(MultiSyncModule):
     def __init__(self, bot):
         commands = self.readconf(bot)
-        MultiSyncModule.__init__(self, 
+        MultiSyncModule.__init__(self,
                         bot,
                         commands=commands)
-    
+
     def extract_to(self, config, cmd, value, backup):
         try:
             v = config.get(cmd, value)
@@ -49,19 +49,27 @@ class CmdAlacon(MultiSyncModule):
         #To initialize MultiSyncModule
         commands = {}
 
+        config_path = ''
+        if hasattr(self.__class__, '_settings'):
+            config_path = self._settings.get('config_path')
+        
+        if not config_path:
+            config_path = os.path.join(os.path.dirname(__file__),
+                "cmdlist.cfg")
+        
         config = ListConfigParser()
-        config_file = os.path.join(os.path.dirname(__file__), "cmdlist.cfg")
-        config.read(config_file)
+        config.read(config_path)
+
         for c in config.sections() :
             self.dico[c] = {}
-            self.dico[c]['desc'] = config.get(c, 'desc') 
+            self.dico[c]['desc'] = config.get(c, 'desc')
             commands[c] = self.dico[c]['desc']
             self.dico[c]['toNobody'] = config.get(c, 'toNobody') if type(config.get(c, 'toNobody')) == list else [config.get(c, 'toNobody')]
             self.extract_to(config, c, "toSender", "toNobody")
             self.extract_to(config, c, "toBot", "toNobody")
             self.extract_to(config, c, "toSomebody", "toNobody")
         return commands
-    
+
     @defaultcmd
     def answer(self, cmd, sender, message):
         toall = self.bot.occupants.get_all(" ", [self.bot.name, sender])

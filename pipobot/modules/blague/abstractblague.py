@@ -49,6 +49,6 @@ class AbstractBlague(SyncModule):
                 send =  u"Nouveau score - %s : %d\n%d secondes depuis ta dernière blague (%s)" % (message, blag.score, ecart, date_bl)
                 blag.submission = temps
             else:
-                send = "Ta dernière blague date de plus de %s secondes !"%(min_delay)
+                send = "Ta dernière blague date de moins de %s secondes !"%(min_delay)
         self.bot.session.commit()
         return send
