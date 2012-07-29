@@ -472,10 +472,15 @@ class IQModule(BotModule):
 
 class BotModuleLoader(object):
     def __init__(self, extra_modules_paths=None, module_settings=None):
-        self._paths = list(__path__)
-        
+        self._orig_path = sys.path
+        additional_paths = list(__path__)
         if extra_modules_paths:
-            self._paths.extend(extra_modules_paths)
+            additional_paths.extend(extra_modules_paths)
+        
+        sys.path = list(self._orig_path)
+        for module_path in additional_paths:
+            if module_path not in sys.path:
+                sys.path.insert(0, module_path)
         
         self._module_settings = module_settings or {}
         self._module_cache = {}
@@ -491,6 +496,10 @@ class BotModuleLoader(object):
             and not hasattr(obj, '_%s__usable' % obj.__name__))
     
     def get_modules(self, module_names):
+        """
+        Returns a list of bot commands from the passed module names.
+        """
+    
         modules = []
         
         for name in module_names:
@@ -499,7 +508,7 @@ class BotModuleLoader(object):
                 continue
             
             try:
-                module_info = imp.find_module(name, self._paths)
+                module_info = imp.find_module(name)
             except ImportError:
                 sys.stderr.write("Module ‘%s’ was not found.\n" % name)
                 sys.exit(1)
@@ -529,6 +538,11 @@ class BotModuleLoader(object):
         modules.append(RecordUsers)
         modules.append(Help)
         return modules
-            
-            
         
+    def cleanup(self):
+        """
+        Should be called after the calls to get_modules. Restores the
+        original system path.
+        """
+    
+        sys.path = self._orig_path

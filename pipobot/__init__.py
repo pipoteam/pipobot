@@ -135,6 +135,7 @@ class PipoBotManager(object):
         modules = {}
         for room in self._config.rooms:
             modules[room] = loader.get_modules(room.modules)
+        loader.cleanup()
         self._configure_database()
         
         for room in self._config.rooms:
