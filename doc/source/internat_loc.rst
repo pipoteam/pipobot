@@ -10,26 +10,26 @@ use the following functions to render your module translatable.
     These functions take a string in argument and return the translated string.
     Sample usage::
         self.bot.say(_("Hello, World!"))
-    
+
     When one of these two functions are used, the string passed in parameter
     will be automatically proposed for translation.
-    
+
     If you want to translate a string format, pass only the format to the
     function::
         self.bot.say(_("Hello, %s") % name)
-    
+
     If you have more than one format parameter, it is better to name them
     explicitely because the translator may want to reverse the order::
         self.bot.say(_("Today is %(month)s, %(day)d") % {'month': month,
             'day': day})
-    
+
 .. function:: ngettext(singular, plural, n)
 
     ``ngettext`` is used to translate expressions which can be pluralised.
     Sample usage::
         self.bot.say(ngettext("You have %d message", "You have %d messages",
             message_count) % message_count)
-        
+
     Always use ``ngettext`` instead of ``if message_count == 1: …`` because 
     some languages have pluralization rules different from English (for
     instance, in French, `0` is singular, not plural, and in Polish, there are
@@ -42,7 +42,7 @@ use the following functions to render your module translatable.
     translated because the translation system is not already active (so ``_``,
     ``gettext`` and ``ngettext`` are unavailable). That may be the case for
     strings defined as constants in a Python module or as a class attribute.
-    
+
     For instance::
 
         HELLO_MESSAGE = N_("Hello, World!")
@@ -90,7 +90,3 @@ run::
     python setup.py compile_catalog # Compile the translation catalog
 
 The translation can now be used by Pipobot.
-
-
-
-   
