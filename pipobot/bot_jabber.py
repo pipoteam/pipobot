@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #-*- coding: utf-8 -*-
-"""This file contains the class 'BotJabber' wich is a bot for jabber MUC"""
+"""This file contains the class 'BotJabber' which is a bot for jabber MUC"""
 
 import logging
 import threading
@@ -25,9 +25,8 @@ XML_NAMESPACE = 'http://www.w3.org/1999/xhtml'
 class BotJabber(xmpp.Client, threading.Thread):
     """The implementation of a bot for jabber MUC"""
     
-    def __init__(self, login, passwd, res, chat, name, xmpp_log = None, manager = None):
+    def __init__(self, login, passwd, res, chat, name, modules, xmpp_log=None):
         self.chatname = chat
-        self.manager = manager
 
         #Definition of an XMPP client
         self.Namespace, self.DBG = 'jabber:client', xmpp.DBG_CLIENT
@@ -43,20 +42,28 @@ class BotJabber(xmpp.Client, threading.Thread):
             #No debug
             xmpp.Client.__init__(self, jid.getDomain(), debug = [])
         threading.Thread.__init__(self)
+        
+        # Daemon thread mode
+        self.daemon = True
 
-        logger.info(_("Connecting to %s") % chat)
+        logger.info("Connecting to %s", chat)
         #Connecting
         con = self.connect()
         if not con:
-            logger.error(_("Unable to connect !"))
-            raise XMPPException(_("Unable to connect !"))
+            logger.error("Unable to connect!")
+            raise XMPPException("Unable to connect !")
         #Authenticating
         auth = self.auth(jid.getNode(), passwd, resource=res)
         if not auth:
-            logger.error(_("Unable to authenticate !"))
-            raise XMPPException(_("Unable to authenticate !"))
+            logger.error("Unable to authenticate!")
+            raise XMPPException("Unable to authenticate!")
 
+        # Creating bot module instances
         self.modules = []
+        for classes in modules:
+            logger.debug("Registering %s", classes)
+            obj = classe(self)
+            self.modules.append(obj)
 
         #If set to True, the bot will not be able to send messages
         self.mute = False
@@ -86,7 +93,7 @@ class BotJabber(xmpp.Client, threading.Thread):
         self.send(pres)
         
         #Saying hello to the room !
-        self.say(_("Hello everyone !"))
+        self.say(_(u"Hello everyone!"))
 
     def message(self, conn, mess):
         """Method called when the bot receives a message"""
@@ -105,24 +112,15 @@ class BotJabber(xmpp.Client, threading.Thread):
             if isinstance(module, ListenModule) or isinstance(module, SyncModule) or isinstance(module, MultiSyncModule):
                 module.do_answer(mess)
 
-    def add_commands(self, classes):
-        """Method called when we specify modules' classes, 
-            at the creation of bot instance"""
-        #We instanciate all modules and then add them to the self.modules list
-        for classe in classes:
-            logger.debug("Registering %s" % classe)
-            objet = classe(self)
-            self.modules.append(objet)
-
     def kill(self):
         """Method used to kill the bot"""
 
         #We kill the thread
         self.alive = False
         #The bot says goodbye
-        self.say(_("I've been asked to leave you"))
+        self.say(_(u"I’ve been asked to leave you"))
         #The bot leaves the room
-        logger.info("Killing %s" % self.chatname)
+        logger.info("Killing %s", self.chatname)
         try:
             self.disconnect()
         except xml.parsers.expat.ExpatError:
@@ -193,18 +191,14 @@ class BotJabber(xmpp.Client, threading.Thread):
             try:
                 self.Process(1)
             except xmpp.protocol.Conflict:
-                msg = _("The ressource defined for the bot in %s is already used" % (self.chatname))
+                msg = "The ressource defined for the bot in %s is already used" % (self.chatname)
                 logger.error(msg)
                 raise XMPPException(msg)
 
         #When bot's killed, every asynchronous module must be killed too
         for module in self.modules:
-            if type(module) == AsyncModule :
+            if isinstance(module, AsyncModule):
                 module.stop()
-
-    def restart(self):
-        """ Will ask the manager to restart this room """
-        self.manager.restart(self.chatname)
 
     def disable_mute(self):
         """To give the bot its voice again"""
