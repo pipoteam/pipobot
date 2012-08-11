@@ -5,6 +5,11 @@ import simplejson
 from pipobot.lib.modules import SyncModule, defaultcmd
 import pipobot.lib.utils
 
+try:
+    import simplejson
+except ImportError:
+    import json as simplejson
+
 class CmdGoogle(SyncModule):
     def __init__(self, bot):
         desc = u"!google mot-clé : recherche le mot clé dans google"

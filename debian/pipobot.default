@@ -1,0 +1,4 @@
+# Defaults for pipobot options (/etc/init.d/pipobot)
+
+# Start pipobot in the background at startup?
+PIPOBOT_DAEMON="true"

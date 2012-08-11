@@ -1,9 +1,9 @@
 syntax:glob
 *.pyc
 *.pyo
+*.mo
 *.orig
 *.swp
-*.mo
 *.log
 .DS_Store
 bdd/*
