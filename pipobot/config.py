@@ -26,8 +26,8 @@ class Configuration(object):
     This class holds all settings used by the program.
     """
 
-    __slots__ = ('log_level', 'daemonize', 'user', 'pid_file', 'rooms',
-        'log_path', 'xmpp_log_path', 'database', 'lang', 'extra_modules',
+    __slots__ = ('log_level', 'daemonize', 'pid_file', 'rooms',
+        'logpath', 'xmpp_logpath', 'database', 'lang', 'extra_modules',
         'modules_conf')
 
     # Default values
@@ -37,7 +37,6 @@ class Configuration(object):
     def __init__(self, cmd_options, conf_file):
         self.log_level = cmd_options.log_level
         self.daemonize = cmd_options.daemonize
-        self.user = cmd_options.user
         self.pid_file = cmd_options.pid_file
         self.rooms = []
 
@@ -56,21 +55,22 @@ class Configuration(object):
                 "corrupt: %s%s", err.problem, err.problem_mark)
 
         # Global configuration
-        for param in ['log_path', 'database', 'lang']:
-            value = data.get(param, "")
+        global_conf = data.get('config', {})
+        for param in ['logpath', 'lang']:
+            value = global_conf.get(param, "")
             if not value or not isinstance(value, basestring):
                 _abort("Required parameter ‘%s’ not found or invalid in "
                     "configuration file ‘%s’.", param, conf_file)
             setattr(self, param, value)
+        self.xmpp_log_path = global_conf.get('xmpp_logpath', None)
 
-        self.extra_modules = data.get('extra_modules', [])
+        self.extra_modules = global_conf.get('modules', [])
         if isinstance(self.extra_modules, basestring):
             self.extra_modules = [self.extra_modules]
         elif type(self.extra_modules) != list:
             _abort("Parameter ‘extra_modules’ should be a string or a list in "
                     "configuration file ‘%s’.", conf_file)
         
-        self.xmpp_log_path = data.get('xmpp_log_path', None)
 
         # Module groups
         module_groups = {}

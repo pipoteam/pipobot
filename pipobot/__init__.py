@@ -13,9 +13,9 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from pipobot._version import __version__
 from pipobot.config import get_configuration
 from pipobot.lib.bdd import Base
-from pipobot.modules import BotModuleLoader
+from pipobot.lib.modules import BotModuleLoader
 from pipobot.translation import setup_i18n
-from pipobot.bot_jabber import Botjabber, XMPPException
+from pipobot.bot_jabber import BotJabber, XMPPException
 
 LOGGER = logging.getLogger('pipobot.manager')
 
@@ -52,10 +52,10 @@ class PipoBotManager(object):
         root_logger.addHandler(console_handler)
         
         try:
-            file_handler = logging.FileHandler(self._config.log_path)
+            file_handler = logging.FileHandler(self._config.logpath)
         except IOError as err:
             _abort("Unable to open the log file ‘%s’: %s",
-                self._config.log_path, err.strerror)
+                self._config.logpath, err.strerror)
         file_handler.setLevel(self._config.log_level)
         file_handler.setFormatter(formatter)
         root_logger.addHandler(file_handler)
