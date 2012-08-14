@@ -129,7 +129,7 @@ class PipoBotManager(object):
         for room in self._config.rooms:
             try:
                 bot = BotJabber(room.login, room.passwd, room.resource,
-                    room.ident, room.nick, modules, self._db_session,  xmpp_log=None)
+                    room.chan, room.nick, modules[room], self._db_session,  xmpp_log=None)
             except XMPPException, exc:
                 LOGGER.error("Unable to join room '%s': %s", room.ident,
                     exc)

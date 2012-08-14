@@ -62,15 +62,36 @@ class Configuration(object):
                 _abort("Required parameter ‘%s’ not found or invalid in "
                     "configuration file ‘%s’.", param, conf_file)
             setattr(self, param, value)
-        self.xmpp_log_path = global_conf.get('xmpp_logpath', None)
+        self.xmpp_logpath = global_conf.get('xmpp_logpath', None)
 
-        self.extra_modules = global_conf.get('modules', [])
+        self.extra_modules = global_conf.get('extra_modules', [])
         if isinstance(self.extra_modules, basestring):
             self.extra_modules = [self.extra_modules]
         elif type(self.extra_modules) != list:
             _abort("Parameter ‘extra_modules’ should be a string or a list in "
                     "configuration file ‘%s’.", conf_file)
-        
+
+        database = data.get("database", {})
+        if type(database) != dict:
+            _abort("Parameter ‘database’ should be a dictionary in "
+                    "configuration file ‘%s’.", conf_file)
+
+        if "engine" in database:
+            if database["engine"] == "sqlite":
+                if "src" in database:
+                    self.database = "sqlite:///%s" % database["src"]
+                else:
+                    _abort("Parameter ‘src’ required for sqlite configuration in"
+                           "file ‘%s’.", conf_file)
+            else:
+                try:
+                    self.database = "mysql://%s:%s@%s/%s" % (database["user"], database["password"],
+                                                             database["host"], database["name"])
+
+                except KeyError as err:
+                    _abort("Parameter ‘%s’ required for mysql configuration in"
+                           "file ‘%s’.", err[0], conf_file)
+
 
         # Module groups
         module_groups = {}
@@ -104,16 +125,17 @@ class Configuration(object):
                 conf_file)
 
         for conf_room in conf_rooms:
-            if type(conf_room) != dict:
-                _abort("Parameter ‘rooms[%s]’ should be a dictionary in "
-                    "configuration file ‘%s’.", room_ident, conf_file)
-
-            for param in ['login', 'passwd', 'resource', 'nick', 'room']:
+            kwargs = {}
+            for param in ['chan', 'login', 'passwd', 'resource', 'nick']:
                 value = conf_room.get(param, "")
                 if not value or not isinstance(value, basestring):
-                    _abort("Required parameter ‘rooms[%s][%s]’ not found or "
-                        "invalid in configuration file ‘%s’.", room_ident,
-                        param, conf_file)
+                    if "chan" in kwargs:
+                        _abort("Required parameter ‘rooms[%s][%s]’ not found or "
+                            "invalid in configuration file ‘%s’.", kwargs["chan"],
+                            param, conf_file)
+                    else:
+                        _abort("One of your rooms needs a ‘chan‘ parameter")
+
 
                 kwargs[param] = value
 
@@ -127,7 +149,7 @@ class Configuration(object):
             for conf_module in conf_modules:
                 if not isinstance(conf_module, basestring):
                     _abort("Parameter ‘rooms[%s][modules]’ should only contain"
-                        " strings in configuration file ‘%s’.", room_ident,
+                        " strings in configuration file ‘%s’.", room_chan,
                         conf_file)
 
                 if not conf_module or conf_module == "_":
@@ -138,12 +160,12 @@ class Configuration(object):
                     if name not in module_groups:
                         _abort("Unknown module group ‘%s’ for room "
                             "configuration ‘%s’ in configuration file ‘%s’.",
-                            name, room_ident, conf_file)
+                            name, room_chan, conf_file)
 
                     modules |= module_groups[name]
 
                 else:
-                    modules |= conf_module
+                    modules.add(conf_module)
 
             self.rooms.append(Room(**kwargs))
             
@@ -156,10 +178,10 @@ class Configuration(object):
 
 
 class Room(object):
-    __slots__ = ('room', 'login', 'passwd', 'resource', 'nick', 'modules')
+    __slots__ = ('chan', 'login', 'passwd', 'resource', 'nick', 'modules')
 
-    def __init__(self, ident, login, passwd, resource, nick, modules):
-        self.ident = ident
+    def __init__(self, chan, login, passwd, resource, nick, modules):
+        self.chan = chan
         self.login = login
         self.passwd = passwd
         self.resource = resource

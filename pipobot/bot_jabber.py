@@ -61,8 +61,8 @@ class BotJabber(xmpp.Client, threading.Thread):
 
         # Creating bot module instances
         self.modules = []
-        for classes in modules:
-            logger.debug("Registering %s", classes)
+        for classe in modules:
+            logger.debug("Registering %s", classe)
             obj = classe(self)
             self.modules.append(obj)
         
@@ -111,7 +111,7 @@ class BotJabber(xmpp.Client, threading.Thread):
                 return
         
         #We look for a module which is concerned by the message
-        for module in self.modules :
+        for module in self.modules:
             if isinstance(module, ListenModule) or isinstance(module, SyncModule) or isinstance(module, MultiSyncModule):
                 module.do_answer(mess)
 

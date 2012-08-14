@@ -470,12 +470,13 @@ class IQModule(BotModule):
 
 
 class BotModuleLoader(object):
-    def __init__(self, extra_modules_paths=None):
-        self._paths = list(__path__)
+    def __init__(self, extra_modules_paths=None, modules_settings=None):
+        self._paths = []
         
         if extra_modules_paths:
             self._paths.extend(extra_modules_paths)
         
+        self._module_settings = modules_settings or {}
         self._module_cache = {}
     
     @staticmethod
@@ -506,11 +507,16 @@ class BotModuleLoader(object):
             bot_modules = inspect.getmembers(module_data, self.is_bot_module)
             bot_modules = [item[1] for item in bot_modules]
             
+            if name in self._module_settings:
+                logger.debug("Configuration for ‘%s’: %s", name,
+                    self._module_settings[name])
+                for module in bot_modules:
+                    module._settings = self._module_settings[name]
+
             logger.debug("Bot modules for ‘%s’ : %s", name, bot_modules)
             
             modules.extend(bot_modules)
             self._module_cache[name] = bot_modules
-        
         
         modules.append(RecordUsers)
         modules.append(Help)

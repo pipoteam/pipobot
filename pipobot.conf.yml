@@ -1,16 +1,23 @@
-log_path: /var/log/pipobot.log
+#Global parameters for all bots
+config:
+    logpath: /tmp/pipobot.log
+    xmpp_logpath: /var/log/pipobot_xmpp.log
+    lang: en
+    # Optional; used for debugging XMPP messages
+    extra_modules:
+       - /home/seb/pipobot-modules
 
-# Optional; used for debugging XMPP messages
-#xmpp_log_path: /var/log/pipobot_xmpp.log
-
-database: sqlite:////usr/share/pipobot/pipobot.sqlite3
-#database: mysql://user:password@server/db_name
-#extra_modules:
-#   - /path/to/modules/directory
-lang: en
+database:
+    #For sqlite you need to specify 'sqlite' as engine, and provide a 'src' parameter
+    #which will be the path to the database file.
+    engine: sqlite
+    src: pipobot.sqlite3
+    #For mysql, use 'mysql' as engine and provide parameters 'user', 'password', 'host', 'name'
+    #to define the database
 
 rooms:
-    test@example.org:
+    -
+        chan: test@chat.sleduc.fr
         login: login@example.org
         passwd: verysecret
         resource: pipobot
@@ -30,7 +37,6 @@ groups:
         - date
         - getjid
         - google
-        - mail
         - nextprev
         - ola
         - pendu
@@ -61,3 +67,5 @@ modules_config:
         repost-ignore:
             - exemple.org
             - sub.domain.net
+    cmdalacon:
+        config_path: /path/to/cmdlist.cfg
