@@ -97,9 +97,11 @@ class PipoBotManager(object):
     
     def _daemonize(self, fd):
         pid = os.fork()
+
         if pid != 0:
-            os.ftruncate(fd, 0)
-            os.write(fd, str(pid))
+            if fd is not None:
+                os.ftruncate(fd, 0)
+                os.write(fd, str(pid))
             os._exit(0)
     
         null = open(os.path.devnull)
