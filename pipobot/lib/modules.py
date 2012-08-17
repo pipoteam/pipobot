@@ -374,13 +374,13 @@ class Help(SyncModule):
             elif isinstance(cmd, PresenceModule):
                 pres_lst.append(cmd.name)
         delim = "*"*10
-        sync = _("%s[Sync commands]%s\n%s") % (delim, delim, Help.genString(sorted(sync_lst)))
-        listen = _("%s[Listen commands]%s\n%s") % (delim, delim, Help.genString(sorted(listen_lst)))
-        multi = _("%s[Multi commands]%s\n%s") % (delim, delim, Help.genString(sorted(multi_lst)))
-        pres = _("%s[Presence commands]%s\n%s") % (delim, delim, Help.genString(sorted(pres_lst)))
-        self.all_help_content = "\n%s\n%s\n%s\n%s" % (sync, listen, multi, pres)
+        sync = _(u"%s[Sync commands]%s\n%s") % (delim, delim, Help.genString(sorted(sync_lst)))
+        listen = _(u"%s[Listen commands]%s\n%s") % (delim, delim, Help.genString(sorted(listen_lst)))
+        multi = _(u"%s[Multi commands]%s\n%s") % (delim, delim, Help.genString(sorted(multi_lst)))
+        pres = _(u"%s[Presence commands]%s\n%s") % (delim, delim, Help.genString(sorted(pres_lst)))
+        self.all_help_content = u"\n%s\n%s\n%s\n%s" % (sync, listen, multi, pres)
         allcmds = sync_lst + multi_lst
-        self.compact_help_content = _("I can execute: \n%s") % Help.genString(sorted(allcmds))
+        self.compact_help_content = _(u"I can execute: \n%s") % Help.genString(sorted(allcmds))
 
     @staticmethod
     def genString(l):
@@ -392,14 +392,14 @@ class Help(SyncModule):
             cmd3 = l[i+2]
             espaces1 = " "*(25 - len(cmd1) - 1)
             espaces2 = " "*(25 - len(cmd2) - 1)
-            line = "-%s%s-%s%s-%s\n"%(cmd1, espaces1, cmd2, espaces2, cmd3)
+            line = u"-%s%s-%s%s-%s\n"%(cmd1, espaces1, cmd2, espaces2, cmd3)
             send += line
             i += 3
         if i < len(l):
             espaces = " "*(25 - len(l[i]) - 1)
-            send += "-%s%s"%(l[i], espaces)
+            send += u"-%s%s"%(l[i], espaces)
         if i +1 < len(l):
-            send += "-%s"%(l[i+1])
+            send += u"-%s"%(l[i+1])
         if i == len(l):
             send = send[0:-1]
         return send
