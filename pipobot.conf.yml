@@ -1,25 +1,30 @@
 #Global parameters for all bots
 config:
-    logpath: /tmp/pipobot.log
-    xmpp_logpath: /var/log/pipobot_xmpp.log
+    #Log file for pipobot
+    logpath: /var/log/pipobot/pipobot.log
+    #OPTIONAL: if provided, all XMPP messages sent by the bot will be logged here
+    #xmpp_logpath: /var/log/pipobot/pipobot_xmpp.log
+    #Language of the application
     lang: en
-    # Optional; used for debugging XMPP messages
+    #A list of directories where modules will be stored
     extra_modules:
-       - /home/seb/pipobot-modules
+       - /usr/share/pipobot/modules
 
+#Database configuration
 database:
     #For sqlite you need to specify 'sqlite' as engine, and provide a 'src' parameter
     #which will be the path to the database file.
     engine: sqlite
-    src: pipobot.sqlite3
+    src: /var/lib/pipobot/pipobot.sqlite3
     #For mysql, use 'mysql' as engine and provide parameters 'user', 'password', 'host', 'name'
     #to define the database
 
+#List of rooms the bot will join when started
 rooms:
     -
-        chan: test@chat.sleduc.fr
-        login: login@example.org
-        passwd: verysecret
+        chan: root@muc.jabber.tld
+        login: jid@jabber.tld
+        passwd: secret
         resource: pipobot
         nick: Pipobot
         modules:
@@ -50,6 +55,8 @@ groups:
         - vdm
         - xhtml
 
+#Specific configuration of modules
+#Please refer to the documentation of these modules
 modules_config:
     botmpd:
         host: localhost
@@ -68,4 +75,4 @@ modules_config:
             - exemple.org
             - sub.domain.net
     cmdalacon:
-        config_path: /path/to/cmdlist.cfg
+        config_path: /usr/share/pipobot/modules/cmdalacon/pipobot.cfg
