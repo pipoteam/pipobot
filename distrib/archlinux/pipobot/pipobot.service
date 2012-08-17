@@ -1,0 +1,10 @@
+[Unit]
+Description=A bot for XMPP MUCs
+After=network.target
+
+[Service]
+EnvironmentFile=/etc/conf.d/pipobot.conf
+User=pipobot
+PIDFile=/run/pipobot/pipobot.pid
+ExecStart=/usr/bin/pipobot -b --pid /run/pipobot/pipobot.pid $CONFIG_FILE
+KillSignal=SIGINT
