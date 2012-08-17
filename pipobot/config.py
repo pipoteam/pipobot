@@ -83,7 +83,7 @@ class Configuration(object):
                 else:
                     _abort("Parameter ‘src’ required for sqlite configuration in"
                            "file ‘%s’.", conf_file)
-            else:
+            elif database["engine"] == "mysql":
                 try:
                     self.database = "mysql://%s:%s@%s/%s" % (database["user"], database["password"],
                                                              database["host"], database["name"])
@@ -91,6 +91,18 @@ class Configuration(object):
                 except KeyError as err:
                     _abort("Parameter ‘%s’ required for mysql configuration in"
                            "file ‘%s’.", err[0], conf_file)
+            elif database["engine"] == "postgresql":
+                try:
+                    self.database = "postgresql://%s:%s@%s/%s" % (database["user"], database["password"],
+                                                             database["host"], database["name"])
+
+                except KeyError as err:
+                    _abort("Parameter ‘%s’ required for postgresql configuration in"
+                           "file ‘%s’.", err[0], conf_file)
+            else:
+                _abort("Unknown database engine : %s", database["engine"])
+        else:
+            _abort("You need to specify a database engine !")
 
 
         # Module groups

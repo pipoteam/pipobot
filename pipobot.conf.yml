@@ -18,6 +18,7 @@ database:
     src: /var/lib/pipobot/pipobot.sqlite3
     #For mysql, use 'mysql' as engine and provide parameters 'user', 'password', 'host', 'name'
     #to define the database
+    #For postgresql, use 'postgresql' as engine and provide 'user', 'password', 'host', 'name' parameters
 
 #List of rooms the bot will join when started
 rooms:
