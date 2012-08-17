@@ -19,32 +19,6 @@ if sys.hexversion < 0x02060000 or sys.hexversion >= 0x03000000:
     )
     sys.exit(1)
 
-def find_bot_module_data():
-    base_dir = join(dirname(__file__), 'pipobot', 'modules')
-    packages = []
-    data_files = []
-
-    def process(path, sys_path, py_path):
-        for item in os.listdir(path):
-            item_path = join(path, item)
-            if isdir(item_path):
-                process(item_path, join(sys_path, item), py_path + "." + item)
-                continue
-            
-            if item == "__init__.py":
-                # py_path is a valid package
-                packages.append(py_path)
-                continue
-
-            _, ext = splitext(item)
-            
-            if ext in [".py", ".pyc", ".pyo"]:
-                continue
-
-            data_files.append(join(sys_path, item))
-
-    process(base_dir, "modules", "pipobot.modules")
-    return packages, data_files
 
 if __name__ == '__main__':
     # We cannot import pipobot._version directly since we could get an already
@@ -65,9 +39,8 @@ if __name__ == '__main__':
     else:
         cmdclass = {}
 
-    packages, data_files = find_bot_module_data()
-    packages += ['pipobot', 'pipobot.lib']
-    data_files += ["i18n/*/LC_MESSAGES/pipobot.mo"]
+    packages = ['pipobot', 'pipobot.lib']
+    data_files = ["i18n/*/LC_MESSAGES/pipobot.mo"]
 
     setup(
         name="PipoBot",
