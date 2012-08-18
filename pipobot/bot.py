@@ -293,7 +293,6 @@ def main():
             except KeyError:
                 raise ConfigException(_("For a MySQL engine, your database section must contain parameters 'user', 'password', 'host' and 'dbname'"))
             manager.db_url = '%s://%s:%s@%s/%s' % (db_engine,db_user,db_password,db_host,db_name)
-            print manager.db_url
         else:
             raise ConfigException(_("The engine «%s» for the database is not yet implemented" % db_engine))
 
