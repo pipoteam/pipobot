@@ -106,7 +106,7 @@ class BotModule(object) :
                     self.bot.say(_("Error from module %s : %s") % (command, send))
         except:
             self.bot.say(_("Error !"))
-            logger.error(_("Error from module %s : %s") % (self.__class__, traceback.format_exc()))
+            logger.error(_("Error from module %s : %s") % (self.__class__, traceback.format_exc().decode("utf-8")))
 
     def _dict_messages(self, send, mess, priv=None) :
         """ Creates messages with a dictionnary described as :
@@ -207,7 +207,7 @@ class SyncModule(BotModule) :
         try:
             return self.fcts["default"](sender, args)
         except KeyError:
-            return "La commande %s n'existe pas pour %s ou la syntaxe de !%s %s est incorrecte → !help %s pour plus d'information" %  \
+            return u"La commande %s n'existe pas pour %s ou la syntaxe de !%s %s est incorrecte → !help %s pour plus d'information" %  \
                         (cmd_name, self.command, self.command, cmd_name, self.command)
 
     def help(self, body):
