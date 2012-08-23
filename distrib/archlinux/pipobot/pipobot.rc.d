@@ -1,7 +1,7 @@
 #!/bin/bash
 
 daemon_name=pipobot
-PID_FILE=/var/run/$daemon_name.pid
+PID_FILE=/run/$daemon_name.pid
 
 . /etc/rc.conf
 . /etc/rc.d/functions
@@ -24,7 +24,7 @@ case "$1" in
 			[[ -f $PID_FILE ]] &&
 				rm -f $PID_FILE
 		# RUN
-		$daemon_name -b $CONFIG_FILE --pid $PID_FILE
+		$daemon_name $CONFIG_FILE -b --pid $PID_FILE
 		#
 		if [[ $? -gt 0 ]]; then
 			stat_fail
