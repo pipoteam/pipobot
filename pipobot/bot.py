@@ -25,6 +25,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from pipobot.lib.bdd import Base
 from pipobot.lib.exceptions import ConfigException
+from pipobot.lib.known_users import KnownUser, KnownUsersJIDs, KnownUsersManager
 
 
 # DEFAULT Constants
@@ -114,6 +115,7 @@ class BotManager:
         #Modules RecordUsers and Help are used by default (no need to add them to the configuration)
         classes_salon.append(pipobot.lib.modules.RecordUsers)
         classes_salon.append(pipobot.lib.modules.Help)
+        classes_salon.append(pipobot.lib.known_users.KnownUsersManager)
         return classes_salon, module_path
 
     def restart(self, bot_room):
