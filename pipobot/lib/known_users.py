@@ -51,7 +51,10 @@ class KnownUsersManager(SyncModule):
                 user = ''
                 if '@' in admin:
                     usersjid = self.bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == admin).first()
-                    user = usersjid.user
+                    if usersjid:
+                        user = usersjid.user
+                    else:
+                        self.logger.error(_('Admin %s is not yet registered !' % admin))
                 else:
                     user = self.bot.session.query(KnownUser).filter(KnownUser.pseudo == admin).first()
                 if user:
@@ -145,7 +148,10 @@ class KnownUsersManager(SyncModule):
             pseudo = sender
         user = self.bot.session.query(KnownUser).filter(KnownUser.pseudo == pseudo).first()
         if not user:
-            user = self.bot.session.query(KnownUser).filter(KnownUsersJIDs.jid == self.bot.occupants.pseudo_to_jid(pseudo)).first()
+            usersjid = self.bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == self.bot.occupants.pseudo_to_jid(pseudo)).first()
+            if not usersjid:
+                return _("I don't know you, %s…" % sender)
+            user = usersjid.user
         if not user:
             return _("I don't know you, %s…" % sender)
         if not lvl:
@@ -153,15 +159,20 @@ class KnownUsersManager(SyncModule):
                 return _('%s: Your Highlight Level is %i' % (sender, user.hllvl))
             return _('%s: Your Permission Level is %i' % (sender, user.permlvl))
 
-        sender = self.bot.session.query(KnownUser).filter(KnownUser.pseudo == sender).first()
-        if sender.permlvl < user.permlvl:
+        senderuser = self.bot.session.query(KnownUser).filter(KnownUser.pseudo == sender).first()
+        if not senderuser:
+            sendersjid = self.bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == self.bot.occupants.pseudo_to_jid(sender)).first()
+            if not sendersjid:
+                return _("I don't know you, %s…" % sender)
+            senderuser = sendersjid.user
+        if senderuser.permlvl < user.permlvl:
             return _('%s: you have less permissions than %s here…' % (sender.pseudo, user.pseudo))
-        if sender != user and sender.permlvl < 2:
-            return _("%s: you don't have the right permissons to do that." % sender.pseudo)
-        if lvltype == 'permlvl' and sender != user and sender.permlvl == user.permlvl:
-            return _("%s: %s and you got the same Permission Level, so you can't change it." % (sender.pseudo, user.pseudo))
-        if lvltype == 'permlvl' and lvl > sender.permlvl:
-            return _("%s: No, you can't give more rights than you have…" % sender.pseudo)
+        if senderuser != user and senderuser.permlvl < 2:
+            return _("%s: you don't have the right permissons to do that." % sender)
+        if lvltype == 'permlvl' and senderuser != user and senderuser.permlvl == user.permlvl:
+            return _("%s: %s and you got the same Permission Level, so you can't change it." % (sender, user.pseudo))
+        if lvltype == 'permlvl' and lvl > senderuser.permlvl:
+            return _("%s: No, you can't give more rights than you have…" % sender)
 
         if lvltype == 'hllvl':
             user.hllvl = lvl
