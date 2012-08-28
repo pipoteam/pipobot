@@ -84,10 +84,15 @@ class KnownUsersManager(SyncModule):
         targetuser = self.bot.session.query(KnownUser).filter(KnownUser.pseudo == pseudo).first()
         senderuser = self.bot.session.query(KnownUser).filter(KnownUser.pseudo == sender).first()
 
+        if not senderuser:
+            senderusersjid = self.bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == self.bot.occupants.pseudo_to_jid(sender)).first()
+            if not senderusersjid:
+                return _("I don't know you %s…" % sender)
+            senderuser = senderusersjid.user
         if not targetuser:
             targetuser = KnownUser(pseudo = pseudo, jids = jids)
             self.bot.session.add(targetuser)
-        elif senderuser.permlvl <= targetuser.permlvl:
+        elif senderuser.permlvl < targetuser.permlvl:
             return _("%s: %s is already registered, and you can't modify his settings" % (senderuser.pseudo, targetuser.pseudo))
 
         for jid in jids:
@@ -102,7 +107,7 @@ class KnownUsersManager(SyncModule):
             self.bot.session.add(j)
         self.bot.session.commit()
 
-        return _("pseudo %s associated to jid(s) %s" % (pseudo,jids))
+        return _("pseudo %s is now associated to jid(s) %s" % (pseudo,jids))
 
     @answercmd(r'^show')
     def answer_show(self, sender, message):
@@ -118,7 +123,10 @@ class KnownUsersManager(SyncModule):
             if not knownuser:
                 if '@' not in user:
                     user = self.bot.occupants.pseudo_to_jid(user)
-                user = self.bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == user).first().users_pseudo
+                knownuser = self.bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == user).first()
+                if not knownuser:
+                    return _("I don't know that %s…" % user)
+                user = knownuser.users_pseudo
                 knownuser = self.bot.session.query(KnownUser).filter(KnownUser.pseudo == user).first()
             if not knownuser:
                 return _('You are not identified')
