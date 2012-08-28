@@ -3,8 +3,10 @@
 # This script generates a .pot file for the projet. If an argument or more is given, it
 # insteads generate the .po file for the language(s) given as argument (from an
 # existing .pot file).
-# 
-version=python2 -c "from pipobot import __version__; print (__version__)"
+#
+cd ..
+version=$(python2 -c "from pipobot import __version__; print (__version__)")
+cd -
 
 if [ $# = 0 ]; then
     gerenate_pot=1
