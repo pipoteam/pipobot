@@ -84,8 +84,8 @@ class KnownUsersManager(SyncModule):
         if not targetuser:
             targetuser = KnownUser(pseudo = pseudo, jids = jids)
             self.bot.session.add(targetuser)
-        elif sender.permlvl <= targetuser.permlvl:
-            return _("%s: %s is already registered, and you can't modify his settings" % (senderuser.pseudo, targetuser.pseudo)
+        elif senderuser.permlvl <= targetuser.permlvl:
+            return _("%s: %s is already registered, and you can't modify his settings" % (senderuser.pseudo, targetuser.pseudo))
 
         for jid in jids:
             check = self.bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == jid).first()
