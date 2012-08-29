@@ -43,6 +43,10 @@ class BotJabber(xmpp.Client, threading.Thread):
             #No debug
             xmpp.Client.__init__(self, jid.getDomain(), debug = [])
         threading.Thread.__init__(self)
+
+        #The nickname the bot will use to join rooms
+        #This nickname will be set by the reception of a presence message after joining the room
+        self.name = name
         
         # Daemon thread mode
         self.daemon = True
@@ -59,6 +63,8 @@ class BotJabber(xmpp.Client, threading.Thread):
             logger.error("Unable to authenticate!")
             raise XMPPException("Unable to authenticate!")
 
+        self.session = session
+
         # Creating bot module instances
         self.modules = []
         for classe in modules:
@@ -66,15 +72,10 @@ class BotJabber(xmpp.Client, threading.Thread):
             obj = classe(self)
             self.modules.append(obj)
         
-        self.session = session
 
         #If set to True, the bot will not be able to send messages
         self.mute = False
         self.alive = True 
-        
-        #The nickname the bot will use to join rooms
-        #This nickname will be set by the reception of a presence message after joining the room
-        self.name = name
 
         #The room the bot will join
         self.chat = xmpp.protocol.JID(chat)
