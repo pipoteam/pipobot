@@ -6,10 +6,6 @@ from sqlalchemy.orm import relationship
 from pipobot.lib.bdd import Base
 from pipobot.lib.modules import SyncModule, defaultcmd, answercmd
 
-def _(arg):
-    return arg
-
-
 class PerChanPermissions(Base):
     __tablename__ = 'per_chan_permissions'
     knownuser_kuid = Column(Integer, ForeignKey('knownuser.kuid'), primary_key=True)
@@ -118,20 +114,27 @@ class KnownUsersManager(SyncModule):
         except KeyError:
             self.logger.error(_('You shall add an admin section in your configuration file'))
 
-    @answercmd(r'^register')  #TODO: Si y’a un gars connecté «Nim», le «register Nim» devrait prendre son jid à lui
-                              # et on devrait pouvoir registrer comme ça une liste de gens
+    @answercmd(r'^register')
     def answer_register(self, sender, message):
         pseudo = ''
+        pseudos = []
         jids = []
         for arg in message.string.strip().split(' ')[1:]:
             if '@' in arg:
                 jids.append(arg)
             else:
-                pseudo = arg
-        if not pseudo:
+                pseudos.append(arg)
+        if not pseudos:
             pseudo = sender
+        elif len(pseudos) == 1:
+            pseudo = pseudos[0]
+        else:
+            ret = ''
+            for pseudo in pseudos:
+                ret += answer_register(self, sender, pseudo) + "\n"
+            return ret
         if not jids:
-            jids.append(self.bot.occupants.pseudo_to_jid(sender))
+            jids.append(self.bot.occupants.pseudo_to_jid(pseudo))
 
         senderuser = self.bot.session.query(KnownUser).filter(KnownUser.pseudo == sender).first()
         if pseudo and pseudo != sender and not senderuser:
@@ -235,7 +238,6 @@ class KnownUsersManager(SyncModule):
         self.bot.session.commit()
 
         return _("%s's Highlight Level modified to %i" % (pseudo, lvl))
-
 
     @answercmd(r'^permlvl')
     def answer_permlvl(self, sender, message):
