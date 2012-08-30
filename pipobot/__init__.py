@@ -13,7 +13,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from pipobot._version import __version__
 from pipobot.config import get_configuration
 from pipobot.lib.bdd import Base
-from pipobot.lib.modules import BotModuleLoader
+from pipobot.lib.loader import BotModuleLoader
 from pipobot.translation import setup_i18n
 from pipobot.bot_jabber import BotJabber, XMPPException
 

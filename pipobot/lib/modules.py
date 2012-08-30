@@ -278,7 +278,10 @@ class AsyncModule(BotModule, threading.Thread) :
     def run(self) :
         while self.alive :
             time.sleep(self.delay)
-            self.action()
+            try:
+                self.action()
+            except:
+                logger.error(_("Error from module %s : %s") % (self.__class__, traceback.format_exc().decode("utf-8")))
 
     def stop(self) :
         self.alive = False
@@ -467,60 +470,3 @@ class IQModule(BotModule):
     def help(self, body):
         if body == self.name:
             return self.desc
-
-
-class BotModuleLoader(object):
-    def __init__(self, extra_modules_paths=None, modules_settings=None):
-        self._paths = []
-        
-        if extra_modules_paths:
-            self._paths.extend(extra_modules_paths)
-        
-        self._module_settings = modules_settings or {}
-        self._module_cache = {}
-    
-    @staticmethod
-    def is_bot_module(obj):
-        """
-        Returns True if an object found in a Python module is a bot module
-        class.
-        """
-    
-        return (inspect.isclass(obj) and issubclass(obj, BotModule)
-            and not hasattr(obj, '_%s__usable' % obj.__name__))
-    
-    def get_modules(self, module_names):
-        modules = []
-        
-        for name in module_names:
-            if name in self._module_cache:
-                modules.extend(self._module_cache[name])
-                continue
-            
-            try:
-                module_info = imp.find_module(name, self._paths)
-            except ImportError:
-                sys.stderr.write("Module ‘%s’ was not found.\n" % name)
-                sys.exit(1)
-            
-            module_data = imp.load_module(name, *module_info)
-            bot_modules = inspect.getmembers(module_data, self.is_bot_module)
-            bot_modules = [item[1] for item in bot_modules]
-            
-            if name in self._module_settings:
-                logger.debug("Configuration for ‘%s’: %s", name,
-                    self._module_settings[name])
-                for module in bot_modules:
-                    module._settings = self._module_settings[name]
-
-            logger.debug("Bot modules for ‘%s’ : %s", name, bot_modules)
-            
-            modules.extend(bot_modules)
-            self._module_cache[name] = bot_modules
-        
-        modules.append(RecordUsers)
-        modules.append(Help)
-        return modules
-            
-            
-        

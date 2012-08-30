@@ -47,7 +47,7 @@ class KnownUsersManager(SyncModule):
         self.logger = logging.getLogger("pipobot.knownusers")
 
         try:
-            for admin in bot.settings["config"]["admins"]:
+            for admin in self._settings["admins"]:
                 user = ''
                 if '@' in admin:
                     usersjid = self.bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == admin).first()
@@ -147,7 +147,7 @@ class KnownUsersManager(SyncModule):
         if not user:
             user = self.bot.session.query(KnownUser).filter(KnownUsersJIDs.jid == self.bot.occupants.pseudo_to_jid(pseudo)).first()
         if not user:
-            return _("I don't know you, %s…" % sender)
+            return _(u"I don't know you, %s…" % sender)
         if not lvl:
             if lvltype == 'hllvl':
                 return _('%s: Your Highlight Level is %i' % (sender, user.hllvl))
@@ -155,13 +155,13 @@ class KnownUsersManager(SyncModule):
 
         sender = self.bot.session.query(KnownUser).filter(KnownUser.pseudo == sender).first()
         if sender.permlvl < user.permlvl:
-            return _('%s: you have less permissions than %s here…' % (sender.pseudo, user.pseudo))
+            return _(u'%s: you have less permissions than %s here…' % (sender.pseudo, user.pseudo))
         if sender != user and sender.permlvl < 2:
             return _("%s: you don't have the right permissons to do that." % sender.pseudo)
         if lvltype == 'permlvl' and sender != user and sender.permlvl == user.permlvl:
             return _("%s: %s and you got the same Permission Level, so you can't change it." % (sender.pseudo, user.pseudo))
         if lvltype == 'permlvl' and lvl > sender.permlvl:
-            return _("%s: No, you can't give more rights than you have…" % sender.pseudo)
+            return _(u"%s: No, you can't give more rights than you have…" % sender.pseudo)
 
         if lvltype == 'hllvl':
             user.hllvl = lvl
