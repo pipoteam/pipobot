@@ -3,6 +3,7 @@
 import logging
 from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.orm import relationship
+from sqlalchemy.exc import IntegrityError
 from pipobot.lib.bdd import Base
 from pipobot.lib.modules import SyncModule, defaultcmd, answercmd
 
@@ -122,7 +123,7 @@ class KnownUsersManager(SyncModule):
             if '@' in arg:
                 jids.append(arg)
             else:
-                pseudos.append(arg)
+                pseudo = arg
         if not pseudo:
             pseudo = sender
         if not jids:
@@ -179,8 +180,7 @@ class KnownUsersManager(SyncModule):
                 knownuser = self.bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == user).first()
                 if not knownuser:
                     return _("I don't know that %s…" % user)
-                user = knownuser.users_pseudo
-                knownuser = self.bot.session.query(KnownUser).filter(KnownUser.pseudo == user).first()
+                knownuser = knownuser.user
             if not knownuser:
                 return _('You are not identified')
             ret = _('%s: Your Highlight Level is %i, your Permission Level is %s, and your JID(s) are:' % (knownuser.pseudo, knownuser.hllvl, knownuser.permlvl))
@@ -281,6 +281,23 @@ class KnownUsersManager(SyncModule):
         self.bot.session.commit()
 
         return _("%s's Permission Level modified to %i" % (pseudo, lvl))
+
+    @answercmd(r'nick')
+    def answer_nick(self, sender, message):
+        senderuser = self.bot.session.query(KnownUser).filter(KnownUser.pseudo == sender).first()
+        if not senderuser:
+            sendersjid = self.bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == self.bot.occupants.pseudo_to_jid(sender)).first()
+            if not sendersjid:
+                return _("I don't know you, %s…" % sender)
+            senderuser = sendersjid.user
+        try:
+            senderuser.pseudo = message.strip()
+            self.bot.session.commit()
+            return _("%s: your pseudo is now %s" % (sender, senderuser.pseudo))
+        except IntegrityError:
+            self.bot.session.rollback()
+            return _("%s: DO NOT EVEN *THINK* ABOUT DOING THAT" % sender)
+
 
     @defaultcmd
     def answer(self, sender, args):
