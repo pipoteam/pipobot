@@ -117,22 +117,14 @@ class KnownUsersManager(SyncModule):
     @answercmd(r'^register')
     def answer_register(self, sender, message):
         pseudo = ''
-        pseudos = []
         jids = []
         for arg in message.string.strip().split(' ')[1:]:
             if '@' in arg:
                 jids.append(arg)
             else:
                 pseudos.append(arg)
-        if not pseudos:
+        if not pseudo:
             pseudo = sender
-        elif len(pseudos) == 1:
-            pseudo = pseudos[0]
-        else:
-            ret = ''
-            for pseudo in pseudos:
-                ret += answer_register(self, sender, pseudo) + "\n"
-            return ret
         if not jids:
             jids.append(self.bot.occupants.pseudo_to_jid(pseudo))
 
