@@ -28,7 +28,7 @@ def setup_i18n(lang):
             trans = gettext.translation('pipobot', base_path, languages=[lang])
         except IOError:
             LOGGER.error("Unable to load translations for language ‘%s’, "
-                "disabling translations.", lang)
+                         "disabling translations.", lang)
             trans = gettext.NullTranslations()
 
     trans.install(unicode=True, names=['gettext', 'ngettext'])
@@ -41,4 +41,4 @@ def setup_i18n(lang):
 # afterwards.
 
 import __builtin__
-__builtin__.__dict__['_N'] = lambda text : text
+__builtin__.__dict__['_N'] = lambda text: text

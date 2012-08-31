@@ -27,12 +27,12 @@ class Configuration(object):
     """
 
     __slots__ = ('log_level', 'daemonize', 'pid_file', 'rooms',
-        'logpath', 'xmpp_logpath', 'database', 'lang', 'extra_modules',
-        'modules_conf')
+                 'logpath', 'xmpp_logpath', 'database', 'lang',
+                 'extra_modules', 'modules_conf')
 
     # Default values
     DEFAULT_CONF_FILE = "/etc/pipobot.conf.yml"
-    DEFAULT_PIDFILE=""
+    DEFAULT_PIDFILE = ""
 
     def __init__(self, cmd_options, conf_file):
         self.log_level = cmd_options.log_level
@@ -45,14 +45,14 @@ class Configuration(object):
                 data = yaml.load(f)
         except IOError, err:
             _abort("Unable to read the configuration file ‘%s’: %s.",
-                conf_file, err.strerror)
+                   conf_file, err.strerror)
         except yaml.reader.ReaderError, err:
             _abort("The configuration file ‘%s’ seems incorrect or "
-                "corrupt: %s (position %s)", conf_file, err.reason,
-                err.position)
+                   "corrupt: %s (position %s)", conf_file, err.reason,
+                   err.position)
         except yaml.scanner.ScannerError, err:
             _abort("The configuration file seems incorrect or "
-                "corrupt: %s%s", err.problem, err.problem_mark)
+                   "corrupt: %s%s", err.problem, err.problem_mark)
 
         # Global configuration
         global_conf = data.get('config', {})
@@ -60,7 +60,7 @@ class Configuration(object):
             value = global_conf.get(param, "")
             if not value or not isinstance(value, basestring):
                 _abort("Required parameter ‘%s’ not found or invalid in "
-                    "configuration file ‘%s’.", param, conf_file)
+                       "configuration file ‘%s’.", param, conf_file)
             setattr(self, param, value)
         self.xmpp_logpath = global_conf.get('xmpp_logpath', None)
 
@@ -69,12 +69,12 @@ class Configuration(object):
             self.extra_modules = [self.extra_modules]
         elif type(self.extra_modules) != list:
             _abort("Parameter ‘extra_modules’ should be a string or a list in "
-                    "configuration file ‘%s’.", conf_file)
+                   "configuration file ‘%s’.", conf_file)
 
         database = data.get("database", {})
         if type(database) != dict:
             _abort("Parameter ‘database’ should be a dictionary in "
-                    "configuration file ‘%s’.", conf_file)
+                   "configuration file ‘%s’.", conf_file)
 
         if "engine" in database:
             if database["engine"] == "sqlite":
@@ -94,7 +94,7 @@ class Configuration(object):
             elif database["engine"] == "postgresql":
                 try:
                     self.database = "postgresql://%s:%s@%s/%s" % (database["user"], database["password"],
-                                                             database["host"], database["name"])
+                                                                  database["host"], database["name"])
 
                 except KeyError as err:
                     _abort("Parameter ‘%s’ required for postgresql configuration in"
@@ -104,25 +104,24 @@ class Configuration(object):
         else:
             _abort("You need to specify a database engine !")
 
-
         # Module groups
         module_groups = {}
         groups_conf = data.get('groups', {})
         if type(groups_conf) != dict:
             _abort("Parameter ‘groups’ should be a dictionary in "
-                "configuration file ‘%s’.", conf_file)
+                   "configuration file ‘%s’.", conf_file)
 
         for group_name, group_items in groups_conf.iteritems():
             module_groups[group_name] = group = set()
             if type(group_items) != list:
                 _abort("Parameter ‘groups[%s]’ should be a list in "
-                    "configuration file ‘%s’.", group_name, conf_file)
+                       "configuration file ‘%s’.", group_name, conf_file)
 
             for group_item in group_items:
                 if not isinstance(group_item, basestring):
                     _abort("Parameter ‘groups[%s]’ should only contain"
-                        " strings in configuration file ‘%s’.", group_name,
-                        conf_file)
+                           " strings in configuration file ‘%s’.", group_name,
+                           conf_file)
                 group.add(group_item)
 
         # Rooms
@@ -130,11 +129,11 @@ class Configuration(object):
         conf_rooms = data.get('rooms', [])
         if type(conf_rooms) != list:
             _abort("Parameter ‘rooms’ should be a dictionary in configuration "
-                "file ‘%s’.", conf_file)
+                   "file ‘%s’.", conf_file)
 
         if not conf_rooms:
             _abort("No rooms are defined in configuration file ‘%s’.",
-                conf_file)
+                   conf_file)
 
         for conf_room in conf_rooms:
             kwargs = {}
@@ -143,11 +142,10 @@ class Configuration(object):
                 if not value or not isinstance(value, basestring):
                     if "chan" in kwargs:
                         _abort("Required parameter ‘rooms[%s][%s]’ not found or "
-                            "invalid in configuration file ‘%s’.", kwargs["chan"],
-                            param, conf_file)
+                               "invalid in configuration file ‘%s’.", kwargs["chan"],
+                               param, conf_file)
                     else:
                         _abort("One of your rooms needs a ‘chan‘ parameter")
-
 
                 kwargs[param] = value
 
@@ -161,8 +159,8 @@ class Configuration(object):
             for conf_module in conf_modules:
                 if not isinstance(conf_module, basestring):
                     _abort("Parameter ‘rooms[%s][modules]’ should only contain"
-                        " strings in configuration file ‘%s’.", room_chan,
-                        conf_file)
+                           " strings in configuration file ‘%s’.", room_chan,
+                           conf_file)
 
                 if not conf_module or conf_module == "_":
                     continue
@@ -171,8 +169,8 @@ class Configuration(object):
                     name = conf_module[1:]
                     if name not in module_groups:
                         _abort("Unknown module group ‘%s’ for room "
-                            "configuration ‘%s’ in configuration file ‘%s’.",
-                            name, room_chan, conf_file)
+                               "configuration ‘%s’ in configuration file ‘%s’.",
+                               name, room_chan, conf_file)
 
                     modules |= module_groups[name]
 
@@ -180,12 +178,12 @@ class Configuration(object):
                     modules.add(conf_module)
 
             self.rooms.append(Room(**kwargs))
-            
+
         # Module parameters
         modules_conf = data.get('modules_config')
         if modules_conf is None:
             modules_conf = {}
-        
+
         self.modules_conf = modules_conf
 
 
@@ -215,18 +213,18 @@ def get_configuration():
     parser.set_usage("Usage: %prog [options] [confpath]")
 
     parser.add_option("-q", "--quiet", action="store_const", dest="log_level",
-        const=logging.CRITICAL, help="Log and print only critical information")
+                      const=logging.CRITICAL, help="Log and print only critical information")
 
     parser.add_option("-d", "--debug", action="store_const", dest="log_level",
-        const=logging.DEBUG, help="Log and print debug messages")
+                      const=logging.DEBUG, help="Log and print debug messages")
 
     parser.add_option("-b", "--background", action="store_const",
-        dest="daemonize", const=True,
-        help="Run in background, with reduced privileges")
+                      dest="daemonize", const=True,
+                      help="Run in background, with reduced privileges")
 
     parser.add_option("--pid", dest="pid_file", type="string",
-        default=Configuration.DEFAULT_PIDFILE,
-        help="Specify a PID file (only used in background mode)")
+                      default=Configuration.DEFAULT_PIDFILE,
+                      help="Specify a PID file (only used in background mode)")
 
     (options, args) = parser.parse_args()
     parser.destroy()

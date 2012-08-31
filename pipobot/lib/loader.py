@@ -9,6 +9,7 @@ from pipobot.lib.known_users import KnownUsersManager
 
 logger = logging.getLogger('pipobot.lib.loader')
 
+
 class BotModuleLoader(object):
     def __init__(self, extra_modules_paths=None, modules_settings=None):
         self._paths = []
@@ -27,7 +28,7 @@ class BotModuleLoader(object):
         """
 
         return (inspect.isclass(obj) and issubclass(obj, BotModule)
-            and not hasattr(obj, '_%s__usable' % obj.__name__))
+                and not hasattr(obj, '_%s__usable' % obj.__name__))
 
     def get_modules(self, module_names):
         modules = []
@@ -49,7 +50,7 @@ class BotModuleLoader(object):
 
             if name in self._module_settings:
                 logger.debug("Configuration for ‘%s’: %s", name,
-                    self._module_settings[name])
+                             self._module_settings[name])
                 for module in bot_modules:
                     module._settings = self._module_settings[name]
 

@@ -6,7 +6,7 @@ syntax:glob
 *.swp
 *.log
 .DS_Store
-bdd/*
+pipobot.sqlite3
 settings.yml
 doc/build/*
 build/*

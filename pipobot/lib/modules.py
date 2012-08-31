@@ -1,83 +1,88 @@
 #! /usr/bin/env python2
 #-*- coding: utf-8 -*-
-""" This module contains all interfaces and general code 
+""" This module contains all interfaces and general code
     for modules """
 
-import imp
 import inspect
 import logging
 import re
-import sys
 import threading
 import time
 import traceback
-logger = logging.getLogger('pipobot.lib.modules') 
+logger = logging.getLogger('pipobot.lib.modules')
 
-def defaultcmd(f) :
-    #We set a marker to indicate that this method is a valid command
-    setattr(f, "subcommand", "default")
-    return f
+
+def defaultcmd(funct):
+    """This defines a decorator to indicate the default answer method
+        for a module"""
+    setattr(funct, "subcommand", "default")
+    return funct
+
 
 def answercmd(*args):
+    """This defines a decorator to indicate a valid command for a module"""
     def wrapper(fct):
         setattr(fct, "subcommand", args)
         return fct
     return wrapper
 
-class ModuleException(Exception) :
+
+class ModuleException(Exception):
     """ A general exception that modules will be able to raise """
 
-    def __init__(self, desc) :
+    def __init__(self, desc):
+        Exception.__init__(self)
         self.desc = desc
 
-    def __unicode__(self) :
+    def __unicode__(self):
         return self.desc
 
-class BotModule(object) :
+
+class BotModule(object):
     """ Defines a basic bot module. Will be subclassed by different types
     of modules than will then by subclassed by actual modules """
     __usable = False
-    
-    def __init__(self, bot, desc) :
+
+    def __init__(self, bot, desc):
         self.bot = bot
         self.desc = desc
-        self.prefixs = ['!', ':', self.bot.name+':', self.bot.name+',']
+        self.prefixs = ['!', ':', self.bot.name + ':', self.bot.name + ',']
 
-    def do_answer(self, mess) :
+    def do_answer(self, mess):
         """ With an xmpp message `mess`, checking if this module is concerned
             by it, and if so get the result of the module and make the bot
             say it """
 
         msg_body = mess.getBody().lstrip()
         sender = mess.getFrom().getResource()
-        
+
         #The bot does not answer to itself (important to avoid some loops !)
         if sender == self.bot.name:
             return
-       
+
         #Check if the message is related to this module
-        if not self.is_concerned(msg_body) :
-            return
-        
-        #If `mess` is a private message but privmsg are not allowed for the module
-        if mess.getType() == "chat" and not self.pm_allowed :
+        if not self.is_concerned(msg_body):
             return
 
-        try :
+        #If `mess` is a private message but privmsg are not allowed for the module
+        if mess.getType() == "chat" and not self.pm_allowed:
+            return
+
+        try:
             #Calling the answer method of the module
-            if isinstance(self, SyncModule)  :
+            if isinstance(self, SyncModule):
                 # Separates command/args and get answer from module
-                command, args =  self.parse(msg_body, self.prefixs)
+                command, args = self.parse(msg_body, self.prefixs)
                 send = self._answer(sender, args)
-            elif isinstance(self, ListenModule) :
-                # In a Listen module the name of the command is not specified 
+            elif isinstance(self, ListenModule):
+                # In a Listen module the name of the command is not specified
                 # so nothing to parse
                 send = self.answer(sender, msg_body)
-            elif isinstance(self, MultiSyncModule) :
+            elif isinstance(self, MultiSyncModule):
                 # Separates command/args and get answer from module
-                command, args =  SyncModule.parse(msg_body, self.prefixs)
+                command, args = SyncModule.parse(msg_body, self.prefixs)
                 send = self._answer(sender, command, args)
-            else :
+            else:
                 # A not specified module type !
                 return
 
@@ -90,7 +95,7 @@ class BotModule(object) :
                 for line in send:
                     time.sleep(0.3)
                     self.bot.say(line, in_reply_to=mess)
-                    
+
             #If it's a dictionary, it is {"text": raw_message,    # Text message, transform XHTML if empty
             #                             "xhtml" : xhtml_message # XHTML message
             #                             "monospace" : True      # XHTML message is the text with monospace
@@ -98,7 +103,7 @@ class BotModule(object) :
             #                                                               in private to the users
             #                            }
             elif type(send) == dict:
-               self._dict_messages(send, mess)
+                self._dict_messages(send, mess)
 
             else:
                 #In any other case, an error has occured in the module
@@ -108,7 +113,7 @@ class BotModule(object) :
             self.bot.say(_("Error !"))
             logger.error(_("Error from module %s : %s") % (self.__class__, traceback.format_exc().decode("utf-8")))
 
-    def _dict_messages(self, send, mess, priv=None) :
+    def _dict_messages(self, send, mess, priv=None):
         """ Creates messages with a dictionnary described as :
                {"text": raw_message,    # Text message, transform XHTML if empty
                 "xhtml" : xhtml_message # XHTML message
@@ -123,28 +128,28 @@ class BotModule(object) :
             html_msg = html_msg.replace("&", "&amp;")
             html_msg = html_msg.replace("<", "&lt;")
             html_msg = html_msg.replace(">", "&gt;")
-            html_msg = '<p><span style="font-family: monospace">%s</span></p>' % html_msg.replace("\n", "<br/>\n") 
+            html_msg = '<p><span style="font-family: monospace">%s</span></p>' % html_msg.replace("\n", "<br/>\n")
             #TODO others characters to convert ?
             self.bot.say_xhtml(send["text"], html_msg, priv=priv, in_reply_to=mess)
         else:
-            self.bot.say(send["text"], priv=priv, in_reply_to = mess)
+            self.bot.say(send["text"], priv=priv, in_reply_to=mess)
 
-        if "users" in send :
-            for user, send_user in send["users"] :
+        if "users" in send:
+            for user, send_user in send["users"]:
                 self._dict_messages(send_user, mess, priv=user)
 
 
-class SyncModule(BotModule) :
+class SyncModule(BotModule):
     """ Defines a bot module that will answer/execute an action
     after a command. This is the most common case """
     __usable = False
 
-    def __init__(self, bot, desc, command, pm_allowed=True, lock_time = -1) :
+    def __init__(self, bot, desc, command, pm_allowed=True, lock_time=1):
         BotModule.__init__(self, bot, desc)
         self.command = command
         self.pm_allowed = pm_allowed
         self.fcts = {}
-        for name, method in inspect.getmembers(self, predicate=inspect.ismethod):
+        for _, method in inspect.getmembers(self, predicate=inspect.ismethod):
             try:
                 handlerarg = getattr(method, "subcommand")
                 if type(handlerarg) == tuple:
@@ -160,26 +165,32 @@ class SyncModule(BotModule) :
             self.enable()
 
     @staticmethod
-    def parse(body, prefixs) :
+    def parse(body, prefixs):
+        """Parses a command to extract command_name and args"""
         command = None
-        for prefix in prefixs :
-            if body.startswith(prefix) :
+        for prefix in prefixs:
+            if body.startswith(prefix):
                 command = body[len(prefix):].strip()
                 break
         return command.partition(' ')[::2] if command is not None else (None, None)
-    
-    def is_concerned(self, body) :
+
+    def is_concerned(self, body):
+        """Checks if a message [body] is in fact a call to this module"""
         return SyncModule.parse(body, self.prefixs)[0] == self.command
 
     def enable(self):
+        """Unsets the lock attribute which prevent a user from flooding
+            using this command"""
         setattr(self.bot, self.lock_name, False)
 
     def disable(self):
+        """Sets the lock attribute which prevent a user from flooding
+            using this command"""
         setattr(self.bot, self.lock_name, True)
         t = threading.Timer(self.lock_time, self.enable)
         t.start()
 
-    def _answer(self, sender, args) :
+    def _answer(self, sender, args):
         # if this command is called by !cmd arg1 arg2 arg3 then args = 'arg1 arg2 arg3'
         #if self.bot
         if hasattr(self, "lock_name"):
@@ -202,30 +213,31 @@ class SyncModule(BotModule) :
             else:
                 # We check if the method is not defined by a regexp matching cmd_name
                 s = re.match(key, args)
-                if s != None:
+                if s is not None:
                     return self.fcts[key](sender, s)
         try:
             return self.fcts["default"](sender, args)
         except KeyError:
             return u"La commande %s n'existe pas pour %s ou la syntaxe de !%s %s est incorrecte → !help %s pour plus d'information" %  \
-                        (cmd_name, self.command, self.command, cmd_name, self.command)
+                (cmd_name, self.command, self.command, cmd_name, self.command)
 
     def help(self, body):
         if body == self.command:
             return self.desc
-        
-class MultiSyncModule(BotModule) :
+
+
+class MultiSyncModule(BotModule):
     """ Defines a bot module that will answer/execute an action
     after a command defined in a list. """
     __usable = False
 
-    def __init__(self, bot, commands, pm_allowed=True) :
+    def __init__(self, bot, commands, pm_allowed=True):
         BotModule.__init__(self, bot, '')
 
         self.commands = commands
         self.pm_allowed = pm_allowed
         self.fcts = {}
-        for name, method in inspect.getmembers(self, predicate=inspect.ismethod):
+        for _, method in inspect.getmembers(self, predicate=inspect.ismethod):
             try:
                 handlerarg = getattr(method, "subcommand")
                 if type(handlerarg) == tuple:
@@ -236,11 +248,11 @@ class MultiSyncModule(BotModule) :
             except AttributeError:
                 pass
 
-    def is_concerned(self, body) :
+    def is_concerned(self, body):
         return SyncModule.parse(body, self.prefixs)[0] in self.commands
 
-    def _answer(self, sender, command, args) :
-        if command not in self.commands :
+    def _answer(self, sender, command, args):
+        if command not in self.commands:
             raise ModuleException(_("Command %s not handled by this module") % command)
 
         module_answer = self.fcts["default"](command, sender, args)
@@ -252,13 +264,13 @@ class MultiSyncModule(BotModule) :
                 return desc
 
 
-class AsyncModule(BotModule, threading.Thread) :
+class AsyncModule(BotModule, threading.Thread):
     """ Defines a bot module that will be executed as a
     daemon thread. Typically for waiting for asynchronous event
     such as mail, etc... """
     __usable = False
-    
-    def __init__(self, bot, name, desc, delay = 0, pm_allowed=True) :
+
+    def __init__(self, bot, name, desc, delay=0, pm_allowed=True):
         threading.Thread.__init__(self)
         BotModule.__init__(self, bot, desc)
 
@@ -272,42 +284,43 @@ class AsyncModule(BotModule, threading.Thread) :
 
         self.pm_allowed = pm_allowed
 
-    def is_concerned(self, command) :
+    def is_concerned(self, command):
         return False
 
-    def run(self) :
-        while self.alive :
+    def run(self):
+        while self.alive:
             time.sleep(self.delay)
             try:
                 self.action()
             except:
                 logger.error(_("Error from module %s : %s") % (self.__class__, traceback.format_exc().decode("utf-8")))
 
-    def stop(self) :
+    def stop(self):
         self.alive = False
 
     def help(self, body):
         if body == self.name:
             return self.desc
 
-         
-class ListenModule(BotModule) :
+
+class ListenModule(BotModule):
     """ Defines a bot module that will receive all
     the message sent on the chatroom and call answer
     on it. Be careful with those modules"""
     __usable = False
 
-    def __init__(self, bot, name, desc, pm_allowed=True) :
+    def __init__(self, bot, name, desc, pm_allowed=True):
         BotModule.__init__(self, bot, desc)
         self.name = name
         self.pm_allowed = pm_allowed
 
-    def is_concerned(self, command) :
+    def is_concerned(self, command):
         return True
-    
+
     def help(self, body):
         if body == self.name:
             return self.desc
+
 
 class Help(SyncModule):
     """ Defines the help module : when we use the command
@@ -316,15 +329,15 @@ class Help(SyncModule):
 
     def __init__(self, bot):
         desc = "!help name : display the help for the module `name`"
-        desc = {"" : _("Display help for modules"), 
-                "module" : _("help [module] : show the full help for a module"),
-                "subcom" : _("help module [subcom] : show the help for a sub-command of a module")}
+        desc = {"": _("Display help for modules"),
+                "module": _("help [module] : show the full help for a module"),
+                "subcom": _("help module [subcom] : show the help for a sub-command of a module")}
         SyncModule.__init__(self, bot, desc, "help")
         self.compact_help_content = ""
         self.genHelp()
 
     @defaultcmd
-    def answer(self, sender, args) :
+    def answer(self, sender, args):
         res = _("The command %s does not exist") % args
         if args == "":
             res = self.compact_help_content
@@ -333,7 +346,7 @@ class Help(SyncModule):
         else:
             try:
                 cmd_name, subcoms = args.split(" ", 1)
-            except ValueError:  
+            except ValueError:
                 cmd_name = args
                 subcoms = ""
             for cmd in self.bot.modules:
@@ -343,7 +356,7 @@ class Help(SyncModule):
                     res = ""
                     if type(hlp) == dict:
                         if subcoms == "subcom":
-                            available_subcoms = ", ".join(sorted([key for key in hlp.keys() if key != ""])) 
+                            available_subcoms = ", ".join(sorted([key for key in hlp.keys() if key != ""]))
                             desc = " : %s" % hlp[""] if "" in hlp else ""
                             res = _("%s%s\nSub-commands : %s") % (cmd_name, desc, available_subcoms)
                         elif subcoms == "":
@@ -360,7 +373,7 @@ class Help(SyncModule):
                     else:
                         res = hlp
                     break
-        return {"text" : res, "monospace" : True}
+        return {"text": res, "monospace": True}
 
     def genHelp(self):
         sync_lst = []
@@ -376,7 +389,7 @@ class Help(SyncModule):
                 multi_lst.extend(cmd.commands.keys())
             elif isinstance(cmd, PresenceModule):
                 pres_lst.append(cmd.name)
-        delim = "*"*10
+        delim = "*" * 10
         sync = _(u"%s[Sync commands]%s\n%s") % (delim, delim, Help.genString(sorted(sync_lst)))
         listen = _(u"%s[Listen commands]%s\n%s") % (delim, delim, Help.genString(sorted(listen_lst)))
         multi = _(u"%s[Multi commands]%s\n%s") % (delim, delim, Help.genString(sorted(multi_lst)))
@@ -389,22 +402,22 @@ class Help(SyncModule):
     def genString(l):
         send = ""
         i = 0
-        while i+2 < len(l):
+        while i + 2 < len(l):
             cmd1 = l[i]
-            cmd2 = l[i+1]
-            cmd3 = l[i+2]
-            espaces1 = " "*(25 - len(cmd1) - 1)
-            espaces2 = " "*(25 - len(cmd2) - 1)
-            line = u"-%s%s-%s%s-%s\n"%(cmd1, espaces1, cmd2, espaces2, cmd3)
+            cmd2 = l[i + 1]
+            cmd3 = l[i + 2]
+            espaces1 = " " * (25 - len(cmd1) - 1)
+            espaces2 = " " * (25 - len(cmd2) - 1)
+            line = u"-%s%s-%s%s-%s\n" % (cmd1, espaces1, cmd2, espaces2, cmd3)
             send += line
             i += 3
         if i < len(l):
-            espaces = " "*(25 - len(l[i]) - 1)
-            send += u"-%s%s"%(l[i], espaces)
-        if i +1 < len(l):
-            send += u"-%s"%(l[i+1])
+            espaces = " " * (25 - len(l[i]) - 1)
+            send += u"-%s%s" % (l[i], espaces)
+        if i + 1 < len(l):
+            send += u"-%s" % (l[i + 1])
         if i == len(l):
-            send = send[0:-1]
+            send = send.rstrip()
         return send
 
 
@@ -433,8 +446,8 @@ class RecordUsers(PresenceModule):
         desc = _("Recording users logins/logout")
         PresenceModule.__init__(self,
                                 bot,
-                                name = "recordusers",
-                                desc = desc)
+                                name="recordusers",
+                                desc=desc)
 
     def do_answer(self, message):
         role = ""
@@ -458,6 +471,7 @@ class RecordUsers(PresenceModule):
 ###############################################################################################
 ########################################  IQ MODULES  #########################################
 ###############################################################################################
+
 
 class IQModule(BotModule):
     __usable = False

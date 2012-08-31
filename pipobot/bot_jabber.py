@@ -7,14 +7,18 @@ import threading
 import xmpp
 import xml.parsers.expat
 
-from pipobot.lib.modules import AsyncModule, ListenModule, MultiSyncModule, PresenceModule, SyncModule, IQModule
+from pipobot.lib.modules import (AsyncModule, ListenModule,
+                                 MultiSyncModule, PresenceModule,
+                                 SyncModule, IQModule)
 from pipobot.lib.user import Occupants
 
-logger = logging.getLogger('pipobot.bot_jabber') 
+logger = logging.getLogger('pipobot.bot_jabber')
+
 
 class XMPPException(Exception):
     """ For errors due to XMPP (conflict, connection/authentification failed, …) """
     def __init__(self, msg):
+        Exception.__init__(self)
         self.msg = msg
 
     def __str__(self):
@@ -22,11 +26,12 @@ class XMPPException(Exception):
 
 XML_NAMESPACE = 'http://www.w3.org/1999/xhtml'
 
+
 class BotJabber(xmpp.Client, threading.Thread):
     """The implementation of a bot for jabber MUC"""
-    
+
     def __init__(self, login, passwd, res, chat, name, modules, session,
-        xmpp_log=None):
+                 xmpp_log=None):
         self.chatname = chat
 
         #Definition of an XMPP client
@@ -36,18 +41,19 @@ class BotJabber(xmpp.Client, threading.Thread):
 
         if xmpp_log is not None:
             #Write all XMPP messages seen by the bot to a log file
-            f = open(xmpp_log, "a")
-            xmpp.Client.__init__(self, jid.getDomain(), debug=f)
-            self._DEBUG._fh = f
+            logfile = open(xmpp_log, "a")
+            xmpp.Client.__init__(self, jid.getDomain(), debug=logfile)
+            self._DEBUG._fh = logfile
         else:
             #No debug
-            xmpp.Client.__init__(self, jid.getDomain(), debug = [])
+            xmpp.Client.__init__(self, jid.getDomain(), debug=[])
         threading.Thread.__init__(self)
 
         #The nickname the bot will use to join rooms
-        #This nickname will be set by the reception of a presence message after joining the room
+        #This nickname will be set by the reception of a presence message
+        #after joining the room
         self.name = name
-        
+
         # Daemon thread mode
         self.daemon = True
 
@@ -71,15 +77,14 @@ class BotJabber(xmpp.Client, threading.Thread):
             logger.debug("Registering %s", classe)
             obj = classe(self)
             self.modules.append(obj)
-        
 
         #If set to True, the bot will not be able to send messages
         self.mute = False
-        self.alive = True 
+        self.alive = True
 
         #The room the bot will join
         self.chat = xmpp.protocol.JID(chat)
-        
+
         #We will stock in it informations about users that join/leave
         self.occupants = Occupants()
 
@@ -89,31 +94,33 @@ class BotJabber(xmpp.Client, threading.Thread):
         self.RegisterHandler('iq', self.iq)
 
         #Joins the room : sends initial presence
-        chatpres = xmpp.protocol.JID(chat+"/"+name)
+        chatpres = xmpp.protocol.JID("%s/%s" % (chat, name))
         pres = xmpp.Presence(to=chatpres)
         pres.setTag('x', namespace=xmpp.NS_MUC)
         #To avoid getting the history of messages when connecting
-        pres.getTag('x').addChild('history', {'maxchars':'0'})
+        pres.getTag('x').addChild('history', {'maxchars': '0'})
         self.send(pres)
-        
+
         #Saying hello to the room !
         self.say(_(u"Hello everyone!"))
 
     def message(self, conn, mess):
         """Method called when the bot receives a message"""
-        #We ignore messages in some cases : 
+        #We ignore messages in some cases :
         #   - it has a subject (change of room topic for instance)
         #   - it is a 'delay' message (backlog at room join)
         #   - the message is empty
-        if self.mute                         \
-           or mess.getSubject() is not None  \
-           or mess.getTag('delay')           \
-           or mess.getBody() == None :
-                return
-        
+        if (self.mute or
+            mess.getSubject() is not None or
+            mess.getTag('delay') or
+            mess.getBody() is None):
+            return
+
         #We look for a module which is concerned by the message
         for module in self.modules:
-            if isinstance(module, ListenModule) or isinstance(module, SyncModule) or isinstance(module, MultiSyncModule):
+            if (isinstance(module, ListenModule) or
+                isinstance(module, SyncModule) or
+                isinstance(module, MultiSyncModule)):
                 module.do_answer(mess)
 
     def kill(self):
@@ -135,9 +142,9 @@ class BotJabber(xmpp.Client, threading.Thread):
 
         message = xmpp.Message(self.chat, mess, typ="groupchat")
         if in_reply_to:
-            message.setType( in_reply_to.getType() )
+            message.setType(in_reply_to.getType())
             if in_reply_to.getType() == "chat":
-                message.setTo( in_reply_to.getFrom() )
+                message.setTo(in_reply_to.getFrom())
 
         #If the bot answers in private
         if priv:
@@ -146,11 +153,11 @@ class BotJabber(xmpp.Client, threading.Thread):
 
         return message
 
-
     def forge_xhtml(self, mess, mess_xhtml, priv=None, in_reply_to=None):
         """Sending an xhtml message in the room"""
 
-        #The message is created from mess, in case some clients does not support XHTML (xep-0071)
+        #The message is created from mess,
+        #in case some clients does not support XHTML (xep-0071)
         message = self.forge_message(mess, priv, in_reply_to)
         #We prepare the XHTML node
         if type(mess_xhtml) == unicode:
@@ -160,14 +167,14 @@ class BotJabber(xmpp.Client, threading.Thread):
         message.addChild('html', {}, [payload], xmpp.NS_XHTML_IM)
 
         return message
-    
-    def say(self, *args, **kwargs) :
+
+    def say(self, *args, **kwargs):
         """The method to call to make the bot sending messages"""
         #If the bot has not been disabled
         if not self.mute:
             self.send(self.forge_message(*args, **kwargs))
 
-    def say_xhtml(self, *args, **kwargs) :
+    def say_xhtml(self, *args, **kwargs):
         """Method to talk in xhtml"""
         #If the bot has not been disabled
         if not self.mute:
@@ -182,14 +189,14 @@ class BotJabber(xmpp.Client, threading.Thread):
         for module in self.modules:
             if isinstance(module, PresenceModule):
                 module.do_answer(mess)
-        
+
     def run(self):
         """Method called when the bot is ran"""
         #We start dameons for asynchronous methods
         for module in self.modules:
             if isinstance(module, AsyncModule):
                 module.start()
-        
+
         #client's loop, exited only when self.alive has been set to False
         while self.alive:
             try:
@@ -208,7 +215,7 @@ class BotJabber(xmpp.Client, threading.Thread):
         """To give the bot its voice again"""
         self.mute = False
 
-    def iq(self, conn, iqdata) :
+    def iq(self, conn, iqdata):
         """Method called when the bot receives an IQ message"""
         for module in self.modules:
             if isinstance(module, IQModule):

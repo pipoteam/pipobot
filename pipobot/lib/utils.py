@@ -96,7 +96,8 @@ class AppURLopener(urllib.FancyURLopener):
     def prompt_user_passwd(self, host, realm):
         return ('', '')
 
-    version = "Mozilla/5.0 (X11; U; Linux; fr-fr) AppleWebKit/531+ (KHTML, like Gecko) Safari/531.2+ Midori/0.2"
+    version = ("Mozilla/5.0 (X11; U; Linux; fr-fr) AppleWebKit/531+"
+               "(KHTML, like Gecko) Safari/531.2+ Midori/0.2")
 urllib._urlopener = AppURLopener()
 
 
@@ -109,9 +110,11 @@ def check_url(url, geturl=False):
             title = 'Pas de titre'
             html = o.read(1000000)
             try:
-                SoupList = BeautifulSoup(utils.unescape(html), parseOnlyThese=SoupStrainer('title'))
+                SoupList = BeautifulSoup(utils.unescape(html),
+                                         parseOnlyThese=SoupStrainer('title'))
             except UnicodeDecodeError:
-                SoupList = BeautifulSoup(utils.unescape(html.decode("latin1", "ignore")), parseOnlyThese=SoupStrainer('title'))
+                SoupList = BeautifulSoup(utils.unescape(html.decode("latin1", "ignore")),
+                                         parseOnlyThese=SoupStrainer('title'))
             try:
                 titles = [title for title in SoupList]
                 title = utils.xhtml2text(titles[0].renderContents())
@@ -120,7 +123,8 @@ def check_url(url, geturl=False):
             except HTMLParseError:
                 pass
             if geturl:
-                send.append("%s : [Lien] Titre : %s" % (o.geturl(), " ".join(title.split())))
+                send.append("%s : [Lien] Titre : %s" %
+                            (o.geturl(), " ".join(title.split())))
             else:
                 send.append("[Lien] Titre : %s" % " ".join(title.split()))
         else:
