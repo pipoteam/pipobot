@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from pipobot.lib.bdd import Base
 from pipobot.lib.modules import SyncModule, defaultcmd, answercmd
 
+
 class PerChanPermissions(Base):
     __tablename__ = 'per_chan_permissions'
     knownuser_kuid = Column(Integer, ForeignKey('knownuser.kuid'), primary_key=True)
@@ -56,6 +57,22 @@ class KnownUser(Base):
         if selfpermlvl > otherpermlvl:
             return True
         return False
+
+    @staticmethod
+    def get(pseudo, bot):
+        if '@' in pseudo:
+            usersjid = bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == pseudo).first()
+            if usersjid:
+                return usersjid.user
+        user = bot.session.query(KnownUser).filter(KnownUser.pseudo == pseudo).first()
+        if user:
+            return user
+        jid = bot.occupants.pseudo_to_jid(pseudo)
+        if jid:
+            usersjid = bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == jid).first()
+            if usersjid:
+                return usersjid.user
+        return bot.session.query(KnownUser).filter(KnownUser.kuid == pseudo).first()
 
 
 class KnownUsersJIDs(Base):
@@ -127,32 +144,28 @@ class KnownUsersManager(SyncModule):
         if not jids:
             jids.append(self.bot.occupants.pseudo_to_jid(pseudo))
 
-        senderuser = self.bot.session.query(KnownUser).filter(KnownUser.pseudo == sender).first()
-        if pseudo and pseudo != sender and not senderuser:
-            senderusersjid = self.bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == self.bot.occupants.pseudo_to_jid(sender)).first()
-            if not senderusersjid:
-                return _("I don't know you %s…" % sender)
-            senderuser = senderusersjid.user
+        senderuser = KnownUser.get(sender, self.bot)
+        if pseudo != sender and not senderuser:
+            return _("I don't know you %s…" % sender)
 
         targetuser = None
         if pseudo or not senderuser:
-            targetuser = self.bot.session.query(KnownUser).filter(KnownUser.pseudo == pseudo).first()
+            targetuser = KnownUser.get(pseudo, self.bot)
             if not targetuser:
                 targetuser = KnownUser(pseudo=pseudo)
                 self.bot.session.add(targetuser)
                 self.bot.session.commit()
-                targetuser = self.bot.session.query(KnownUser).filter(KnownUser.pseudo == pseudo).first()
+                targetuser = KnownUser.get(pseudo, self.bot)
             elif not senderuser.has_the_power_on(targetuser, self.bot.chatname):
                 return _("%s: %s is already registered, and you can't modify his settings" % (senderuser.pseudo, targetuser.pseudo))
         else:
             targetuser = senderuser
 
         for jid in jids:
-            check = self.bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == jid).first()
+            check = KnownUser.get(jid, self.bot)
             if check:
-                existinguser = check.user
-                ret = "%s: %s est associé aux JID(s) " % (sender, existinguser.pseudo)
-                for jid in existinguser.jids:
+                ret = "%s: %s est associé aux JID(s) " % (sender, check.pseudo)
+                for jid in check.jids:
                     ret += '%s ' % jid.jid
                 return ret
             j = KnownUsersJIDs(jid, targetuser.kuid)
@@ -169,18 +182,9 @@ class KnownUsersManager(SyncModule):
         elif message.string[5:]:
             user = message.string[5:].strip()
         if user:
-            knownuser = ''
-            if '@' not in user:
-                knownuser = self.bot.session.query(KnownUser).filter(KnownUser.pseudo == user).first()
+            knownuser = KnownUser.get(user, self.bot)
             if not knownuser:
-                if '@' not in user:
-                    user = self.bot.occupants.pseudo_to_jid(user)
-                knownuser = self.bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == user).first()
-                if not knownuser:
-                    return _("I don't know that %s…" % user)
-                knownuser = knownuser.user
-            if not knownuser:
-                return _('You are not identified')
+                return _("I don't know that %s…" % user)
             ret = _('%s: Your Highlight Level is %i, your Permission Level is %s, and your JID(s) are:' % (knownuser.pseudo, knownuser.hllvl, knownuser.permlvl))
             for jid in knownuser.jids:
                 ret += ' %s' % jid.jid
@@ -206,23 +210,18 @@ class KnownUsersManager(SyncModule):
                 pseudo = arg
         if not pseudo:
             pseudo = sender
-        user = self.bot.session.query(KnownUser).filter(KnownUser.pseudo == pseudo).first()
+        user = KnownUser.get(pseudo, self.bot)
         if not user:
-            usersjid = self.bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == self.bot.occupants.pseudo_to_jid(pseudo)).first()
-            if not usersjid:
-                return _("I don't know you, %s…" % sender)
-            user = usersjid.user
+            return _("I don't know you, %s…" % sender)
         if not lvl:
             return _('%s: Your Highlight Level is %i' % (user.pseudo, user.hllvl))
 
-        senderuser = self.bot.session.query(KnownUser).filter(KnownUser.pseudo == sender).first()
+        senderuser = KnownUser.get(sender, self.bot)
         if not senderuser:
-            sendersjid = self.bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == self.bot.occupants.pseudo_to_jid(sender)).first()
-            if not sendersjid:
-                return _("I don't know you, %s…" % sender)
-            senderuser = sendersjid.user
+            return _("I don't know you, %s…" % sender)
+
         if not senderuser.has_the_power_on(user, self.bot.chatname):
-            return _("%s: you don't have the right permissons to do that." % sender)
+            return _("%s: you don't have the permisson to do that." % sender)
 
         user.hllvl = lvl
         self.bot.session.commit()
@@ -240,24 +239,19 @@ class KnownUsersManager(SyncModule):
                 pseudo = arg
         if not pseudo:
             pseudo = sender
-        user = self.bot.session.query(KnownUser).filter(KnownUser.pseudo == pseudo).first()
+        user = KnownUser.get(pseudo, self.bot)
         if not user:
-            usersjid = self.bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == self.bot.occupants.pseudo_to_jid(pseudo)).first()
-            if not usersjid:
-                return _("I don't know you, %s…" % sender)
-            user = usersjid.user
+            return _("I don't know you, %s…" % sender)
         if not lvl:
             ret = _('%s: Your Permission Level is %i' % (user.pseudo, user.permlvl))
             if user.chanperms:
                 ret += _(", and you have specials rights on some chans: %s" % user.chanperms)
             return ret
 
-        senderuser = self.bot.session.query(KnownUser).filter(KnownUser.pseudo == sender).first()
+        senderuser = KnownUser.get(sender, self.bot)
         if not senderuser:
-            sendersjid = self.bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == self.bot.occupants.pseudo_to_jid(sender)).first()
-            if not sendersjid:
-                return _("I don't know you, %s…" % sender)
-            senderuser = sendersjid.user
+            return _("I don't know you, %s…" % sender)
+
         if not senderuser.has_the_power_on(user, self.bot.chatname):
             return _("%s: you don't have the right permissons to do that." % sender)
         if lvl > senderuser.permlvl:
@@ -282,12 +276,9 @@ class KnownUsersManager(SyncModule):
 
     @answercmd(r'nick')
     def answer_nick(self, sender, message):
-        senderuser = self.bot.session.query(KnownUser).filter(KnownUser.pseudo == sender).first()
+        senderuser = KnownUser.get(sender, self.bot)
         if not senderuser:
-            sendersjid = self.bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == self.bot.occupants.pseudo_to_jid(sender)).first()
-            if not sendersjid:
-                return _("I don't know you, %s…" % sender)
-            senderuser = sendersjid.user
+            return _("I don't know you, %s…" % sender)
         try:
             senderuser.pseudo = message.strip()
             self.bot.session.commit()
@@ -295,7 +286,6 @@ class KnownUsersManager(SyncModule):
         except IntegrityError:
             self.bot.session.rollback()
             return _("%s: DO NOT EVEN *THINK* ABOUT DOING THAT" % sender)
-
 
     @defaultcmd
     def answer(self, sender, args):
