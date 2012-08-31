@@ -36,6 +36,9 @@ class KnownUser(Base):
         self.permlvl = permlvl
         self.hllvl = hllvl
 
+    def __str__(self):
+        return self.pseudo
+
     def has_the_power_on(self, other, chan):
         if not other:
             print 'other does not exist'
