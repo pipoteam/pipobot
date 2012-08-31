@@ -67,10 +67,12 @@ class KnownUser(Base):
         user = bot.session.query(KnownUser).filter(KnownUser.pseudo == pseudo).first()
         if user:
             return user
-        usersjid = bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == bot.occupants.pseudo_to_jid(pseudo)).first()
-        if usersjid:
-            return usersjid.user
-        return None
+        jid = bot.occupants.pseudo_to_jid(pseudo)
+        if jid:
+            usersjid = bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == jid).first()
+            if usersjid:
+                return usersjid.user
+        return bot.session.query(KnownUser).filter(KnownUser.kuid == pseudo).first()
 
 
 class KnownUsersJIDs(Base):
