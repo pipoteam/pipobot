@@ -75,24 +75,24 @@ class NotifyModule(SyncModule, AsyncModule):
                  pm_allowed=True, lock_time=0, delay=0):
         AsyncModule.__init__(self, bot, command, desc, delay, pm_allowed)
         SyncModule.__init__(self, bot, desc, command, pm_allowed, lock_time)
-        self._mute = False
+        self.mute = True
 
     @answercmd("mute")
     def mute(self, sender, message):
         """ Disables notifications """
-        self._mute = True
+        self.mute = True
         return _("Disabling notifications for command %s") % self.command
 
     @answercmd("unmute")
     def unmute(self, sender, message):
         """ Enables notifications """
-        self._mute = False
+        self.mute = False
         self.update(silent=True)
         return _("Enabling notifications for command %s") % self.command
 
     def action(self):
         """ What will the module do every [delay] second """
-        if not self._mute:
+        if not self.mute:
             self.do_action()
 
     def update(self, silent=False):
