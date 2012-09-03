@@ -164,8 +164,11 @@ class KnownUsersManager(SyncModule):
             jids.append(self.bot.occupants.pseudo_to_jid(pseudo))
 
         senderuser = KnownUser.get(sender, self.bot)
-        if pseudo != sender and not senderuser:
-            return _("I don't know you %s…" % sender)
+        if pseudo != sender:
+            if not not senderuser:
+                return _("I don't know you %s…" % sender)
+            if senderuser.get_permlvl(self.bot.chatname) < 2:
+                return _("I don't trust you, %s…" % sender)
 
         targetuser = None
         if pseudo or not senderuser:
