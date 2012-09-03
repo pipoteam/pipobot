@@ -165,7 +165,7 @@ class KnownUsersManager(SyncModule):
 
         senderuser = KnownUser.get(sender, self.bot)
         if pseudo != sender:
-            if not not senderuser:
+            if not senderuser:
                 return _("I don't know you %s…" % sender)
             if senderuser.get_permlvl(self.bot.chatname) < 2:
                 return _("I don't trust you, %s…" % sender)
