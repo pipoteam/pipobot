@@ -1,1 +1,0 @@
-from blague import CmdBlague

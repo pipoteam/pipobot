@@ -1,20 +1,24 @@
 #!/usr/bin/python
-#-*- coding: utf8 -*-
-"""This file contains the class 'BotJabber' wich is a bot for jabber MUC"""
+#-*- coding: utf-8 -*-
+"""This file contains the class 'BotJabber' which is a bot for jabber MUC"""
 
 import logging
 import threading
 import sleekxmpp
 import xml.parsers.expat
 
-from pipobot.lib.modules import AsyncModule, ListenModule, MultiSyncModule, PresenceModule, SyncModule, IQModule
+from pipobot.lib.modules import (AsyncModule, ListenModule,
+                                 MultiSyncModule, PresenceModule,
+                                 SyncModule, IQModule)
 from pipobot.lib.user import Occupants
 
-logger = logging.getLogger('pipobot.bot_jabber') 
+logger = logging.getLogger('pipobot.bot_jabber')
+
 
 class XMPPException(Exception):
     """ For errors due to XMPP (conflict, connection/authentification failed, …) """
     def __init__(self, msg):
+        Exception.__init__(self)
         self.msg = msg
 
     def __str__(self):
@@ -25,14 +29,22 @@ _muc_xml = "{http://jabber.org/protocol/muc#user}status"
 
 class BotJabber(sleekxmpp.ClientXMPP):
     """The implementation of a bot for jabber MUC"""
-    
-    def __init__(self, login, passwd, res, chat, name, xmpp_log = None, manager = None):
+
+    def __init__(self, login, passwd, res, chat, name, modules, session,
+                 xmpp_log=None):
         self.chatname = chat
-        self.manager = manager
 
         sleekxmpp.ClientXMPP.__init__(self, login, passwd, ssl = True)
 
-        logger.info(_("Connecting to %s") % chat)
+        #The nickname the bot will use to join rooms
+        #This nickname will be set by the reception of a presence message
+        #after joining the room
+        self.name = name
+
+        # Daemon thread mode
+        self.daemon = True
+
+        logger.info("Connecting to %s", chat)
         #Connecting
         con = self.connect(reattempt = False)
         if not con:
@@ -49,18 +61,18 @@ class BotJabber(sleekxmpp.ClientXMPP):
         self.add_event_handler("disconnected", self.disconnected)
         self.add_event_handler("groupchat_presence", self.presence)
 
-#        #xmpppy handlers to XMPP stanzas
-#        self.RegisterHandler('iq', self.iq)
+        self.session = session
 
+        # Creating bot module instances
         self.modules = []
+        for classe in modules:
+            logger.debug("Registering %s", classe)
+            obj = classe(self)
+            self.modules.append(obj)
 
         #If set to True, the bot will not be able to send messages
         self.mute = False
-        self.alive = True 
-        
-        #The nickname the bot will use to join rooms
-        #This nickname will be set by the reception of a presence message after joining the room
-        self.name = name
+        self.alive = True
 
         #We will stock in it informations about users that join/leave
         self.occupants = Occupants()
@@ -82,7 +94,7 @@ class BotJabber(sleekxmpp.ClientXMPP):
 
     def message(self, mess):
         """Method called when the bot receives a message"""
-        #We ignore messages in some cases : 
+        #We ignore messages in some cases :
         #   - it has a subject (change of room topic for instance)
         #   - it is a 'delay' message (backlog at room join)
         #   - the message is empty
@@ -93,7 +105,9 @@ class BotJabber(sleekxmpp.ClientXMPP):
         
         #We look for a module which is concerned by the message
         for module in self.modules:
-            if isinstance(module, ListenModule) or isinstance(module, SyncModule) or isinstance(module, MultiSyncModule):
+            if (isinstance(module, ListenModule) or
+                isinstance(module, SyncModule) or
+                isinstance(module, MultiSyncModule)):
                 module.do_answer(mess)
 
     def add_commands(self, classes):
@@ -113,9 +127,9 @@ class BotJabber(sleekxmpp.ClientXMPP):
         #We kill the thread
         self.alive = False
         #The bot says goodbye
-        self.say(_("I've been asked to leave you"))
+        self.say(_(u"I’ve been asked to leave you"))
         #The bot leaves the room
-        logger.info("Killing %s" % self.chatname)
+        logger.info("Killing %s", self.chatname)
         try:
             self.disconnect()
         except xml.parsers.expat.ExpatError:
@@ -158,7 +172,7 @@ class BotJabber(sleekxmpp.ClientXMPP):
             msg = self.forge_message(*args, **kwargs)
             msg.send()
 
-    def say_xhtml(self, *args, **kwargs) :
+    def say_xhtml(self, *args, **kwargs):
         """Method to talk in xhtml"""
         #If the bot has not been disabled
         if not self.mute:
@@ -185,11 +199,32 @@ class BotJabber(sleekxmpp.ClientXMPP):
         """ Will ask the manager to restart this room """
         self.manager.restart(self.chatname)
 
+    def run(self):
+        """Method called when the bot is ran"""
+        #We start dameons for asynchronous methods
+        for module in self.modules:
+            if isinstance(module, AsyncModule):
+                module.start()
+
+        #client's loop, exited only when self.alive has been set to False
+        while self.alive:
+            try:
+                self.Process(1)
+            except: #TODO trouver la bonne exception
+                msg = "The ressource defined for the bot in %s is already used" % (self.chatname)
+                logger.error(msg)
+                raise XMPPException(msg)
+
+        #When bot's killed, every asynchronous module must be killed too
+        for module in self.modules:
+            if isinstance(module, AsyncModule):
+                module.stop()
+
     def disable_mute(self):
         """To give the bot its voice again"""
         self.mute = False
 
-    def iq(self, conn, iqdata) :
+    def iq(self, conn, iqdata):
         """Method called when the bot receives an IQ message"""
         for module in self.modules:
             if isinstance(module, IQModule):

@@ -1,5 +1,7 @@
 config:
     logpath: /tmp/testbot.log
+    extra_modules:
+        - ../modules
 
 database:
     engine: sqlite
@@ -48,7 +50,7 @@ modules:
     botmpd:
         host: localhost
         port: 6600
-        pwd: *secret*
+        pwd: /secret/
         datadir: /path/to/music
     hg:
         default: repo2
@@ -56,3 +58,8 @@ modules:
             repo1: /path/to/repo1
             repo2: /path/to/repo2
             repo3: /path/to/repo3
+    url:
+        repost: True
+        repost-ignore:
+            - exemple.org
+            - sub.domain.net

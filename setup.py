@@ -1,33 +1,58 @@
-from setuptools import setup, find_packages
+#!/usr/bin/env python
+
+from distutils.core import setup
+from os.path import dirname, join, isdir, splitext
 import os
+import sys
 
-from pipobot import __version__
+try:
+    from babel.messages import frontend as babel
+except ImportError:
+    sys.stderr.write("The babel module is not installed. Translation tools "
+        "will not be available.\n")
+    babel = None
 
-def list_all_data_files(dst_path, src_path):
-    f = []
-    for (dirpath, dirname, filenames) in os.walk(src_path):
-        f.append((os.path.join(dst_path, dirpath),
-                  [os.path.join(dirpath, filename) for filename in filenames]))
-    return f
+if sys.hexversion < 0x02060000 or sys.hexversion >= 0x03000000:
+    sys.stderr.write(
+        "This program require Python 2.6 or newer, but is not yet compatible "
+        "with Python 3.\n"
+    )
+    sys.exit(1)
 
-setup(
-    name = 'pipobot',
-    version = __version__,
-    description = 'A modular bot for Jabber MUCs',
-    author = 'Pipoteam',
-    author_email = 'pipoteam@xouillet.info',
-#   url = '',
 
-    packages = find_packages(exclude=["modules*"]),
-    data_files = list_all_data_files('/usr/share/pipobot', 'modules'),
-#   scripts = [],
+if __name__ == '__main__':
+    # We cannot import pipobot._version directly since we could get an already
+    # installed version.
+    
+    execfile(join(dirname(__file__), 'pipobot', '_version.py'))
+    # __version__ is now defined.
 
-    entry_points = {
-        'console_scripts' : [
-            'pipobot = pipobot.bot:main',
-        ]
-    },
 
-    install_requires=['distribute'],
-    requires=['BeautifulSoup'],
-)
+    kwargs = {}
+    if babel:
+        kwargs['cmdclass'] = {
+            'compile_catalog': babel.compile_catalog,
+            'extract_messages': babel.extract_messages,
+            'init_catalog': babel.init_catalog,
+            'update_catalog': babel.update_catalog,
+        }
+    else:
+        cmdclass = {}
+
+    packages = ['pipobot', 'pipobot.lib']
+    data_files = ["i18n/*/LC_MESSAGES/pipobot.mo"]
+
+    setup(
+        name="PipoBot",
+        version=__version__,
+        description="A modular bot for Jabber MUCs.",
+        author="Pipoteam",
+        author_email="pipoteam@xouillet.info",
+        url="http://github.com/pipoteam/pipobot",
+        packages=packages,
+        package_data={'pipobot': data_files},
+        data_files=[('/etc', ['pipobot.conf.yml'])],
+        requires=['yaml', 'sqlalchemy'],
+        scripts=['bin/pipobot'],
+        **kwargs
+    )

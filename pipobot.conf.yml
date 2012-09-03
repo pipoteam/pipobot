@@ -1,0 +1,79 @@
+#Global parameters for all bots
+config:
+    #Log file for pipobot
+    logpath: /var/log/pipobot/pipobot.log
+    #OPTIONAL: if provided, all XMPP messages sent by the bot will be logged here
+    #xmpp_logpath: /var/log/pipobot/pipobot_xmpp.log
+    #Language of the application
+    lang: en
+    #A list of directories where modules will be stored
+    extra_modules:
+       - /usr/share/pipobot/modules
+
+#Database configuration
+database:
+    #For sqlite you need to specify 'sqlite' as engine, and provide a 'src' parameter
+    #which will be the path to the database file.
+    engine: sqlite
+    src: /var/lib/pipobot/pipobot.sqlite3
+    #For mysql, use 'mysql' as engine and provide parameters 'user', 'password', 'host', 'name'
+    #to define the database
+    #For postgresql, use 'postgresql' as engine and provide 'user', 'password', 'host', 'name' parameters
+
+#List of rooms the bot will join when started
+rooms:
+    -
+        chan: root@muc.jabber.tld
+        login: jid@jabber.tld
+        passwd: secret
+        resource: pipobot
+        nick: Pipobot
+        modules:
+            - _all
+
+groups:
+    all:
+        - bashfr
+        - bashorg
+        - blague
+        - botanswers
+        - bourse
+        - chuck
+        - cmdalacon
+        - date
+        - getjid
+        - google
+        - nextprev
+        - ola
+        - pendu
+        - reminder
+        - rps
+        - spell
+        - todo
+        - tv
+        - unicode
+        - url
+        - vdm
+        - xhtml
+
+#Specific configuration of modules
+#Please refer to the documentation of these modules
+modules_config:
+    botmpd:
+        host: localhost
+        port: 6600
+        pwd: /secret/
+        datadir: /path/to/music
+    hg:
+        default: repo2
+        repos:
+            repo1: /path/to/repo1
+            repo2: /path/to/repo2
+            repo3: /path/to/repo3
+    url:
+        respost: True
+        repost-ignore:
+            - exemple.org
+            - sub.domain.net
+    cmdalacon:
+        config_path: /usr/share/pipobot/modules/cmdalacon/pipobot.cfg

@@ -1,11 +1,12 @@
 syntax:glob
 *.pyc
 *.pyo
+*.mo
 *.orig
 *.swp
-*.mo
 *.log
-bdd/*
+.DS_Store
+pipobot.sqlite3
 settings.yml
 doc/build/*
 build/*
