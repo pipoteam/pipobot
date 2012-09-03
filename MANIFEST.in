@@ -1,8 +1,9 @@
-recursive-include pipobot *
-recursive-include modules *
+recursive-include pipobot *.py
+recursive-include pipobot *.pot
+recursive-include pipobot *.po
+recursive-include pipobot *.mo
 recursive-include doc *
 recursive-include scripts *
-recursive-include translation *
 recursive-include examples *
 
 include readme readme.requirements

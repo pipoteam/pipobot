@@ -2,12 +2,16 @@
 # -*- coding: UTF-8 -*-
 import logging
 
+
 class Occupants:
     def __init__(self):
         self.users = {}
         self.logger = logging.getLogger("pipobot.users")
-    
+
     def add_user(self, nickname, jid, role):
+        if not jid:
+            jid = "%s@chat.invalid" % nickname
+
         u = User(nickname, jid, role)
         self.users[nickname] = u
 
@@ -18,9 +22,10 @@ class Occupants:
             #Removing a user not in the room… should never happen
             pass
 
-    def get_all(self, separator, exceptions = []):
-        return separator.join([user.nickname for user in self.users.itervalues() if user.nickname not in exceptions])
-        
+    def get_all(self, separator, exceptions=[]):
+        return separator.join([user.nickname for user in self.users.itervalues()
+                               if user.nickname not in exceptions])
+
     def pseudo_to_jid(self, pseudo):
         try:
             return self.users[pseudo].jid
@@ -42,9 +47,9 @@ class Occupants:
         self.logger.error(_("The user with jid %s is not in the room !") % jid)
         return jid
 
+
 class User:
     def __init__(self, nickname, jid, role):
         self.nickname = nickname
         self.jid = jid
         self.role = role
-

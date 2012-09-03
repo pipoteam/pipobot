@@ -112,12 +112,10 @@ class KnownUsersManager(SyncModule):
                 bot,
                 desc=desc,
                 command="user")
-
-        self.desc = desc
         self.logger = logging.getLogger("pipobot.knownusers")
 
         try:
-            for admin in bot.settings["config"]["admins"]:
+            for admin in self._settings["admins"]:
                 user = ''
                 if '@' in admin:
                     usersjid = bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == admin).first()
