@@ -14,7 +14,7 @@ def minpermlvl(lvl):
             user = KnownUser.get(sender, self.bot)
             if not user:
                 return _("%s: You are not even registered…" % sender)
-            if user.permlvl < lvl:
+            if user.get_permlvl(self.bot.chatname) < lvl:
                 return _("%s: You need a permlvl of %i to do that." % (sender, lvl))
             return fct(self, sender, message)
         return wrapped
@@ -52,6 +52,15 @@ class KnownUser(Base):
     def __str__(self):
         return self.pseudo
 
+    def get_permlvl(self, chan):
+        for scp in self.chanperms:
+            if scp.chan.name == chan:
+                if scp.permlvl > self.permlvl:
+                    return scp.permlvl
+                break
+        return self.permlvl
+
+
     def has_the_power_on(self, other, chan):
         if not other:
             print 'other does not exist'
@@ -59,16 +68,8 @@ class KnownUser(Base):
         if self == other:
             return True
 
-        selfpermlvl = self.permlvl
-        otherpermlvl = other.permlvl
-        for scp in self.chanperms:
-            if scp.chan.name == chan and scp.permlvl > selfpermlvl:
-                selfpermlvl = scp.permlvl
-                break
-        for ocp in other.chanperms:
-            if ocp.chan.name == chan and ocp.permlvl > otherpermlvl:
-                otherpermlvl = ocp.permlvl
-                break
+        selfpermlvl = self.get_permlvl(chan)
+        otherpermlvl = other.get_permlvl(chan)
 
         if selfpermlvl > otherpermlvl:
             return True
@@ -282,10 +283,15 @@ class KnownUsersManager(SyncModule):
                 self.bot.session.add(chan)
                 self.bot.session.commit()
                 chan = self.bot.session.query(Chans).filter(Chans.name == self.bot.chatname).first()
-            perchanperm = PerChanPermissions(lvl)
-            perchanperm.chan = chan
-            self.bot.session.add(perchanperm)
-            user.chanperms.append(perchanperm)
+            for chanperm in user.chanperms:
+                if chanperm.chans_cid == chan.cid:
+                    chanperm.permlvl = lvl
+                    break
+            else:
+                perchanperm = PerChanPermissions(lvl)
+                perchanperm.chan = chan
+                self.bot.session.add(perchanperm)
+                user.chanperms.append(perchanperm)
         else:
             user.permlvl = lvl
         self.bot.session.commit()
