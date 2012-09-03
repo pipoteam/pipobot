@@ -8,6 +8,19 @@ from pipobot.lib.bdd import Base
 from pipobot.lib.modules import SyncModule, defaultcmd, answercmd
 
 
+def minpermlvl(lvl):
+    def wrapper(fct):
+        def wrapped(self, sender, message):
+            user = KnownUser.get(sender, self.bot)
+            if not user:
+                return _("%s: You are not even registered…" % sender)
+            if user.permlvl < lvl:
+                return _("%s: You need a permlvl of %i to do that." % (sender, lvl))
+            return fct(self, sender, message)
+        return wrapped
+    return wrapper
+
+
 class PerChanPermissions(Base):
     __tablename__ = 'per_chan_permissions'
     knownuser_kuid = Column(Integer, ForeignKey('knownuser.kuid'), primary_key=True)
