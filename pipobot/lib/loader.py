@@ -61,6 +61,9 @@ class BotModuleLoader(object):
 
         modules.append(RecordUsers)
         modules.append(Help)
-        KnownUsersManager._settings = self._module_settings["user"]
+        KnownUsersManager._settings = {}
+        if "user" in self._module_settings:
+            KnownUsersManager._settings = self._module_settings["user"]
+
         modules.append(KnownUsersManager)
         return modules
