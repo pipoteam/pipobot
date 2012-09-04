@@ -98,16 +98,22 @@ class BotJabber(sleekxmpp.ClientXMPP):
         #   - it has a subject (change of room topic for instance)
         #   - it is a 'delay' message (backlog at room join)
         #   - the message is empty
-        if self.mute                         \
+        if self.mute                 \
            or mess["subject"] != ""  \
            or mess["body"] == "" :
                 return
         
-        #We look for a module which is concerned by the message
+        #First we look if a SyncModule matches
         for module in self.modules:
-            if (isinstance(module, ListenModule) or
-                isinstance(module, SyncModule) or
+            if (isinstance(module, SyncModule) or
                 isinstance(module, MultiSyncModule)):
+                ret = module.do_answer(mess)
+                if ret is not None:
+                    return
+
+        #If no SyncModule was concerned by the message, we look for a ListenModule
+        for module in self.modules:
+            if isinstance(module, ListenModule):
                 module.do_answer(mess)
 
     def add_commands(self, classes):

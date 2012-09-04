@@ -46,7 +46,15 @@ class BotModule(object):
     def __init__(self, bot, desc):
         self.bot = bot
         self.desc = desc
-        self.prefixs = ['!', ':', self.bot.name + ':', self.bot.name + ',']
+        #Valid prefixes are : "!", ":" or "bot_name[:|,] [!|:]"
+        self.prefixs = []
+        base_prefixs = ["!", ":"]
+
+        for prefix in base_prefixs:
+            self.prefixs.append("%s, %s" % (self.bot.name, prefix))
+            self.prefixs.append("%s: %s" % (self.bot.name, prefix))
+
+        self.prefixs.extend(base_prefixs)
 
     def do_answer(self, mess):
         """ With an xmpp message `mess`, checking if this module is concerned
@@ -88,12 +96,14 @@ class BotModule(object):
             #If the method is just a string, it will be the bot's answer
             if type(send) == str or type(send) == unicode:
                 self.bot.say(send, in_reply_to=mess)
+                return send
 
             #If it's a list we display each message with a time delay
             elif type(send) == list:
                 for line in send:
                     time.sleep(0.3)
                     self.bot.say(line, in_reply_to=mess)
+                return send
 
             #If it's a dictionary, it is {"text": raw_message,    # Text message, transform XHTML if empty
             #                             "xhtml" : xhtml_message # XHTML message
@@ -103,11 +113,13 @@ class BotModule(object):
             #                            }
             elif type(send) == dict:
                 self._dict_messages(send, mess)
+                return send
 
             else:
                 #In any other case, an error has occured in the module
                 if send is not None:
                     self.bot.say(_("Error from module %s : %s") % (command, send))
+                    return send
         except:
             self.bot.say(_("Error !"))
             logger.error(_("Error from module %s : %s") % (self.__class__, traceback.format_exc().decode("utf-8")))
