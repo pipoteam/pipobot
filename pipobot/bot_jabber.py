@@ -118,9 +118,15 @@ class BotJabber(xmpp.Client, threading.Thread):
 
         #We look for a module which is concerned by the message
         for module in self.modules:
-            if (isinstance(module, ListenModule) or
-                isinstance(module, SyncModule) or
+            if (isinstance(module, SyncModule) or
                 isinstance(module, MultiSyncModule)):
+                ret = module.do_answer(mess)
+                if ret is not None:
+                    return
+
+        #If no SyncModule was concerned by the message, we look for a ListenModule
+        for module in self.modules:
+            if isinstance(module, ListenModule):
                 module.do_answer(mess)
 
     def kill(self):
