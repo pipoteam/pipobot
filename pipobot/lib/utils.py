@@ -2,7 +2,7 @@
 #-*- coding: utf-8 -*-
 
 import re
-import xmpp
+from xml.etree import cElementTree as ET
 import utils
 import urllib
 import httplib
@@ -55,40 +55,38 @@ def xhtml2text(html):
 
 
 def kick(toKick, msg, bot):
-    iq = xmpp.Iq(typ="set",
-                 to=bot.chat)
-    querychild = iq.addChild('query')
-    querychild.setAttr("xmlns", "http://jabber.org/protocol/muc#admin")
-    itemchild = querychild.addChild("item")
-    itemchild.setAttr("nick", toKick)
-    itemchild.setAttr("role", "none")
-
-    reason = itemchild.addChild("reason")
-    reason.addData(msg)
+    iq = bot.makeIqSet()
+    iq["to"] = bot.chatname
+    query = ET.Element('{http://jabber.org/protocol/muc#admin}query')
+    item = ET.Element('{http://jabber.org/protocol/muc#admin}item', {'nick': toKick, 'role': 'none'})
+    reason_el = ET.Element('{http://jabber.org/protocol/muc#admin}reason')
+    reason_el.text = msg
+    item.append(reason_el)
+    query.append(item)
+    iq.append(query)
     bot.send(iq)
 
 
 def mute(toKick, msg, bot):
-    iq = xmpp.Iq(typ="set",
-                 to=bot.chat)
-    querychild = iq.addChild('query')
-    querychild.setAttr("xmlns", "http://jabber.org/protocol/muc#admin")
-    itemchild = querychild.addChild("item")
-    itemchild.setAttr("nick", toKick)
-    itemchild.setAttr("role", "visitor")
-    reason = itemchild.addChild("reason")
-    reason.addData(msg)
+    iq = bot.makeIqSet()
+    iq["to"] = bot.chatname
+    query = ET.Element('{http://jabber.org/protocol/muc#admin}query')
+    item = ET.Element('{http://jabber.org/protocol/muc#admin}item', {'nick': toKick, 'role': 'visitor'})
+    reason_el = ET.Element('{http://jabber.org/protocol/muc#admin}reason')
+    reason_el.text = msg
+    item.append(reason_el)
+    query.append(item)
+    iq.append(query)
     bot.send(iq)
 
 
-def unmute(toMute, bot):
-    iq = xmpp.Iq(typ="set",
-                 to=bot.chat)
-    querychild = iq.addChild('query')
-    querychild.setAttr("xmlns", "http://jabber.org/protocol/muc#admin")
-    itemchild = querychild.addChild("item")
-    itemchild.setAttr("nick", toMute)
-    itemchild.setAttr("role", "participant")
+def unmute(toKick, bot):
+    iq = bot.makeIqSet()
+    iq["to"] = bot.chatname
+    query = ET.Element('{http://jabber.org/protocol/muc#admin}query')
+    item = ET.Element('{http://jabber.org/protocol/muc#admin}item', {'nick': toKick, 'role': 'participant'})
+    query.append(item)
+    iq.append(query)
     bot.send(iq)
 
 

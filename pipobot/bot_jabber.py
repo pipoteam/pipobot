@@ -59,6 +59,7 @@ class BotJabber(sleekxmpp.ClientXMPP):
         #sleekxmpp handlers to XMPP stanzas
         self.add_event_handler("message", self.message)
         self.add_event_handler("groupchat_presence", self.presence)
+        self.add_event_handler("failed_auth", self.failed_auth)
 
         self.session = session
 
@@ -76,7 +77,10 @@ class BotJabber(sleekxmpp.ClientXMPP):
         #We will stock in it informations about users that join/leave
         self.occupants = Occupants()
         
-        self.process(threaded = True)
+        self.process(threaded=True)
+
+    def failed_auth(self, event):
+        logger.error(_("Unable to authenticate !"))
 
     def connect_muc(self, event):
         for module in self.modules:
