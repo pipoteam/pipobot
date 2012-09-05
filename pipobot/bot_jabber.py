@@ -58,7 +58,6 @@ class BotJabber(sleekxmpp.ClientXMPP):
 
         #sleekxmpp handlers to XMPP stanzas
         self.add_event_handler("message", self.message)
-        self.add_event_handler("disconnected", self.disconnected)
         self.add_event_handler("groupchat_presence", self.presence)
 
         self.session = session
@@ -76,21 +75,18 @@ class BotJabber(sleekxmpp.ClientXMPP):
 
         #We will stock in it informations about users that join/leave
         self.occupants = Occupants()
-
         
         self.process(threaded = True)
 
     def connect_muc(self, event):
+        for module in self.modules:
+            if isinstance(module, AsyncModule):
+                module.start()
         self.send_presence()
         muc = self.plugin["xep_0045"]
         join = muc.joinMUC(self.chatname, self.name)
         hello_msg = _("Hello everyone !")
         self.send_message(mto = self.chatname, mbody = hello_msg, mtype = "groupchat")
-
-    def disconnected(self, event):
-        for module in self.modules:
-            if type(module) == AsyncModule:
-                module.stop()
 
     def message(self, mess):
         """Method called when the bot receives a message"""
@@ -136,10 +132,11 @@ class BotJabber(sleekxmpp.ClientXMPP):
         self.say(_(u"I’ve been asked to leave you"))
         #The bot leaves the room
         logger.info("Killing %s", self.chatname)
-        try:
-            self.disconnect()
-        except xml.parsers.expat.ExpatError:
-            pass
+        self.disconnect(wait=True)
+
+        for module in self.modules:
+            if isinstance(module, AsyncModule):
+                module.stop()
 
     def forge_message(self, mess, priv=None, in_reply_to=None):
         """Method used to send a message in a the room"""
@@ -204,27 +201,6 @@ class BotJabber(sleekxmpp.ClientXMPP):
     def restart(self):
         """ Will ask the manager to restart this room """
         self.manager.restart(self.chatname)
-
-    def run(self):
-        """Method called when the bot is ran"""
-        #We start dameons for asynchronous methods
-        for module in self.modules:
-            if isinstance(module, AsyncModule):
-                module.start()
-
-        #client's loop, exited only when self.alive has been set to False
-        while self.alive:
-            try:
-                self.Process(1)
-            except: #TODO trouver la bonne exception
-                msg = "The ressource defined for the bot in %s is already used" % (self.chatname)
-                logger.error(msg)
-                raise XMPPException(msg)
-
-        #When bot's killed, every asynchronous module must be killed too
-        for module in self.modules:
-            if isinstance(module, AsyncModule):
-                module.stop()
 
     def disable_mute(self):
         """To give the bot its voice again"""
