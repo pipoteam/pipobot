@@ -202,10 +202,6 @@ class BotJabber(sleekxmpp.ClientXMPP):
             if isinstance(module, PresenceModule):
                 module.do_answer(mess)
         
-    def restart(self):
-        """ Will ask the manager to restart this room """
-        self.manager.restart(self.chatname)
-
     def disable_mute(self):
         """To give the bot its voice again"""
         self.mute = False

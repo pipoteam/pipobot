@@ -9,7 +9,9 @@ license=('GPL')
 depends=('python2' 'pipobot')
 optdepends=('python2-beautifulsoup3: for modules parsing online content'
             'python-mpd: for the MPD module'
+            'python2-eyed3: to edit tags in the MPD module'
             'python-simplejson: for google module'
+            'python2-pyinotify: for mail module'
             'mercurial: for the mercurial module'
             'python2-pyenchant: for the spell module')
 install=$pkgname.install
