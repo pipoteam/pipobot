@@ -48,6 +48,38 @@ class BotModuleLoader(object):
             bot_modules = inspect.getmembers(module_data, self.is_bot_module)
             bot_modules = [item[1] for item in bot_modules]
 
+            #We search for _config parameter (ie required configuration parameter) in each module
+            for module in bot_modules:
+                if hasattr(module, "_config"):
+                    #If there is a configuration section in config file for this module
+                    if name in self._module_settings:
+                        #We check all required parameters
+                        for (param_name, param_type) in module._config:
+                            #If the parameter is defined in the configuration file
+                            if param_name in self._module_settings[name]:
+                                config_param = self._module_settings[name][param_name]
+                                #If the configuration section is well defined
+                                if type(config_param) == param_type:
+                                    setattr(module, param_name, config_param)
+                                else:
+                                    #In case of failure, we create an empty parameter with the good type
+                                    setattr(module, param_name, param_type())
+                                    logger.error(("Parameter %s of configuration of module %s must be a %s, but is "
+                                                  "currently a %s") % (param_name,
+                                                                        name,
+                                                                        param_type.__name__,
+                                                                        type(config_param).__name__))
+                            else:
+                                setattr(module, param_name, param_type())
+                                logger.error("Configuration of %s requires %s parameter" % (name,
+                                                                                            param_name))
+
+                    else:
+                        logger.error("Missing configuration for module %s" % name)
+                        for (param_name, param_type) in module._config:
+                            #In case of failure, we create an empty parameter with the good type
+                            setattr(module, param_name, param_type())
+
             if name in self._module_settings:
                 logger.debug("Configuration for ‘%s’: %s", name,
                              self._module_settings[name])
