@@ -123,7 +123,13 @@ class PipoBotManager(object):
 
         modules = {}
         for room in self._config.rooms:
-            modules[room] = loader.get_modules(room.modules)
+            if self._config.check_modules:
+                LOGGER.info("Checking configuration of modules for room %s" % room)
+            modules[room] = loader.get_modules(room.modules, self._config.check_modules)
+
+        if self._config.check_modules:
+            return
+
         self._configure_database()
 
         for room in self._config.rooms:

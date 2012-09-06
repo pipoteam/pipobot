@@ -26,9 +26,9 @@ class Configuration(object):
     This class holds all settings used by the program.
     """
 
-    __slots__ = ('log_level', 'daemonize', 'pid_file', 'rooms',
-                 'logpath', 'xmpp_logpath', 'database', 'lang',
-                 'extra_modules', 'modules_conf')
+    __slots__ = ('log_level', 'daemonize', 'check_modules', 'pid_file',
+                 'rooms', 'logpath', 'xmpp_logpath', 'database',
+                 'lang', 'extra_modules', 'modules_conf')
 
     # Default values
     DEFAULT_CONF_FILE = "/etc/pipobot.conf.yml"
@@ -37,6 +37,7 @@ class Configuration(object):
     def __init__(self, cmd_options, conf_file):
         self.log_level = cmd_options.log_level
         self.daemonize = cmd_options.daemonize
+        self.check_modules = cmd_options.check_modules
         self.pid_file = cmd_options.pid_file
         self.rooms = []
 
@@ -220,6 +221,10 @@ def get_configuration():
 
     parser.add_option("-b", "--background", action="store_const",
                       dest="daemonize", const=True,
+                      help="Run in background, with reduced privileges")
+
+    parser.add_option("-c", "--check-modules", action="store_const",
+                      dest="check_modules", const=True, default=False,
                       help="Run in background, with reduced privileges")
 
     parser.add_option("--pid", dest="pid_file", type="string",

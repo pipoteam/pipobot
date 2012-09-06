@@ -30,7 +30,7 @@ class BotModuleLoader(object):
         return (inspect.isclass(obj) and issubclass(obj, BotModule)
                 and not hasattr(obj, '_%s__usable' % obj.__name__))
 
-    def get_modules(self, module_names):
+    def get_modules(self, module_names, check=False):
         modules = []
 
         for name in module_names:
@@ -41,8 +41,11 @@ class BotModuleLoader(object):
             try:
                 module_info = imp.find_module(name, self._paths)
             except ImportError:
-                sys.stderr.write("Module ‘%s’ was not found.\n" % name)
-                sys.exit(1)
+                logger.error(("Module ‘%s’ was not found." % name))
+                if check:
+                    continue
+                else:
+                    sys.exit(1)
 
             module_data = imp.load_module(name, *module_info)
             bot_modules = inspect.getmembers(module_data, self.is_bot_module)
@@ -60,7 +63,7 @@ class BotModuleLoader(object):
                         #If the parameter defined in the config file does not have the good structure
                         if type(config_param) != param_type:
                             #an empty value of type param_type
-                            logger.error(_("Parameter %s of configuration of module %s must be a %s, but is "
+                            logger.error(_("Parameter ‘%s‘ of configuration of module ‘%s‘ must be a %s, but is "
                                            "currently a %s") % (param_name,
                                                                 name,
                                                                 param_type.__name__,
@@ -70,10 +73,16 @@ class BotModuleLoader(object):
                     else:
                         #The parameter is not defined in the config file
                         #We use default_value if provided (not None), else an empty value of type param_type
-                        config_param = param_type() if default_value is None else default_value
                         if default_value is None:
-                            logger.error(_("Configuration of %s requires %s parameter") % (name,
+                            logger.error(_("Configuration of ‘%s‘ requires ‘%s‘ parameter") % (name,
                                                                                            param_name))
+                            config_param = param_type()
+                        else:
+                            config_param = default_value
+                            logger.info(_("Optional parameter for module ‘%s‘ : ‘%s‘ (default value ‘%s‘ will be used)") % (name,
+                                                                                                                       param_name,
+                                                                                                                       config_param))
+
                     setattr(module, param_name, config_param)
 
             if name in self._module_settings:
