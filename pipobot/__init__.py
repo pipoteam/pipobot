@@ -42,11 +42,26 @@ class PipoBotManager(object):
         )
 
         console_handler = logging.StreamHandler()
+        # If we want to log XMPP debug
+        if self._config.xmpp_logpath != None:
+            #filter to select sleekxmpp logs
+            sleek_filter = logging.Filter("sleekxmpp")
+            try:
+                sleek_handler = logging.FileHandler(self._config.xmpp_logpath)
+                sleek_handler.addFilter(sleek_filter)
+                root_logger.addHandler(sleek_handler)
+            except IOError as err:
+                _abort("Unable to open the XMPP log file ‘%s’: %s",
+                       self._config.xmpp_logpath, err.strerror)
+
+        #filter to select pipobot logs
+        pipobot_filter = logging.Filter("pipobot")
         if self._config.daemonize:
             console_handler.setLevel(logging.WARNING)
         else:
             console_handler.setLevel(self._config.log_level)
         console_handler.setFormatter(formatter)
+        console_handler.addFilter(pipobot_filter)
         root_logger.addHandler(console_handler)
 
         try:
@@ -56,6 +71,7 @@ class PipoBotManager(object):
                    self._config.logpath, err.strerror)
         file_handler.setLevel(self._config.log_level)
         file_handler.setFormatter(formatter)
+        file_handler.addFilter(pipobot_filter)
         root_logger.addHandler(file_handler)
 
     def _configure_database(self):
@@ -136,7 +152,7 @@ class PipoBotManager(object):
             try:
                 bot = BotJabber(room.login, room.passwd, room.resource,
                                 room.chan, room.nick, modules[room],
-                                self._db_session,  xmpp_log=None)
+                                self._db_session)
             except XMPPException, exc:
                 LOGGER.error("Unable to join room '%s': %s", room.chan,
                              exc)

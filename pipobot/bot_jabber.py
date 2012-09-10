@@ -28,8 +28,7 @@ _muc_xml = "{http://jabber.org/protocol/muc#user}status"
 class BotJabber(sleekxmpp.ClientXMPP):
     """The implementation of a bot for jabber MUC"""
 
-    def __init__(self, login, passwd, res, chat, name, modules, session,
-                 xmpp_log=None):
+    def __init__(self, login, passwd, res, chat, name, modules, session):
         self.chatname = chat
 
         sleekxmpp.ClientXMPP.__init__(self, login, passwd, ssl = True)
