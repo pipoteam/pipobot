@@ -11,7 +11,7 @@ Pipobot is written in python and compatible with versions of python2>=2.5.
 
 It is based on these Python modules:
 
-    - `xmpppy` : engine of connection to XMPP servers
+    - `python-sleekxmpp` : engine of connection to XMPP servers
     - `python-yaml` : configuration files are yaml files
     - `python-sqlalchemy` : Pipobot is storing data to database through sqlalchemy library.
 

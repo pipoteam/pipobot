@@ -3,9 +3,7 @@
 """This file contains the class 'BotJabber' which is a bot for jabber MUC"""
 
 import logging
-import threading
 import sleekxmpp
-import xml.parsers.expat
 
 from pipobot.lib.modules import (AsyncModule, ListenModule,
                                  MultiSyncModule, PresenceModule,
@@ -40,9 +38,6 @@ class BotJabber(sleekxmpp.ClientXMPP):
         #This nickname will be set by the reception of a presence message
         #after joining the room
         self.name = name
-
-        # Daemon thread mode
-        self.daemon = True
 
         logger.info("Connecting to %s", chat)
         #Connecting
@@ -115,17 +110,6 @@ class BotJabber(sleekxmpp.ClientXMPP):
         for module in self.modules:
             if isinstance(module, ListenModule):
                 module.do_answer(mess)
-
-    def add_commands(self, classes):
-        """Method called when we specify modules' classes, 
-            at the creation of bot instance"""
-        #We instanciate all modules and then add them to the self.modules list
-        for classe in classes:
-            logger.debug("Registering %s" % classe)
-            objet = classe(self)
-            self.modules.append(objet)
-            if isinstance(objet, AsyncModule):
-                objet.start()
 
     def kill(self):
         """Method used to kill the bot"""
