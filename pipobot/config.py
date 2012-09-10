@@ -27,8 +27,8 @@ class Configuration(object):
     """
 
     __slots__ = ('log_level', 'daemonize', 'check_modules', 'pid_file',
-                 'rooms', 'logpath', 'xmpp_logpath', 'database',
-                 'lang', 'extra_modules', 'modules_conf')
+                 'rooms', 'logpath', 'xmpp_logpath', 'database', 'lang',
+                 'extra_modules', 'modules_conf', 'unit_test', 'unittest_mods')
 
     # Default values
     DEFAULT_CONF_FILE = "/etc/pipobot.conf.yml"
@@ -39,6 +39,7 @@ class Configuration(object):
         self.daemonize = cmd_options.daemonize
         self.check_modules = cmd_options.check_modules
         self.pid_file = cmd_options.pid_file
+        self.unit_test = cmd_options.unit_test
         self.rooms = []
 
         try:
@@ -63,6 +64,7 @@ class Configuration(object):
                 _abort("Required parameter ‘%s’ not found or invalid in "
                        "configuration file ‘%s’.", param, conf_file)
             setattr(self, param, value)
+
         self.xmpp_logpath = global_conf.get('xmpp_logpath', None)
 
         self.extra_modules = global_conf.get('extra_modules', [])
@@ -82,8 +84,8 @@ class Configuration(object):
                 if "src" in database:
                     self.database = "sqlite:///%s" % database["src"]
                 else:
-                    _abort("Parameter ‘src’ required for sqlite configuration in"
-                           "file ‘%s’.", conf_file)
+                    _abort("Parameter ‘src’ required for sqlite configuration "
+                           "in file ‘%s’.", conf_file)
             elif database["engine"] == "mysql":
                 try:
                     self.database = "mysql://%s:%s@%s/%s" % (database["user"], database["password"],
@@ -104,6 +106,9 @@ class Configuration(object):
                 _abort("Unknown database engine : %s", database["engine"])
         else:
             _abort("You need to specify a database engine !")
+
+        # Unit test modules
+        self.unittest_mods = data.get("unit_test", [])
 
         # Module groups
         module_groups = {}
@@ -225,7 +230,11 @@ def get_configuration():
 
     parser.add_option("-c", "--check-modules", action="store_const",
                       dest="check_modules", const=True, default=False,
-                      help="Run in background, with reduced privileges")
+                      help="Checks if modules' configuration is correct")
+
+    parser.add_option("-u", "--unit-test", action="store_const",
+                      dest="unit_test", const=True,
+                      help="Run unit test defined in the config file")
 
     parser.add_option("--pid", dest="pid_file", type="string",
                       default=Configuration.DEFAULT_PIDFILE,

@@ -5,6 +5,7 @@ import imp
 import logging
 import sys
 from pipobot.lib.modules import Help, RecordUsers, BotModule
+from pipobot.lib.unittest import UnitTest
 from pipobot.lib.known_users import KnownUsersManager
 
 logger = logging.getLogger('pipobot.lib.loader')
@@ -30,9 +31,19 @@ class BotModuleLoader(object):
         return (inspect.isclass(obj) and issubclass(obj, BotModule)
                 and not hasattr(obj, '_%s__usable' % obj.__name__))
 
-    def get_modules(self, module_names, check=False):
-        modules = []
+    @staticmethod
+    def is_test_unit(obj):
+        """
+        Returns True if an object found in a Python module is a test unit
+        class.
+        """
 
+        return (inspect.isclass(obj) and issubclass(obj, UnitTest)
+                and not hasattr(obj, '_%s__usable' % obj.__name__))
+
+    def get_modules(self, module_names, check=False, unit_test=False):
+        modules = []
+        test_modules = []
         for name in module_names:
             if name in self._module_cache:
                 modules.extend(self._module_cache[name])
@@ -48,6 +59,9 @@ class BotModuleLoader(object):
                     sys.exit(1)
 
             module_data = imp.load_module(name, *module_info)
+            if unit_test:
+                test_modules.extend(elt[1] for elt in inspect.getmembers(module_data, self.is_test_unit))
+
             bot_modules = inspect.getmembers(module_data, self.is_bot_module)
             bot_modules = [item[1] for item in bot_modules]
 
@@ -75,13 +89,14 @@ class BotModuleLoader(object):
                         #We use default_value if provided (not None), else an empty value of type param_type
                         if default_value is None:
                             logger.error(_("Configuration of ‘%s‘ requires ‘%s‘ parameter") % (name,
-                                                                                           param_name))
+                                                                                               param_name))
                             config_param = param_type()
                         else:
                             config_param = default_value
-                            logger.info(_("Optional parameter for module ‘%s‘ : ‘%s‘ (default value ‘%s‘ will be used)") % (name,
-                                                                                                                       param_name,
-                                                                                                                       config_param))
+                            logger.info(_("Optional parameter for module ‘%s‘ : ‘%s‘ "
+                                          "(default value ‘%s‘ will be used)") % (name,
+                                                                                  param_name,
+                                                                                  config_param))
 
                     setattr(module, param_name, config_param)
 
@@ -103,4 +118,4 @@ class BotModuleLoader(object):
             KnownUsersManager._settings = self._module_settings["user"]
 
         modules.append(KnownUsersManager)
-        return modules
+        return test_modules, modules

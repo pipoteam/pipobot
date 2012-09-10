@@ -16,6 +16,7 @@ from pipobot.lib.bdd import Base
 from pipobot.lib.loader import BotModuleLoader
 from pipobot.translation import setup_i18n
 from pipobot.bot_jabber import BotJabber, XMPPException
+from pipobot.bot_test import TestBot
 
 LOGGER = logging.getLogger('pipobot.manager')
 
@@ -123,30 +124,13 @@ class PipoBotManager(object):
             getattr(sys, desc).close()
             setattr(sys, desc, null)
 
-    def run(self):
+    def _jabber_bot(self, modules):
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
         signal.signal(signal.SIGQUIT, self._signal_handler)
         signal.signal(signal.SIGHUP, self._signal_handler)
 
-        if self._config.daemonize:
-            LOGGER.debug("Running in daemon mode")
-            lock_fd = self._setup_lock_file()
-
         bots = []
-        loader = BotModuleLoader(self._config.extra_modules,
-                                 self._config.modules_conf)
-
-        modules = {}
-        for room in self._config.rooms:
-            if self._config.check_modules:
-                LOGGER.info("Checking configuration of modules for room %s" % room)
-            modules[room] = loader.get_modules(room.modules, self._config.check_modules)
-
-        if self._config.check_modules:
-            return
-
-        self._configure_database()
 
         for room in self._config.rooms:
             try:
@@ -161,11 +145,9 @@ class PipoBotManager(object):
             bots.append(bot)
 
         if self._config.daemonize:
+            LOGGER.debug("Running in daemon mode")
+            lock_fd = self._setup_lock_file()
             lock_fh = self._daemonize(lock_fd)
-
-
-        del loader
-        del self._config
 
         while self.is_running:
             signal.pause()
@@ -175,12 +157,45 @@ class PipoBotManager(object):
         signal.signal(signal.SIGQUIT, signal.SIG_DFL)
         signal.signal(signal.SIGHUP, signal.SIG_DFL)
 
-        LOGGER.debug("Exiting…")
         for bot in bots:
             bot.kill()
 
-        logging.shutdown()
+    def _load_modules(self, unit_test=False):
+        loader = BotModuleLoader(self._config.extra_modules,
+                                 self._config.modules_conf)
 
+        test_mods = []
+        if unit_test:
+            test_mods, modules = loader.get_modules(self._config.unittest_mods,
+                                                    self._config.check_modules,
+                                                    unit_test=True)
+        else:
+            modules = {}
+            for room in self._config.rooms:
+                if self._config.check_modules:
+                    LOGGER.info("Checking modules configuration for room %s" %
+                                room.chan)
+                _, modules[room] = loader.get_modules(room.modules,
+                                                      self._config.check_modules)
+        del loader
+        return test_mods, modules
+
+    def run(self):
+        test_mods, modules = self._load_modules(self._config.unit_test)
+
+        self._configure_database()
+
+        if not self._config.check_modules:
+            if self._config.unit_test:
+                bot = TestBot(modules, self._db_session)
+                for mod in test_mods:
+                    mod(bot).test_all()
+            else:
+                self._jabber_bot(modules)
+
+        LOGGER.debug("Exiting…")
+        logging.shutdown()
+        del self._config
 
 def _abort(message, *args):
     """
