@@ -181,7 +181,7 @@ class PipoBotManager(object):
         return test_mods, modules
 
     def run(self):
-        test_mods, modules = self._load_modules(self._config.unit_test)
+        test_mods, modules = self._load_modules(self._config.unit_test or self._config.script)
 
         self._configure_database()
 
@@ -190,6 +190,12 @@ class PipoBotManager(object):
                 bot = TestBot(modules, self._db_session)
                 for mod in test_mods:
                     mod(bot).test_all()
+
+            elif self._config.script:
+                bot = TestBot(modules, self._db_session)
+                for msg in self._config.script.split(";"):
+                    LOGGER.info("<< %s" % msg)
+                    LOGGER.info(">> %s" % bot.create_msg("bob", msg))
             else:
                 self._jabber_bot(modules)
 

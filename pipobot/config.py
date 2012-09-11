@@ -28,7 +28,8 @@ class Configuration(object):
 
     __slots__ = ('log_level', 'daemonize', 'check_modules', 'pid_file',
                  'rooms', 'logpath', 'xmpp_logpath', 'database', 'lang',
-                 'extra_modules', 'modules_conf', 'unit_test', 'unittest_mods')
+                 'extra_modules', 'modules_conf', 'unit_test', 'script',
+                 'unittest_mods')
 
     # Default values
     DEFAULT_CONF_FILE = "/etc/pipobot.conf.yml"
@@ -40,6 +41,7 @@ class Configuration(object):
         self.check_modules = cmd_options.check_modules
         self.pid_file = cmd_options.pid_file
         self.unit_test = cmd_options.unit_test
+        self.script = cmd_options.script
         self.rooms = []
 
         try:
@@ -228,17 +230,22 @@ def get_configuration():
                       dest="daemonize", const=True,
                       help="Run in background, with reduced privileges")
 
-    parser.add_option("-c", "--check-modules", action="store_const",
-                      dest="check_modules", const=True, default=False,
-                      help="Checks if modules' configuration is correct")
-
-    parser.add_option("-u", "--unit-test", action="store_const",
-                      dest="unit_test", const=True,
-                      help="Run unit test defined in the config file")
-
     parser.add_option("--pid", dest="pid_file", type="string",
                       default=Configuration.DEFAULT_PIDFILE,
                       help="Specify a PID file (only used in background mode)")
+
+    parser.add_option("--check-modules", action="store_const",
+                      dest="check_modules", const=True, default=False,
+                      help="Checks if modules' configuration is correct")
+
+    parser.add_option("--unit-test", action="store_const",
+                      dest="unit_test", const=True,
+                      help="Run unit test defined in the config file")
+
+    parser.add_option("--script", action="store",
+                      dest="script", type="string", default="",
+                      help="Run unit test defined in the config file")
+
 
     (options, args) = parser.parse_args()
     parser.destroy()
