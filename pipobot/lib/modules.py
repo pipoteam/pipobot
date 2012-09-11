@@ -112,7 +112,7 @@ class BotModule(object):
             #                                                               in private to the users
             #                            }
             elif type(send) == dict:
-                send = self._dict_messages(send, mess)
+                self._dict_messages(send, mess)
                 return send
 
             else:

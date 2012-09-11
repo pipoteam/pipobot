@@ -17,7 +17,6 @@ from pipobot.lib.loader import BotModuleLoader
 from pipobot.translation import setup_i18n
 from pipobot.bot_jabber import BotJabber, XMPPException
 from pipobot.bot_test import TestBot
-from pipobot.bot_twisted import TwistedBot
 
 LOGGER = logging.getLogger('pipobot.manager')
 
@@ -200,6 +199,9 @@ class PipoBotManager(object):
                     LOGGER.info("<< %s" % msg)
                     LOGGER.info(">> %s" % bot.create_msg("bob", msg))
             elif self._config.interract:
+                # We import it here so the bot does not 'depend' on twisted
+                # unless you *really* want to use the --interract mode
+                from pipobot.bot_twisted import TwistedBot
                 bot = TwistedBot(modules, self._db_session)
             else:
                 self._jabber_bot(modules)

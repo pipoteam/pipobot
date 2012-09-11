@@ -87,8 +87,8 @@ class TestBot:
             if (isinstance(module, SyncModule) or
                 isinstance(module, MultiSyncModule)):
                 ret = module.do_answer(mess)
-                ret = self.decode_module_message(ret)
                 if ret is not None:
+                    ret = self.decode_module_message(ret)
                     return ret
 
         ret = None
@@ -115,12 +115,12 @@ class TestBot:
     def say(self, *args, **kwargs):
         """The method to call to make the bot sending messages"""
         #In test mode, say does nothing !
-        return
+        return args[0]
 
     def say_xhtml(self, *args, **kwargs):
         """Method to talk in xhtml"""
         #If the bot has not been disabled
-        self.say(args, kwargs)
+        return self.say(args, kwargs)
 
     def disable_mute(self):
         """To give the bot its voice again"""
