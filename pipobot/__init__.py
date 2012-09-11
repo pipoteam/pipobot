@@ -17,6 +17,7 @@ from pipobot.lib.loader import BotModuleLoader
 from pipobot.translation import setup_i18n
 from pipobot.bot_jabber import BotJabber, XMPPException
 from pipobot.bot_test import TestBot
+from pipobot.bot_twisted import TwistedBot
 
 LOGGER = logging.getLogger('pipobot.manager')
 
@@ -44,7 +45,7 @@ class PipoBotManager(object):
 
         console_handler = logging.StreamHandler()
         # If we want to log XMPP debug
-        if self._config.xmpp_logpath != None:
+        if self._config.xmpp_logpath is not None:
             #filter to select sleekxmpp logs
             sleek_filter = logging.Filter("sleekxmpp")
             try:
@@ -181,7 +182,9 @@ class PipoBotManager(object):
         return test_mods, modules
 
     def run(self):
-        test_mods, modules = self._load_modules(self._config.unit_test or self._config.script)
+        test_mods, modules = self._load_modules(self._config.unit_test or
+                                                self._config.script or
+                                                self._config.interract)
 
         self._configure_database()
 
@@ -196,12 +199,15 @@ class PipoBotManager(object):
                 for msg in self._config.script.split(";"):
                     LOGGER.info("<< %s" % msg)
                     LOGGER.info(">> %s" % bot.create_msg("bob", msg))
+            elif self._config.interract:
+                bot = TwistedBot(modules, self._db_session)
             else:
                 self._jabber_bot(modules)
 
         LOGGER.debug("Exiting…")
         logging.shutdown()
         del self._config
+
 
 def _abort(message, *args):
     """

@@ -29,7 +29,7 @@ class Configuration(object):
     __slots__ = ('log_level', 'daemonize', 'check_modules', 'pid_file',
                  'rooms', 'logpath', 'xmpp_logpath', 'database', 'lang',
                  'extra_modules', 'modules_conf', 'unit_test', 'script',
-                 'unittest_mods')
+                 'interract', 'unittest_mods')
 
     # Default values
     DEFAULT_CONF_FILE = "/etc/pipobot.conf.yml"
@@ -42,6 +42,7 @@ class Configuration(object):
         self.pid_file = cmd_options.pid_file
         self.unit_test = cmd_options.unit_test
         self.script = cmd_options.script
+        self.interract = cmd_options.interract
         self.rooms = []
 
         try:
@@ -246,6 +247,9 @@ def get_configuration():
                       dest="script", type="string", default="",
                       help="Run unit test defined in the config file")
 
+    parser.add_option("--interract", action="store_const",
+                      dest="interract", const=True,
+                      help="Run the twisted bot")
 
     (options, args) = parser.parse_args()
     parser.destroy()

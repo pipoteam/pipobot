@@ -3,7 +3,6 @@
 """This module contains a class to test the bot in a CLI mode"""
 
 import logging
-import sleekxmpp
 from pipobot.lib.modules import (AsyncModule, ListenModule,
                                  MultiSyncModule, PresenceModule,
                                  SyncModule, IQModule)
@@ -43,6 +42,8 @@ class TestBot:
             if isinstance(obj, SyncModule):
                 if hasattr(obj, "lock_name"):
                     del obj.lock_name
+            if isinstance(obj, AsyncModule):
+                obj.start()
             self.modules.append(obj)
 
         #If set to True, the bot will not be able to send messages
@@ -56,6 +57,21 @@ class TestBot:
         """ Creates a fake message and returns the bot response """
         msg = ForgedMsg(frm, content)
         return self.message(msg)
+
+    def decode_module_message(self, msg):
+        """ Extracts the 'text' value of a message return by BotJabber.answer """
+        if msg is not None:
+            if type(msg) is dict:
+                res = msg["text"]
+            elif type(msg) is list:
+                res = "\n".join(msg)
+            elif type(msg) is tuple:
+                res = msg[0]
+            elif type(msg) is str:
+                res = msg
+            elif type(msg) is unicode:
+                res = msg.decode("utf-8")
+            return res
 
     def message(self, mess):
         """Method called when the bot receives a message"""
@@ -71,28 +87,19 @@ class TestBot:
             if (isinstance(module, SyncModule) or
                 isinstance(module, MultiSyncModule)):
                 ret = module.do_answer(mess)
+                ret = self.decode_module_message(ret)
                 if ret is not None:
-                    if type(ret) is dict:
-                        return ret["text"]
-                    elif type(ret) is list:
-                        return "\n".join(ret)
-                    else:
-                        return ret
+                    return ret
 
-        ret = []
+        ret = None
         #If no SyncModule was concerned by the message, we look for a ListenModule
         for module in self.modules:
             if isinstance(module, ListenModule):
                 rep = module.do_answer(mess)
-                if rep is not None:
-                    if type(rep) is dict:
-                        ret.append(rep["text"])
-                    elif type(rep) is list:
-                        ret.extends(rep)
-                    else:
-                        ret.append(rep)
+                ret = self.decode_module_message(rep)
 
-        return "\n".join(ret)
+        return ret
+
 
     def forge_message(self, mess, priv=None, in_reply_to=None):
         """Method used to send a message in a the room"""
@@ -107,9 +114,8 @@ class TestBot:
 
     def say(self, *args, **kwargs):
         """The method to call to make the bot sending messages"""
-        #If the bot has not been disabled
-        if not self.mute:
-            msg = self.forge_message(*args, **kwargs)
+        #In test mode, say does nothing !
+        return
 
     def say_xhtml(self, *args, **kwargs):
         """Method to talk in xhtml"""
@@ -121,4 +127,7 @@ class TestBot:
         self.mute = False
 
     def kill(self):
+        for module in self.modules:
+            if isinstance(module, ListenModule):
+                module.stop()
         return

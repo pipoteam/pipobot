@@ -112,14 +112,15 @@ class BotModule(object):
             #                                                               in private to the users
             #                            }
             elif type(send) == dict:
-                self._dict_messages(send, mess)
+                send = self._dict_messages(send, mess)
                 return send
 
             else:
                 #In any other case, an error has occured in the module
                 if send is not None:
-                    self.bot.say(_("Error from module %s : %s") % (command, send))
-                    return send
+                    msg = _("Error from module %s : %s") % (command, send)
+                    self.bot.say(msg)
+                    return msg
         except:
             self.bot.say(_("Error !"))
             logger.error(_("Error from module %s : %s") % (self.__class__, traceback.format_exc().decode("utf-8")))
