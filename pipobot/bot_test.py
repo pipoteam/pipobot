@@ -71,7 +71,7 @@ class TestBot:
                 res = msg
             elif type(msg) is unicode:
                 res = msg.decode("utf-8")
-            return res
+            return res.strip()
 
     def message(self, mess):
         """Method called when the bot receives a message"""

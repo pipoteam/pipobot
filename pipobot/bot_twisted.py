@@ -75,8 +75,7 @@ class TwistedBot(TestBot):
         args = args[0]
         if args is not None:
             ret = self.decode_module_message(args)
+            msg = "%s %s\n" % (color("<%s>" % self.name, self.color), ret)
  
             for client in self.client_facto.clients:
-                msg = "%s %s\n" % (color("<%s>" % self.name, self.color),
-                                   ret.strip())
                 client.transport.write(msg.encode("utf-8"))
