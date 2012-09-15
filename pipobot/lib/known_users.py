@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
+# TODO: si on se réenregistre ça fout la m***
 import logging
 from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.orm import relationship
@@ -81,9 +82,10 @@ class KnownUser(Base):
             usersjid = bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == pseudo).first()
             if usersjid:
                 return usersjid.user
-        user = bot.session.query(KnownUser).filter(KnownUser.pseudo == pseudo).first()
-        if user:
-            return user
+        # Authentication via pseudo… Looks like it's not secure enough ;)
+        #user = bot.session.query(KnownUser).filter(KnownUser.pseudo == pseudo).first()
+        #if user:
+            #return user
         jid = bot.occupants.pseudo_to_jid(pseudo)
         if jid:
             usersjid = bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == jid).first()
