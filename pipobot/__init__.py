@@ -166,7 +166,7 @@ class PipoBotManager(object):
 
         test_mods = []
         if unit_test:
-            test_mods, modules = loader.get_modules(self._config.unittest_mods,
+            test_mods, modules = loader.get_modules(self._config.testing_modules,
                                                     self._config.check_modules,
                                                     unit_test=True)
         else:

@@ -7,7 +7,8 @@ arch=("any")
 url="https://github.com/pipoteam/pipobot"
 license=('GPL')
 depends=('python2' 'python2-sleekxmpp' 'python2-yaml' 'python2-sqlalchemy' )
-optdepends=("pipobot-modules: a set of modules to add functionalities to pipobot") 
+optdepends=("pipobot-modules: a set of modules to add functionalities to pipobot"
+            "twisted: used for the testing mode of pipobot (to test modules without an XMPP server)")
 makedepends=('python2')
 install=$pkgname.install
 #"https://github.com/pipoteam/pipobot/zipball/@$pkgver"

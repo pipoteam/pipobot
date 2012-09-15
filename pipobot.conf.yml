@@ -56,6 +56,21 @@ groups:
         - vdm
         - xhtml
 
+#This list of module will be used when pipobot is started with one of the following flags :
+#   --interract, --script, --unit-test
+testing:
+    - cmdfu
+    - url
+    - bashfr
+    - spell
+    - chiffres_lettres
+    - date
+    - getjid
+    - google
+    - ola
+    - reminder
+    - xhtml
+
 #Specific configuration of modules
 #Please refer to the documentation of these modules
 modules_config:

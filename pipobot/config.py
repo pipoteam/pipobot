@@ -29,7 +29,7 @@ class Configuration(object):
     __slots__ = ('log_level', 'daemonize', 'check_modules', 'pid_file',
                  'rooms', 'logpath', 'xmpp_logpath', 'database', 'lang',
                  'extra_modules', 'modules_conf', 'unit_test', 'script',
-                 'interract', 'unittest_mods')
+                 'interract', 'testing_modules')
 
     # Default values
     DEFAULT_CONF_FILE = "/etc/pipobot.conf.yml"
@@ -111,7 +111,7 @@ class Configuration(object):
             _abort("You need to specify a database engine !")
 
         # Unit test modules
-        self.unittest_mods = data.get("unit_test", [])
+        self.testing_modules = data.get("testing", [])
 
         # Module groups
         module_groups = {}
