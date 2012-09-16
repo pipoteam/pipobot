@@ -123,6 +123,7 @@ class KnownUsersManager(SyncModule):
         desc += "\nuser hllvl [<pseudo>] <lvl> [<pseudo>]: sets the Highlight Level of <pseudo> (defaults: you) to <lvl>"
         desc += "\nuser permlvl [<pseudo>]: prints the Permission Level of <pseudo> (defaults: you)"
         desc += "\nuser permlvl [<pseudo>] <lvl> [<pseudo>]: sets the Permission Level of <pseudo> (defaults: you) to <lvl>"
+        desc += "\nuser nick <pseudo>: sets your pseudo to <pseudo>"
         SyncModule.__init__(self,
                 bot,
                 desc=desc,
