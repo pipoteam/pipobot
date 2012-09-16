@@ -24,10 +24,11 @@ def color(txt, color_name):
 class UnitTest:
     __usable = False
 
-    def __init__(self, cmd, desc=None, sender="test", pre_hook=None, post_hook=None):
+    def __init__(self, cmd, desc=None, sender="test", tst_fct=None, pre_hook=None, post_hook=None):
         self.cmd = cmd
         self.desc = desc if desc is not None else "Testing %s" % cmd
         self.sender = sender
+        self.tst_fct = tst_fct
         self.pre_hook = pre_hook
         self.post_hook = post_hook
 
@@ -45,7 +46,10 @@ class UnitTest:
         logger.debug(self.cmd)
         res = bot.create_msg(self.sender, self.cmd)
         logger.debug(res)
-        error, msg = self.check_test(res)
+        if self.tst_fct is not None:
+            error, msg = self.tst_fct(res)
+        else:
+            error, msg = self.check_test(res)
         print self.gen_report(error, msg, self.desc)
         if self.post_hook is not None:
             self.post_hook()
@@ -55,7 +59,7 @@ class ReTest(UnitTest):
     __usable = False
 
     def __init__(self, cmd, expected, desc=None, sender='test', pre_hook=None, post_hook=None):
-        UnitTest.__init__(self, cmd, desc, sender, pre_hook, post_hook)
+        UnitTest.__init__(self, cmd, desc, sender=sender, pre_hook=pre_hook, post_hook=post_hook)
         expected = expected if type(expected) is list else [expected]
         self.regexps = map(re.compile, expected)
 
@@ -73,7 +77,7 @@ class ExactTest(UnitTest):
     __usable = False
 
     def __init__(self, cmd, expected, desc=None, sender='test', pre_hook=None, post_hook=None):
-        UnitTest.__init__(self, cmd, desc, sender, pre_hook, post_hook)
+        UnitTest.__init__(self, cmd, desc=desc, sender=sender, pre_hook=pre_hook, post_hook=post_hook)
         self.expected = expected if type(expected) is list else [expected]
 
     def check_test(self, res):
