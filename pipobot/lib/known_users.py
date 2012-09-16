@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-# TODO: si on se réenregistre ça fout la m***
 import logging
 from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.orm import relationship
@@ -64,7 +63,6 @@ class KnownUser(Base):
 
     def has_the_power_on(self, other, chan):
         if not other:
-            print 'other does not exist'
             return True
         if self == other:
             return True
@@ -116,14 +114,15 @@ class Chans(Base):
 
 class KnownUsersManager(SyncModule):
     def __init__(self, bot):
-        desc = "user: shows this help"
-        desc += "\nuser register <args>: register user <pseudo> (defaults: you) with JID(s) <jid(s)> (defaults: your JID)"
-        desc += "\nuser show: prints the whole Knows Users database"
-        desc += "\nuser show <pseudo>: prints informations about <pseudo> (can also be 'me')"
-        desc += "\nuser hllvl [<pseudo>]: prints the Highlight Level of <pseudo> (defaults: you)"
-        desc += "\nuser hllvl [<pseudo>] <lvl> [<pseudo>]: sets the Highlight Level of <pseudo> (defaults: you) to <lvl>"
-        desc += "\nuser permlvl [<pseudo>]: prints the Permission Level of <pseudo> (defaults: you)"
-        desc += "\nuser permlvl [<pseudo>] <lvl> [<pseudo>]: sets the Permission Level of <pseudo> (defaults: you) to <lvl>"
+        desc = _("user: shows this help")
+        desc += _("\nuser register <args>: register user <pseudo> (defaults: you) with JID(s) <jid(s)> (defaults: your JID)")
+        desc += _("\nuser show: prints the whole Knows Users database")
+        desc += _("\nuser show <pseudo>: prints informations about <pseudo> (can also be 'me')")
+        desc += _("\nuser hllvl [<pseudo>]: prints the Highlight Level of <pseudo> (defaults: you)")
+        desc += _("\nuser hllvl [<pseudo>] <lvl> [<pseudo>]: sets the Highlight Level of <pseudo> (defaults: you) to <lvl>")
+        desc += _("\nuser permlvl [<pseudo>]: prints the Permission Level of <pseudo> (defaults: you)")
+        desc += _("\nuser permlvl [<pseudo>] <lvl> [<pseudo>]: sets the Permission Level of <pseudo> (defaults: you) to <lvl>")
+        desc += _("\nuser nick <pseudo>: sets your pseudo to <pseudo>")
         SyncModule.__init__(self,
                 bot,
                 desc=desc,
@@ -186,7 +185,7 @@ class KnownUsersManager(SyncModule):
         for jid in jids:
             check = KnownUser.get(jid, self.bot)
             if check:
-                ret = "%s: %s est associé aux JID(s) " % (sender, check.pseudo)
+                ret = _("%s: %s is associated to JID(s) " % (sender, check.pseudo))
                 for jid in check.jids:
                     ret += '%s ' % jid.jid
                 return ret

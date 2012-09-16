@@ -158,16 +158,18 @@ class SyncModule(BotModule):
     def __init__(self, bot, desc, command, pm_allowed=True, lock_time=1):
         BotModule.__init__(self, bot, desc)
         self.command = command
-        self.pm_allowed = pm_allowed
-        self.fcts = {}
+        self.fcts = []
+        self.default = None
         for _, method in inspect.getmembers(self, predicate=inspect.ismethod):
             try:
                 handlerarg = getattr(method, "subcommand")
-                if type(handlerarg) == tuple:
+                if handlerarg == "default":
+                    self.default = method
+                elif type(handlerarg) == tuple:
                     for sub_fct in handlerarg:
-                        self.fcts[sub_fct] = method
+                        self.fcts.append((sub_fct, method))
                 else:
-                    self.fcts[handlerarg] = method
+                    self.fcts.append((handlerarg, method))
             except AttributeError:
                 pass
         if lock_time > 0:
@@ -214,23 +216,23 @@ class SyncModule(BotModule):
         cmd_name = splitted_args[0].strip()
         cmd_args = splitted_args[1].strip() if len(splitted_args) > 1 else ""
 
-        for key in self.fcts.keys():
+        for key, fct in self.fcts:
             # if in the module there is a method with @answercmd(cmd_name)
             if key == cmd_name:
                 try:
-                    return self.fcts[cmd_name](sender, cmd_args)
+                    return fct(sender, cmd_args)
                 except KeyError:
                     return _("The %s command requires args") % self.command
             else:
                 # We check if the method is not defined by a regexp matching cmd_name
                 s = re.match(key, args)
                 if s is not None:
-                    return self.fcts[key](sender, s)
-        try:
-            return self.fcts["default"](sender, args)
-        except KeyError:
-            return u"La commande %s n'existe pas pour %s ou la syntaxe de !%s %s est incorrecte → !help %s pour plus d'information" %  \
-                (cmd_name, self.command, self.command, cmd_name, self.command)
+                    return fct(sender, s)
+        if self.default is not None:
+            return self.default(sender, args)
+        else:
+            return "La commande %s n'existe pas pour %s ou la syntaxe de !%s %s est incorrecte → !help %s pour plus d'information" %  \
+                        (cmd_name, self.command, self.command, cmd_name, self.command)
 
     def help(self, body):
         if body == self.command:
@@ -247,15 +249,18 @@ class MultiSyncModule(BotModule):
 
         self.commands = commands
         self.pm_allowed = pm_allowed
-        self.fcts = {}
+        self.fcts = []
+        self.default = None
         for _, method in inspect.getmembers(self, predicate=inspect.ismethod):
             try:
                 handlerarg = getattr(method, "subcommand")
-                if type(handlerarg) == tuple:
+                if handlerarg == "default":
+                    self.default = method
+                elif type(handlerarg) == tuple:
                     for sub_fct in handlerarg:
-                        self.fcts[sub_fct] = method
+                        self.fcts.append((sub_fct, method))
                 else:
-                    self.fcts[handlerarg] = method
+                    self.fcts.append((handlerarg, method))
             except AttributeError:
                 pass
 
@@ -266,7 +271,11 @@ class MultiSyncModule(BotModule):
         if command not in self.commands:
             raise ModuleException(_("Command %s not handled by this module") % command)
 
-        module_answer = self.fcts["default"](command, sender, args)
+        if self.default is not None:
+            module_answer = self.default(command, sender, args)
+        else:
+            logger.error(_("MultisyncModule must define a “@defaultcmd” method"))
+            module_answer = None
         return module_answer
 
     def help(self, body):
