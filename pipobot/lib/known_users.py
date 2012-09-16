@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-# TODO: si on se réenregistre ça fout la m***
 import logging
 from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.orm import relationship
