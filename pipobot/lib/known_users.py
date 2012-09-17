@@ -212,7 +212,7 @@ class KnownUsersManager(SyncModule):
         elif message.string[5:]:
             user = message.string[5:].strip()
         if user:
-            knownuser = KnownUser.get(user, self.bot)
+            knownuser = KnownUser.get(user, self.bot, authviapseudo=True)
             if not knownuser:
                 return _("I don't know that %s…" % user)
             ret = _('%s: Your Highlight Level is %i, your Permission Level is %s, and your JID(s) are:' % (knownuser.pseudo, knownuser.hllvl, knownuser.permlvl))
