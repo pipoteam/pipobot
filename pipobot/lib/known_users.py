@@ -11,7 +11,7 @@ from pipobot.lib.modules import SyncModule, defaultcmd, answercmd
 def minpermlvl(lvl):
     def wrapper(fct):
         def wrapped(self, sender, message):
-            user = KnownUser.get(sender, self.bot)
+            user = KnownUser.get(sender, self.bot, authviapseudo=False)
             if not user:
                 return _("%s: You are not even registered…" % sender)
             if user.get_permlvl(self.bot.chatname) < lvl:
@@ -166,7 +166,7 @@ class KnownUsersManager(SyncModule):
         if not jids:
             jids.append(self.bot.occupants.pseudo_to_jid(pseudo))
 
-        senderuser = KnownUser.get(sender, self.bot)
+        senderuser = KnownUser.get(sender, self.bot, authviapseudo=False)
         if pseudo != sender:
             if not senderuser:
                 return _("I don't know you %s…" % sender)
@@ -176,7 +176,7 @@ class KnownUsersManager(SyncModule):
         targetuser = None
         newtargetuser = False
         if pseudo or not senderuser:
-            targetuser = KnownUser.get(pseudo, self.bot)
+            targetuser = KnownUser.get(pseudo, self.bot, authviapseudo=True)
             if not targetuser:
                 newtargetuser = True
                 targetuser = KnownUser(pseudo=pseudo)
@@ -189,7 +189,7 @@ class KnownUsersManager(SyncModule):
             targetuser = senderuser
 
         for jid in jids:
-            check = KnownUser.get(jid, self.bot)
+            check = KnownUser.get(jid, self.bot, authviapseudo=False)
             if check:
                 ret = _("%s: %s is associated to JID(s) " % (sender, check.pseudo))
                 for jid in check.jids:
@@ -240,13 +240,17 @@ class KnownUsersManager(SyncModule):
                 pseudo = arg
         if not pseudo:
             pseudo = sender
-        user = KnownUser.get(pseudo, self.bot)
+        user = KnownUser.get(pseudo, self.bot, authviapseudo=True)
         if not user:
             return _("I don't know you, %s…" % sender)
         if not lvl:
             return _('%s: Your Highlight Level is %i' % (user.pseudo, user.hllvl))
 
-        senderuser = KnownUser.get(sender, self.bot)
+        user = KnownUser.get(pseudo, self.bot, authviapseudo=False)
+        if not user:
+            return _("%s: I don't trust you…" % sender)
+
+        senderuser = KnownUser.get(sender, self.bot, authviapseudo=False)
         if not senderuser:
             return _("I don't know you, %s…" % sender)
 
@@ -269,7 +273,7 @@ class KnownUsersManager(SyncModule):
                 pseudo = arg
         if not pseudo:
             pseudo = sender
-        user = KnownUser.get(pseudo, self.bot)
+        user = KnownUser.get(pseudo, self.bot, authviapseudo=True)
         if not user:
             return _("I don't know you, %s…" % sender)
         if not lvl:
@@ -278,7 +282,11 @@ class KnownUsersManager(SyncModule):
                 ret += _(", and you have specials rights on some chans: %s" % user.chanperms)
             return ret
 
-        senderuser = KnownUser.get(sender, self.bot)
+        user = KnownUser.get(pseudo, self.bot, authviapseudo=False)
+        if not user:
+            return _("%s: I don't trust you…" % sender)
+
+        senderuser = KnownUser.get(sender, self.bot, authviapseudo=False)
         if not senderuser:
             return _("I don't know you, %s…" % sender)
 
@@ -311,7 +319,7 @@ class KnownUsersManager(SyncModule):
 
     @answercmd(r'nick')
     def answer_nick(self, sender, message):
-        senderuser = KnownUser.get(sender, self.bot)
+        senderuser = KnownUser.get(sender, self.bot, authviapseudo=False)
         if not senderuser:
             return _("I don't know you, %s…" % sender)
         try:
