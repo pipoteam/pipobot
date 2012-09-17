@@ -80,7 +80,7 @@ class KnownUser(Base):
             usersjid = bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == pseudo).first()
             if usersjid:
                 return usersjid.user
-            else: 
+            else:
                 return None
         # Authentication via pseudo… Looks like it's not secure enough ;)
         #user = bot.session.query(KnownUser).filter(KnownUser.pseudo == pseudo).first()
@@ -174,9 +174,11 @@ class KnownUsersManager(SyncModule):
                 return _("I don't trust you, %s…" % sender)
 
         targetuser = None
+        newtargetuser = False
         if pseudo or not senderuser:
             targetuser = KnownUser.get(pseudo, self.bot)
             if not targetuser:
+                newtargetuser = True
                 targetuser = KnownUser(pseudo=pseudo)
                 self.bot.session.add(targetuser)
                 self.bot.session.commit()
@@ -192,6 +194,9 @@ class KnownUsersManager(SyncModule):
                 ret = _("%s: %s is associated to JID(s) " % (sender, check.pseudo))
                 for jid in check.jids:
                     ret += '%s ' % jid.jid
+                if newtargetuser:
+                    self.bot.session.delete(targetuser)
+                    self.bot.session.commit()
                 return ret
             j = KnownUsersJIDs(jid, targetuser.kuid)
             self.bot.session.add(j)
