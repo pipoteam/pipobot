@@ -60,7 +60,6 @@ class KnownUser(Base):
                 break
         return self.permlvl
 
-
     def has_the_power_on(self, other, chan):
         if not other:
             return True
@@ -75,7 +74,7 @@ class KnownUser(Base):
         return False
 
     @staticmethod
-    def get(pseudo, bot):
+    def get(pseudo, bot, authviapseudo=False):
         if '@' in pseudo:
             usersjid = bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == pseudo).first()
             if usersjid:
@@ -83,9 +82,10 @@ class KnownUser(Base):
             else:
                 return None
         # Authentication via pseudo… Looks like it's not secure enough ;)
-        #user = bot.session.query(KnownUser).filter(KnownUser.pseudo == pseudo).first()
-        #if user:
-            #return user
+        if authviapseudo:
+            user = bot.session.query(KnownUser).filter(KnownUser.pseudo == pseudo).first()
+            if user:
+                return user
         jid = bot.occupants.pseudo_to_jid(pseudo)
         if jid:
             usersjid = bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == jid).first()
@@ -182,7 +182,7 @@ class KnownUsersManager(SyncModule):
                 targetuser = KnownUser(pseudo=pseudo)
                 self.bot.session.add(targetuser)
                 self.bot.session.commit()
-                targetuser = KnownUser.get(pseudo, self.bot)
+                targetuser = KnownUser.get(pseudo, self.bot, authviapseudo=True)
             elif not senderuser.has_the_power_on(targetuser, self.bot.chatname):
                 return _("%s: %s is already registered, and you can't modify his settings" % (senderuser.pseudo, targetuser.pseudo))
         else:
