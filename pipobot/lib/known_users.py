@@ -80,6 +80,8 @@ class KnownUser(Base):
             usersjid = bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == pseudo).first()
             if usersjid:
                 return usersjid.user
+            else: 
+                return None
         # Authentication via pseudo… Looks like it's not secure enough ;)
         #user = bot.session.query(KnownUser).filter(KnownUser.pseudo == pseudo).first()
         #if user:
