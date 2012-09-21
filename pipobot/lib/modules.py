@@ -73,9 +73,9 @@ class BotModule(object):
             return
 
         #If `mess` is a private message but privmsg are not allowed for the module
-        if mess["type"] == "chat" and not self.pm_allowed :
+        if mess["type"] == "chat" and not self.pm_allowed:
             return
-        try :
+        try:
             #Calling the answer method of the module
             if isinstance(self, SyncModule):
                 # Separates command/args and get answer from module
@@ -93,39 +93,13 @@ class BotModule(object):
                 # A not specified module type !
                 return
 
-            #If the method is just a string, it will be the bot's answer
-            if type(send) == str or type(send) == unicode:
-                self.bot.say(send, in_reply_to=mess)
-                return send
-
-            #If it's a list we display each message with a time delay
-            elif type(send) == list:
-                for line in send:
-                    time.sleep(0.3)
-                    self.bot.say(line, in_reply_to=mess)
-                return send
-
-            #If it's a dictionary, it is {"text": raw_message,    # Text message, transform XHTML if empty
-            #                             "xhtml" : xhtml_message # XHTML message
-            #                             "monospace" : True      # XHTML message is the text with monospace
-            #                             "users" : { "pseudo1" : {...} } # Send the same type of dictionnary
-            #                                                               in private to the users
-            #                            }
-            elif type(send) == dict:
-                self._dict_messages(send, mess)
-                return send
-
-            else:
-                #In any other case, an error has occured in the module
-                if send is not None:
-                    msg = _("Error from module %s : %s") % (command, send)
-                    self.bot.say(msg)
-                    return msg
+            return send
         except:
             self.bot.say(_("Error !"))
-            logger.error(_("Error from module %s : %s") % (self.__class__, traceback.format_exc().decode("utf-8")))
+            logger.error(_("Error from module %s : %s") % (self.__class__,
+                                                           traceback.format_exc().decode("utf-8")))
 
-    def _dict_messages(self, send, mess, priv=None):
+    def gen_xhtml(self, send, mess, priv=None):
         """ Creates messages with a dictionnary described as :
                {"text": raw_message,    # Text message, transform XHTML if empty
                 "xhtml" : xhtml_message # XHTML message
@@ -133,22 +107,20 @@ class BotModule(object):
                 "users" : { "pseudo1" : {...} } # Send the same type of dictionnary
                                                   in private to the users
                }"""
-        if "xhtml" in send and "text" in send:
-            self.bot.say_xhtml(send["text"], send["xhtml"], priv=priv, in_reply_to=mess)
-        elif "text" in send and "monospace" in send and send["monospace"]:
+        if "xhtml" not in send and "text" in send and "monospace" in send and send["monospace"]:
             html_msg = send["text"]
             html_msg = html_msg.replace("&", "&amp;")
             html_msg = html_msg.replace("<", "&lt;")
             html_msg = html_msg.replace(">", "&gt;")
             html_msg = '<p><span style="font-family: monospace">%s</span></p>' % html_msg.replace("\n", "<br/>\n")
             #TODO others characters to convert ?
-            self.bot.say_xhtml(send["text"], html_msg, priv=priv, in_reply_to=mess)
-        else:
-            self.bot.say(send["text"], priv=priv, in_reply_to=mess)
+            send["xhtml"] = html_msg
+        return send
 
-        if "users" in send:
-            for user, send_user in send["users"]:
-                self._dict_messages(send_user, mess, priv=user)
+#        if "users" in send:
+#            for user, send_user in send["users"]:
+#                self._dict_messages(send_user, mess, priv=user)
+#
 
 
 class SyncModule(BotModule):
@@ -203,8 +175,6 @@ class SyncModule(BotModule):
         t.start()
 
     def _answer(self, sender, args):
-        # if this command is called by !cmd arg1 arg2 arg3 then args = 'arg1 arg2 arg3'
-        #if self.bot
         if hasattr(self, "lock_name"):
             if getattr(self.bot, self.lock_name):
                 return _("Please do not flood !")
@@ -305,7 +275,8 @@ class AsyncModule(BotModule, threading.Thread):
             try:
                 self.action()
             except:
-                logger.error(_("Error from module %s : %s") % (self.__class__, traceback.format_exc().decode("utf-8")))
+                logger.error(_("Error from module %s : %s") % (self.__class__,
+                                                               traceback.format_exc().decode("utf-8")))
 
     def stop(self):
         self.alive = False
@@ -388,24 +359,18 @@ class Help(SyncModule):
         return {"text": res, "monospace": True}
 
     def genHelp(self):
-        sync_lst = []
-        listen_lst = []
         multi_lst = []
-        pres_lst = []
-        for cmd in self.bot.modules:
-            if isinstance(cmd, SyncModule):
-                sync_lst.append(cmd.command)
-            elif isinstance(cmd, ListenModule):
-                listen_lst.append(cmd.name)
-            elif isinstance(cmd, MultiSyncModule):
-                multi_lst.extend(cmd.commands.keys())
-            elif isinstance(cmd, PresenceModule):
-                pres_lst.append(cmd.name)
+        for cmd in self.bot.multisync_mods:
+            multi_lst.extend(cmd.commands.keys())
+        sync_lst = sorted([cmd.command for cmd in self.bot.sync_mods])
+        listen_lst = sorted([cmd.name for cmd in self.bot.listen_mods])
+        pres_lst = sorted([cmd.name for cmd in self.bot.presence_mods])
+
         delim = "*" * 10
-        sync = _(u"%s[Sync commands]%s\n%s") % (delim, delim, Help.genString(sorted(sync_lst)))
-        listen = _(u"%s[Listen commands]%s\n%s") % (delim, delim, Help.genString(sorted(listen_lst)))
-        multi = _(u"%s[Multi commands]%s\n%s") % (delim, delim, Help.genString(sorted(multi_lst)))
-        pres = _(u"%s[Presence commands]%s\n%s") % (delim, delim, Help.genString(sorted(pres_lst)))
+        sync = _(u"%s[Sync commands]%s\n%s") % (delim, delim, Help.genString(sync_lst))
+        listen = _(u"%s[Listen commands]%s\n%s") % (delim, delim, Help.genString(listen_lst))
+        multi = _(u"%s[Multi commands]%s\n%s") % (delim, delim, Help.genString(multi_lst))
+        pres = _(u"%s[Presence commands]%s\n%s") % (delim, delim, Help.genString(pres_lst))
         self.all_help_content = u"\n%s\n%s\n%s\n%s" % (sync, listen, multi, pres)
         allcmds = sync_lst + multi_lst
         self.compact_help_content = _(u"I can execute: \n%s") % Help.genString(sorted(allcmds))
@@ -451,6 +416,7 @@ class PresenceModule(BotModule):
     def help(self, body):
         if body == self.name:
             return self.desc
+
 
 class RecordUsers(PresenceModule):
     def __init__(self, bot):

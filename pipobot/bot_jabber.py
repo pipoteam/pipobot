@@ -9,6 +9,7 @@ from pipobot.lib.modules import (AsyncModule, ListenModule,
                                  MultiSyncModule, PresenceModule,
                                  SyncModule, IQModule)
 from pipobot.lib.user import Occupants
+from pipobot.bot import PipoBot
 
 logger = logging.getLogger('pipobot.bot_jabber')
 
@@ -25,22 +26,16 @@ class XMPPException(Exception):
 XML_NAMESPACE = 'http://www.w3.org/1999/xhtml'
 _muc_xml = "{http://jabber.org/protocol/muc#user}status"
 
-class BotJabber(sleekxmpp.ClientXMPP):
+
+class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
     """The implementation of a bot for jabber MUC"""
 
     def __init__(self, login, passwd, res, chat, name, modules, session):
-        self.chatname = chat
-
-        sleekxmpp.ClientXMPP.__init__(self, login, passwd, ssl = True)
-
-        #The nickname the bot will use to join rooms
-        #This nickname will be set by the reception of a presence message
-        #after joining the room
-        self.name = name
+        sleekxmpp.ClientXMPP.__init__(self, login, passwd, ssl=True)
 
         logger.info("Connecting to %s", chat)
         #Connecting
-        con = self.connect(reattempt = False)
+        con = self.connect(reattempt=False)
         if not con:
             logger.error(_("Unable to connect !"))
             raise XMPPException(_("Unable to connect !"))
@@ -55,75 +50,47 @@ class BotJabber(sleekxmpp.ClientXMPP):
         self.add_event_handler("groupchat_presence", self.presence)
         self.add_event_handler("failed_auth", self.failed_auth)
 
-        self.session = session
+        PipoBot.__init__(self, name, chat, modules, session)
 
-        # Creating bot module instances
-        self.modules = []
-        for classe in modules:
-            logger.debug("Registering %s", classe)
-            obj = classe(self)
-            self.modules.append(obj)
-
-        #If set to True, the bot will not be able to send messages
-        self.mute = False
-        self.alive = True
-
-        #We will stock in it informations about users that join/leave
-        self.occupants = Occupants()
-        
         self.process(threaded=True)
 
     def failed_auth(self, event):
         logger.error(_("Unable to authenticate !"))
 
     def connect_muc(self, event):
-        for module in self.modules:
-            if isinstance(module, AsyncModule):
-                module.start()
         self.send_presence()
         muc = self.plugin["xep_0045"]
         join = muc.joinMUC(self.chatname, self.name)
         hello_msg = _("Hello everyone !")
-        self.send_message(mto = self.chatname, mbody = hello_msg, mtype = "groupchat")
+        self.send_message(mto=self.chatname, mbody=hello_msg, mtype="groupchat")
 
     def message(self, mess):
         """Method called when the bot receives a message"""
         #We ignore messages in some cases :
+        #   - the bot is muted
         #   - it has a subject (change of room topic for instance)
-        #   - it is a 'delay' message (backlog at room join)
         #   - the message is empty
         if self.mute                 \
-           or mess["subject"] != ""  \
-           or mess["body"] == "" :
+            or mess["subject"] != ""  \
+            or mess["body"] == "":
                 return
-        
-        #First we look if a SyncModule matches
-        for module in self.modules:
-            if (isinstance(module, SyncModule) or
-                isinstance(module, MultiSyncModule)):
-                ret = module.do_answer(mess)
-                if ret is not None:
-                    return
 
-        #If no SyncModule was concerned by the message, we look for a ListenModule
-        for module in self.modules:
-            if isinstance(module, ListenModule):
-                module.do_answer(mess)
+        result = self.module_answer(mess)
+        if type(result) is list:
+            for to_send in result:
+                self.say(to_send, in_reply_to=mess)
+        else:
+            self.say(result, in_reply_to=mess)
 
     def kill(self):
         """Method used to kill the bot"""
 
-        #We kill the thread
-        self.alive = False
         #The bot says goodbye
         self.say(_(u"I’ve been asked to leave you"))
         #The bot leaves the room
-        logger.info("Killing %s", self.chatname)
         self.disconnect(wait=True)
 
-        for module in self.modules:
-            if isinstance(module, AsyncModule):
-                module.stop()
+        self.stop_modules()
 
     def forge_message(self, mess, priv=None, in_reply_to=None):
         """Method used to send a message in a the room"""
@@ -140,34 +107,39 @@ class BotJabber(sleekxmpp.ClientXMPP):
             if mtyp == "chat":
                 mto = in_reply_to["from"]
 
-        msg = self.make_message(mto, mbody = mess, mtype = mtyp)
+        msg = self.make_message(mto, mbody=mess, mtype=mtyp)
         return msg
 
-    def forge_xhtml(self, mess, mess_xhtml, priv=None, in_reply_to=None):
+    def forge(self, mess, priv=None, in_reply_to=None):
         """Sending an xhtml message in the room"""
 
+        #It is an XHTML message !
         #The message is created from mess, in case some clients does not support XHTML (xep-0071)
-        msg = self.forge_message(mess, priv, in_reply_to)
-        #We prepare the XHTML node
-        if type(mess_xhtml) == unicode:
-            mess_xhtml = mess_xhtml.encode("utf8")
-        msg["html"]["body"] = mess_xhtml
-
+        if type(mess) is dict and "xhtml" in mess:
+            msg = self.forge_message(mess["text"],
+                                     priv=priv,
+                                     in_reply_to=in_reply_to)
+            mess_xhtml = mess["xhtml"]
+            if type(mess_xhtml) is unicode:
+                mess_xhtml = mess_xhtml.encode("utf-8")
+            msg["html"]["body"] = mess_xhtml
+        else:
+            msg = self.forge_message(mess, priv=None, in_reply_to=None)
         return msg
-    
-    def say(self, *args, **kwargs) :
+
+    def say(self, msg, priv=None, in_reply_to=None):
         """The method to call to make the bot sending messages"""
         #If the bot has not been disabled
         if not self.mute:
-            msg = self.forge_message(*args, **kwargs)
-            msg.send()
-
-    def say_xhtml(self, *args, **kwargs):
-        """Method to talk in xhtml"""
-        #If the bot has not been disabled
-        if not self.mute:
-            msg = self.forge_xhtml(*args, **kwargs)
-            msg.send()
+            if type(msg) is str or type(msg) is unicode:
+                self.forge(msg, priv=priv, in_reply_to=in_reply_to).send()
+            elif type(msg) is list:
+                for line in msg:
+                    time.sleep(0.3)
+                    self.forge(line, priv=priv, in_reply_to=in_reply_to).send()
+            elif type(msg) is dict:
+                if not "user" in msg:
+                    self.forge(msg, priv=priv, in_reply_to=in_reply_to).send()
 
     def presence(self, mess):
         """Method called when the bot receives a presence message.
@@ -181,16 +153,10 @@ class BotJabber(sleekxmpp.ClientXMPP):
             #No "status code" in the message
             pass
 
-        for module in self.modules:
-            if isinstance(module, PresenceModule):
-                module.do_answer(mess)
-        
-    def disable_mute(self):
-        """To give the bot its voice again"""
-        self.mute = False
+        for module in self.presence_mods:
+            module.do_answer(mess)
 
     def iq(self, conn, iqdata):
         """Method called when the bot receives an IQ message"""
-        for module in self.modules:
-            if isinstance(module, IQModule):
-                module.do_answer(iqdata)
+        for module in self.iq_mods:
+            module.do_answer(iqdata)

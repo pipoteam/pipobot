@@ -7,6 +7,7 @@ from pipobot.lib.modules import (AsyncModule, ListenModule,
                                  MultiSyncModule, PresenceModule,
                                  SyncModule, IQModule)
 from pipobot.lib.user import Occupants
+from pipobot.bot import PipoBot
 
 logger = logging.getLogger('pipobot.bot_jabber')
 
@@ -23,35 +24,18 @@ class ForgedMsg(dict):
         self["body"] = body
 
 
-class TestBot:
+class TestBot(PipoBot):
     def __init__(self, modules, session):
-
-        self.chatname = "test@unit_test.tld"
-        self.name = "pipotest"
+        PipoBot.__init__(self, "pipotest", "test@unit_test.tld", modules, session)
 
         logger.info("Starting console bot in fake room %s" % self.chatname)
 
         self.session = session
 
-        # Creating bot module instances
-        self.modules = []
-        for classe in modules:
-            logger.debug("Registering %s", classe)
-            obj = classe(self)
-            # Since we are in test mode, we remove time constraints
-            if isinstance(obj, SyncModule):
-                if hasattr(obj, "lock_name"):
-                    del obj.lock_name
-            if isinstance(obj, AsyncModule):
-                obj.start()
-            self.modules.append(obj)
-
-        #If set to True, the bot will not be able to send messages
-        self.mute = False
-        self.alive = True
-
-        #We will stock in it informations about users that join/leave
-        self.occupants = Occupants()
+        # Since we are in test mode, we remove time constraints
+        for module in self.sync_mods:
+            if hasattr(module, "lock_name"):
+                del module.lock_name
 
     def create_msg(self, frm, content):
         """ Creates a fake message and returns the bot response """
@@ -79,38 +63,12 @@ class TestBot:
         #   - it has a subject (change of room topic for instance)
         #   - it is a 'delay' message (backlog at room join)
         #   - the message is empty
-        if self.mute:
-            return
-
-        #First we look if a SyncModule matches
-        for module in self.modules:
-            if (isinstance(module, SyncModule) or
-                isinstance(module, MultiSyncModule)):
-                ret = module.do_answer(mess)
-                if ret is not None:
-                    ret = self.decode_module_message(ret)
-                    return ret
-
-        ret = None
-        #If no SyncModule was concerned by the message, we look for a ListenModule
-        for module in self.modules:
-            if isinstance(module, ListenModule):
-                rep = module.do_answer(mess)
-                ret = self.decode_module_message(rep)
-
-        return ret
-
-
-    def forge_message(self, mess, priv=None, in_reply_to=None):
-        """Method used to send a message in a the room"""
-
-        return mess
-
-    def forge_xhtml(self, mess, mess_xhtml, priv=None, in_reply_to=None):
-        """Sending an xhtml message in the room"""
-
-        #The message is created from mess, in case some clients does not support XHTML (xep-0071)
-        return self.forge_message(mess, priv, in_reply_to)
+        ret = self.module_answer(mess)
+        if type(ret) is list:
+            result = "\n".join(map(self.decode_module_message, ret))
+        else:
+            result = self.decode_module_message(ret)
+        return result
 
     def say(self, *args, **kwargs):
         """The method to call to make the bot sending messages"""
@@ -122,12 +80,5 @@ class TestBot:
         #If the bot has not been disabled
         return self.say(args, kwargs)
 
-    def disable_mute(self):
-        """To give the bot its voice again"""
-        self.mute = False
-
     def kill(self):
-        for module in self.modules:
-            if isinstance(module, ListenModule):
-                module.stop()
-        return
+        self.stop_modules()

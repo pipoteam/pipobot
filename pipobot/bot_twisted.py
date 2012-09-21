@@ -39,11 +39,11 @@ class MultiClientEcho(Protocol):
             msg = "%s %s\n" % (color("<%s>" % self.username, self.color),
                                data.strip())
 
-        #Broadcast message to all clients
-        for client in self.factory.clients:
-            client.transport.write(msg)
+            msg += "%s\n" % self.factory.bot.create_msg(self.username, data.strip())
 
-        self.factory.bot.create_msg(self.username, data.strip())
+        #Broadcast message to all clients + bot answer
+        for client in self.factory.clients:
+            client.transport.write(msg.encode("utf-8"))
 
     def connectionLost(self, reason):
         self.factory.clients.remove(self)
@@ -76,6 +76,6 @@ class TwistedBot(TestBot):
         if args is not None:
             ret = self.decode_module_message(args)
             msg = "%s %s\n" % (color("<%s>" % self.name, self.color), ret)
- 
+
             for client in self.client_facto.clients:
                 client.transport.write(msg.encode("utf-8"))
