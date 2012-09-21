@@ -25,13 +25,14 @@ class XMPPException(Exception):
 XML_NAMESPACE = 'http://www.w3.org/1999/xhtml'
 _muc_xml = "{http://jabber.org/protocol/muc#user}status"
 
+
 class BotJabber(sleekxmpp.ClientXMPP):
     """The implementation of a bot for jabber MUC"""
 
     def __init__(self, login, passwd, res, chat, name, modules, session):
         self.chatname = chat
 
-        sleekxmpp.ClientXMPP.__init__(self, login, passwd, ssl = True)
+        sleekxmpp.ClientXMPP.__init__(self, login, passwd, ssl=True)
 
         #The nickname the bot will use to join rooms
         #This nickname will be set by the reception of a presence message
@@ -40,14 +41,14 @@ class BotJabber(sleekxmpp.ClientXMPP):
 
         logger.info("Connecting to %s", chat)
         #Connecting
-        con = self.connect(reattempt = False)
+        con = self.connect(reattempt=False)
         if not con:
             logger.error(_("Unable to connect !"))
             raise XMPPException(_("Unable to connect !"))
 
         self.registerPlugin("xep_0045")
 
-        #When the session start (bot connected) the connect_muc method will be called
+        # When the session start (bot connected) the connect_muc method will be called
         self.add_event_handler("session_start", self.connect_muc)
 
         #sleekxmpp handlers to XMPP stanzas
@@ -70,7 +71,7 @@ class BotJabber(sleekxmpp.ClientXMPP):
 
         #We will stock in it informations about users that join/leave
         self.occupants = Occupants()
-        
+
         self.process(threaded=True)
 
     def failed_auth(self, event):
@@ -84,7 +85,7 @@ class BotJabber(sleekxmpp.ClientXMPP):
         muc = self.plugin["xep_0045"]
         join = muc.joinMUC(self.chatname, self.name)
         hello_msg = _("Hello everyone !")
-        self.send_message(mto = self.chatname, mbody = hello_msg, mtype = "groupchat")
+        self.send_message(mto=self.chatname, mbody=hello_msg, mtype="groupchat")
 
     def message(self, mess):
         """Method called when the bot receives a message"""
@@ -94,9 +95,9 @@ class BotJabber(sleekxmpp.ClientXMPP):
         #   - the message is empty
         if self.mute                 \
            or mess["subject"] != ""  \
-           or mess["body"] == "" :
+           or mess["body"] == "":
                 return
-        
+
         #First we look if a SyncModule matches
         for module in self.modules:
             if (isinstance(module, SyncModule) or
@@ -105,7 +106,7 @@ class BotJabber(sleekxmpp.ClientXMPP):
                 if ret is not None:
                     return
 
-        #If no SyncModule was concerned by the message, we look for a ListenModule
+        # If no SyncModule was concerned by the message, we look for a ListenModule
         for module in self.modules:
             if isinstance(module, ListenModule):
                 module.do_answer(mess)
@@ -140,7 +141,7 @@ class BotJabber(sleekxmpp.ClientXMPP):
             if mtyp == "chat":
                 mto = in_reply_to["from"]
 
-        msg = self.make_message(mto, mbody = mess, mtype = mtyp)
+        msg = self.make_message(mto, mbody=mess, mtype=mtyp)
         return msg
 
     def forge_xhtml(self, mess, mess_xhtml, priv=None, in_reply_to=None):
@@ -154,8 +155,8 @@ class BotJabber(sleekxmpp.ClientXMPP):
         msg["html"]["body"] = mess_xhtml
 
         return msg
-    
-    def say(self, *args, **kwargs) :
+
+    def say(self, *args, **kwargs):
         """The method to call to make the bot sending messages"""
         #If the bot has not been disabled
         if not self.mute:
@@ -184,7 +185,7 @@ class BotJabber(sleekxmpp.ClientXMPP):
         for module in self.modules:
             if isinstance(module, PresenceModule):
                 module.do_answer(mess)
-        
+
     def disable_mute(self):
         """To give the bot its voice again"""
         self.mute = False

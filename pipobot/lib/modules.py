@@ -72,10 +72,10 @@ class BotModule(object):
         if not self.is_concerned(msg_body):
             return
 
-        #If `mess` is a private message but privmsg are not allowed for the module
-        if mess["type"] == "chat" and not self.pm_allowed :
+        # If `mess` is a private message but privmsg are not allowed for the module
+        if mess["type"] == "chat" and not self.pm_allowed:
             return
-        try :
+        try:
             #Calling the answer method of the module
             if isinstance(self, SyncModule):
                 # Separates command/args and get answer from module
@@ -122,7 +122,8 @@ class BotModule(object):
                     return send
         except:
             self.bot.say(_("Error !"))
-            logger.error(_("Error from module %s : %s") % (self.__class__, traceback.format_exc().decode("utf-8")))
+            logger.error(_("Error from module %s : %s") % (self.__class__,
+                                                           traceback.format_exc().decode("utf-8")))
 
     def _dict_messages(self, send, mess, priv=None):
         """ Creates messages with a dictionnary described as :
@@ -205,7 +206,6 @@ class SyncModule(BotModule):
 
     def _answer(self, sender, args):
         # if this command is called by !cmd arg1 arg2 arg3 then args = 'arg1 arg2 arg3'
-        #if self.bot
         if hasattr(self, "lock_name"):
             if getattr(self.bot, self.lock_name):
                 return _("Please do not flood !")
@@ -313,7 +313,8 @@ class AsyncModule(BotModule, threading.Thread):
             try:
                 self.action()
             except:
-                logger.error(_("Error from module %s : %s") % (self.__class__, traceback.format_exc().decode("utf-8")))
+                logger.error(_("Error from module %s : %s") % (self.__class__,
+                                                               traceback.format_exc().decode("utf-8")))
 
     def stop(self):
         self.alive = False
@@ -445,6 +446,7 @@ class Help(SyncModule):
 ##################################  PRESENCE MODULES  #########################################
 ###############################################################################################
 
+
 class PresenceModule(BotModule):
     """ Defines a bot module that will receive all
     the presence sent on the chatroom and call answer
@@ -459,6 +461,7 @@ class PresenceModule(BotModule):
     def help(self, body):
         if body == self.name:
             return self.desc
+
 
 class RecordUsers(PresenceModule):
     def __init__(self, bot):
@@ -481,6 +484,7 @@ class RecordUsers(PresenceModule):
             except AttributeError:
                 jid = ""
             self.bot.occupants.add_user(pseudo, jid, role)
+
 
 ###############################################################################################
 ########################################  IQ MODULES  #########################################

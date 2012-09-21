@@ -143,7 +143,8 @@ class Configuration(object):
                 if not value or not isinstance(value, basestring):
                     if "chan" in kwargs:
                         _abort("Required parameter ‘rooms[%s][%s]’ not found or "
-                               "invalid in configuration file ‘%s’.", kwargs["chan"],
+                               "invalid in configuration file ‘%s’.", kwargs[
+                                   "chan"],
                                param, conf_file)
                     else:
                         _abort("One of your rooms needs a ‘chan‘ parameter")

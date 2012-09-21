@@ -163,7 +163,6 @@ class PipoBotManager(object):
         if self._config.daemonize:
             lock_fh = self._daemonize(lock_fd)
 
-
         del loader
         del self._config
 
