@@ -11,7 +11,7 @@ from pipobot.lib.modules import SyncModule, defaultcmd, answercmd
 def minpermlvl(lvl):
     def wrapper(fct):
         def wrapped(self, sender, message):
-            user = KnownUser.get(sender, self.bot)
+            user = KnownUser.get(sender, self.bot, authviapseudo=False)
             if not user:
                 return _("%s: You are not even registered…" % sender)
             if user.get_permlvl(self.bot.chatname) < lvl:
@@ -60,7 +60,6 @@ class KnownUser(Base):
                 break
         return self.permlvl
 
-
     def has_the_power_on(self, other, chan):
         if not other:
             return True
@@ -75,15 +74,18 @@ class KnownUser(Base):
         return False
 
     @staticmethod
-    def get(pseudo, bot):
+    def get(pseudo, bot, authviapseudo=False):
         if '@' in pseudo:
             usersjid = bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == pseudo).first()
             if usersjid:
                 return usersjid.user
+            else:
+                return None
         # Authentication via pseudo… Looks like it's not secure enough ;)
-        #user = bot.session.query(KnownUser).filter(KnownUser.pseudo == pseudo).first()
-        #if user:
-            #return user
+        if authviapseudo:
+            user = bot.session.query(KnownUser).filter(KnownUser.pseudo == pseudo).first()
+            if user:
+                return user
         jid = bot.occupants.pseudo_to_jid(pseudo)
         if jid:
             usersjid = bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == jid).first()
@@ -162,7 +164,7 @@ class KnownUsersManager(SyncModule):
         if not jids:
             jids.append(self.bot.occupants.pseudo_to_jid(pseudo))
 
-        senderuser = KnownUser.get(sender, self.bot)
+        senderuser = KnownUser.get(sender, self.bot, authviapseudo=False)
         if pseudo != sender:
             if not senderuser:
                 return _("I don't know you %s…" % sender)
@@ -170,24 +172,29 @@ class KnownUsersManager(SyncModule):
                 return _("I don't trust you, %s…" % sender)
 
         targetuser = None
+        newtargetuser = False
         if pseudo or not senderuser:
-            targetuser = KnownUser.get(pseudo, self.bot)
+            targetuser = KnownUser.get(pseudo, self.bot, authviapseudo=True)
             if not targetuser:
+                newtargetuser = True
                 targetuser = KnownUser(pseudo=pseudo)
                 self.bot.session.add(targetuser)
                 self.bot.session.commit()
-                targetuser = KnownUser.get(pseudo, self.bot)
+                targetuser = KnownUser.get(pseudo, self.bot, authviapseudo=True)
             elif not senderuser.has_the_power_on(targetuser, self.bot.chatname):
                 return _("%s: %s is already registered, and you can't modify his settings" % (senderuser.pseudo, targetuser.pseudo))
         else:
             targetuser = senderuser
 
         for jid in jids:
-            check = KnownUser.get(jid, self.bot)
+            check = KnownUser.get(jid, self.bot, authviapseudo=False)
             if check:
                 ret = _("%s: %s is associated to JID(s) " % (sender, check.pseudo))
                 for jid in check.jids:
                     ret += '%s ' % jid.jid
+                if newtargetuser:
+                    self.bot.session.delete(targetuser)
+                    self.bot.session.commit()
                 return ret
             j = KnownUsersJIDs(jid, targetuser.kuid)
             self.bot.session.add(j)
@@ -203,7 +210,7 @@ class KnownUsersManager(SyncModule):
         elif message.string[5:]:
             user = message.string[5:].strip()
         if user:
-            knownuser = KnownUser.get(user, self.bot)
+            knownuser = KnownUser.get(user, self.bot, authviapseudo=True)
             if not knownuser:
                 return _("I don't know that %s…" % user)
             ret = _('%s: Your Highlight Level is %i, your Permission Level is %s, and your JID(s) are:' % (knownuser.pseudo, knownuser.hllvl, knownuser.permlvl))
@@ -231,13 +238,17 @@ class KnownUsersManager(SyncModule):
                 pseudo = arg
         if not pseudo:
             pseudo = sender
-        user = KnownUser.get(pseudo, self.bot)
+        user = KnownUser.get(pseudo, self.bot, authviapseudo=True)
         if not user:
             return _("I don't know you, %s…" % sender)
         if not lvl:
             return _('%s: Your Highlight Level is %i' % (user.pseudo, user.hllvl))
 
-        senderuser = KnownUser.get(sender, self.bot)
+        user = KnownUser.get(pseudo, self.bot, authviapseudo=False)
+        if not user:
+            return _("%s: I don't trust you…" % sender)
+
+        senderuser = KnownUser.get(sender, self.bot, authviapseudo=False)
         if not senderuser:
             return _("I don't know you, %s…" % sender)
 
@@ -260,7 +271,7 @@ class KnownUsersManager(SyncModule):
                 pseudo = arg
         if not pseudo:
             pseudo = sender
-        user = KnownUser.get(pseudo, self.bot)
+        user = KnownUser.get(pseudo, self.bot, authviapseudo=True)
         if not user:
             return _("I don't know you, %s…" % sender)
         if not lvl:
@@ -269,7 +280,11 @@ class KnownUsersManager(SyncModule):
                 ret += _(", and you have specials rights on some chans: %s" % user.chanperms)
             return ret
 
-        senderuser = KnownUser.get(sender, self.bot)
+        user = KnownUser.get(pseudo, self.bot, authviapseudo=False)
+        if not user:
+            return _("%s: I don't trust you…" % sender)
+
+        senderuser = KnownUser.get(sender, self.bot, authviapseudo=False)
         if not senderuser:
             return _("I don't know you, %s…" % sender)
 
@@ -302,7 +317,7 @@ class KnownUsersManager(SyncModule):
 
     @answercmd(r'nick')
     def answer_nick(self, sender, message):
-        senderuser = KnownUser.get(sender, self.bot)
+        senderuser = KnownUser.get(sender, self.bot, authviapseudo=False)
         if not senderuser:
             return _("I don't know you, %s…" % sender)
         try:
