@@ -64,7 +64,8 @@ class ReTest(UnitTest):
         self.regexps = map(re.compile, expected)
 
     def check_test(self, res):
-        tst = any(regexp.match(res) for regexp in self.regexps)
+        tst = (res is not None) and any(regexp.match(res) for regexp in self.regexps)
+
         if tst:
             return False, ""
         else:
