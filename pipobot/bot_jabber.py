@@ -115,7 +115,10 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
 
         #It is an XHTML message !
         #The message is created from mess, in case some clients does not support XHTML (xep-0071)
-        if type(mess) is dict and "xhtml" in mess:
+        if type(mess) is dict:
+            if "xhtml" not in mess:
+                mess = self.gen_xhtml(mess)
+
             msg = self.forge_message(mess["text"],
                                      priv=priv,
                                      in_reply_to=in_reply_to)

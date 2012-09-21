@@ -99,30 +99,6 @@ class BotModule(object):
             logger.error(_("Error from module %s : %s") % (self.__class__,
                                                            traceback.format_exc().decode("utf-8")))
 
-    def gen_xhtml(self, send, mess, priv=None):
-        """ Creates messages with a dictionnary described as :
-               {"text": raw_message,    # Text message, transform XHTML if empty
-                "xhtml" : xhtml_message # XHTML message
-                "monospace" : True      # XHTML message is the text with monospace
-                "users" : { "pseudo1" : {...} } # Send the same type of dictionnary
-                                                  in private to the users
-               }"""
-        if "xhtml" not in send and "text" in send and "monospace" in send and send["monospace"]:
-            html_msg = send["text"]
-            html_msg = html_msg.replace("&", "&amp;")
-            html_msg = html_msg.replace("<", "&lt;")
-            html_msg = html_msg.replace(">", "&gt;")
-            html_msg = '<p><span style="font-family: monospace">%s</span></p>' % html_msg.replace("\n", "<br/>\n")
-            #TODO others characters to convert ?
-            send["xhtml"] = html_msg
-        return send
-
-#        if "users" in send:
-#            for user, send_user in send["users"]:
-#                self._dict_messages(send_user, mess, priv=user)
-#
-
-
 class SyncModule(BotModule):
     """ Defines a bot module that will answer/execute an action
     after a command. This is the most common case """
