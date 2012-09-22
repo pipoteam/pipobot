@@ -4,6 +4,7 @@
 
 import logging
 import sleekxmpp
+import threading
 
 from pipobot.lib.modules import (AsyncModule, ListenModule,
                                  MultiSyncModule, PresenceModule,
@@ -75,6 +76,10 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
             or mess["body"] == "":
                 return
 
+        thread = threading.Thread(target=self.answer, args=(mess,))
+        thread.start()
+
+    def answer(self, mess):
         result = self.module_answer(mess)
         if type(result) is list:
             for to_send in result:

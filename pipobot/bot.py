@@ -23,11 +23,12 @@ class PipoBot:
 
         for classe in modules:
             obj = classe(self)
-            if isinstance(obj, SyncModule):
-                self.sync_mods.append(obj)
-            elif isinstance(obj, AsyncModule):
+            if isinstance(obj, AsyncModule):
                 obj.start()
                 self.async_mods.append(obj)
+            # Not an elif here because some modules can be Async *and* Sync
+            if isinstance(obj, SyncModule):
+                self.sync_mods.append(obj)
             elif isinstance(obj, ListenModule):
                 self.listen_mods.append(obj)
             elif isinstance(obj, MultiSyncModule):
