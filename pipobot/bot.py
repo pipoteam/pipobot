@@ -41,6 +41,11 @@ class PipoBot:
         self.mute = False
         self.occupants = Occupants()
 
+    @property
+    def modules(self):
+        return (self.async_mods + self.iq_mods + self.listen_mods +
+                self.multisync_mods + self.presence_mods + self.sync_mods)
+
     def stop_modules(self):
         logger.info(u"Killing %s" % self.chatname)
         for module in self.async_mods:
