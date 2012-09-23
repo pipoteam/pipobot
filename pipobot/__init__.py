@@ -6,6 +6,7 @@ import os
 import pwd
 import signal
 import sys
+import unittest
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -16,6 +17,7 @@ from pipobot.lib.bdd import Base
 from pipobot.lib.loader import BotModuleLoader
 from pipobot.translation import setup_i18n
 from pipobot.bot_jabber import BotJabber, XMPPException
+from pipobot.lib.module_test import ModuleTest
 from pipobot.bot_test import TestBot
 
 LOGGER = logging.getLogger('pipobot.manager')
@@ -190,8 +192,10 @@ class PipoBotManager(object):
         if not self._config.check_modules:
             if self._config.unit_test:
                 bot = TestBot(modules, self._db_session)
-                for mod in test_mods:
-                    mod(bot).test_all()
+                suite = unittest.TestSuite()
+                for test in test_mods:
+                    suite.addTests(ModuleTest.parametrize(test, bot=bot))
+                unittest.TextTestRunner(verbosity=2).run(suite)
 
             elif self._config.script:
                 bot = TestBot(modules, self._db_session)

@@ -4,9 +4,10 @@ import inspect
 import imp
 import logging
 import sys
+import unittest
 from pipobot.lib.modules import Help, RecordUsers, BotModule
-from pipobot.lib.unittest import GroupUnitTest
 from pipobot.lib.known_users import KnownUsersManager
+from pipobot.lib.module_test import ModuleTest
 
 logger = logging.getLogger('pipobot.lib.loader')
 
@@ -38,7 +39,7 @@ class BotModuleLoader(object):
         class.
         """
 
-        return (inspect.isclass(obj) and issubclass(obj, GroupUnitTest)
+        return (inspect.isclass(obj) and issubclass(obj, ModuleTest)
                 and not hasattr(obj, '_%s__usable' % obj.__name__))
 
     def get_modules(self, module_names, check=False, unit_test=False):
