@@ -154,12 +154,12 @@ class SyncModule(BotModule) :
         self.command = command
         self.pm_allowed = pm_allowed
         self.fcts = []
-        self.default = None
+        self.default_cmd = None
         for name, method in inspect.getmembers(self, predicate=inspect.ismethod):
             try:
                 handlerarg = getattr(method, "subcommand")
                 if handlerarg == "default":
-                    self.default = method
+                    self.default_cmd = method
                 elif type(handlerarg) == tuple:
                     for sub_fct in handlerarg:
                         self.fcts.append((sub_fct, method))
@@ -217,8 +217,8 @@ class SyncModule(BotModule) :
                 s = re.match(key, args)
                 if s != None:
                     return fct(sender, s)
-        if self.default is not None:
-            return self.default(sender, args)
+        if self.default_cmd is not None:
+            return self.default_cmd(sender, args)
         else:
             return "La commande %s n'existe pas pour %s ou la syntaxe de !%s %s est incorrecte → !help %s pour plus d'information" %  \
                         (cmd_name, self.command, self.command, cmd_name, self.command)
