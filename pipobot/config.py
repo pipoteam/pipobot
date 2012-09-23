@@ -29,7 +29,7 @@ class Configuration(object):
     __slots__ = ('log_level', 'daemonize', 'check_modules', 'pid_file',
                  'rooms', 'logpath', 'xmpp_logpath', 'database', 'lang',
                  'extra_modules', 'modules_conf', 'unit_test', 'script',
-                 'interract', 'testing_modules')
+                 'interract', 'testing_modules', 'use_ipv6')
 
     # Default values
     DEFAULT_CONF_FILE = "/etc/pipobot.conf.yml"
@@ -69,6 +69,7 @@ class Configuration(object):
             setattr(self, param, value)
 
         self.xmpp_logpath = global_conf.get('xmpp_logpath', None)
+        self.use_ipv6 = global_conf.get('ipv6', True)
 
         self.extra_modules = global_conf.get('extra_modules', [])
         if isinstance(self.extra_modules, basestring):
@@ -151,7 +152,8 @@ class Configuration(object):
                 if not value or not isinstance(value, basestring):
                     if "chan" in kwargs:
                         _abort("Required parameter ‘rooms[%s][%s]’ not found or "
-                               "invalid in configuration file ‘%s’.", kwargs["chan"],
+                               "invalid in configuration file ‘%s’.", kwargs[
+                                   "chan"],
                                param, conf_file)
                     else:
                         _abort("One of your rooms needs a ‘chan‘ parameter")

@@ -9,7 +9,7 @@ try:
     from babel.messages import frontend as babel
 except ImportError:
     sys.stderr.write("The babel module is not installed. Translation tools "
-        "will not be available.\n")
+                     "will not be available.\n")
     babel = None
 
 if sys.hexversion < 0x02060000 or sys.hexversion >= 0x03000000:
@@ -23,10 +23,9 @@ if sys.hexversion < 0x02060000 or sys.hexversion >= 0x03000000:
 if __name__ == '__main__':
     # We cannot import pipobot._version directly since we could get an already
     # installed version.
-    
+
     execfile(join(dirname(__file__), 'pipobot', '_version.py'))
     # __version__ is now defined.
-
 
     kwargs = {}
     if babel:

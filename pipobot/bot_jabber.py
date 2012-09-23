@@ -31,10 +31,11 @@ _muc_xml = "{http://jabber.org/protocol/muc#user}status"
 class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
     """The implementation of a bot for jabber MUC"""
 
-    def __init__(self, login, passwd, res, chat, name, modules, session):
+    def __init__(self, login, passwd, res, chat, name, modules, session, use_ipv6):
         sleekxmpp.ClientXMPP.__init__(self, login, passwd, ssl=True)
 
         logger.info("Connecting to %s", chat)
+        self.use_ipv6 = use_ipv6
         #Connecting
         con = self.connect(reattempt=False)
         if not con:
@@ -43,7 +44,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
 
         self.registerPlugin("xep_0045")
 
-        #When the session start (bot connected) the connect_muc method will be called
+        # When the session start (bot connected) the connect_muc method will be called
         self.add_event_handler("session_start", self.connect_muc)
 
         #sleekxmpp handlers to XMPP stanzas
