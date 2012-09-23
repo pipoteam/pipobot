@@ -28,7 +28,7 @@ class Configuration(object):
 
     __slots__ = ('log_level', 'daemonize', 'check_modules', 'pid_file',
                  'rooms', 'logpath', 'xmpp_logpath', 'database',
-                 'lang', 'extra_modules', 'modules_conf')
+                 'lang', 'extra_modules', 'modules_conf', 'use_ipv6')
 
     # Default values
     DEFAULT_CONF_FILE = "/etc/pipobot.conf.yml"
@@ -64,6 +64,7 @@ class Configuration(object):
                        "configuration file ‘%s’.", param, conf_file)
             setattr(self, param, value)
         self.xmpp_logpath = global_conf.get('xmpp_logpath', None)
+        self.use_ipv6 = global_conf.get('ipv6', True)
 
         self.extra_modules = global_conf.get('extra_modules', [])
         if isinstance(self.extra_modules, basestring):

@@ -29,10 +29,10 @@ _muc_xml = "{http://jabber.org/protocol/muc#user}status"
 class BotJabber(sleekxmpp.ClientXMPP):
     """The implementation of a bot for jabber MUC"""
 
-    def __init__(self, login, passwd, res, chat, name, modules, session):
+    def __init__(self, login, passwd, res, chat, name, modules, session, use_ipv6):
         self.chatname = chat
 
-        sleekxmpp.ClientXMPP.__init__(self, login, passwd, ssl=True)
+        sleekxmpp.ClientXMPP.__init__(self, login, passwd)
 
         #The nickname the bot will use to join rooms
         #This nickname will be set by the reception of a presence message
@@ -41,6 +41,7 @@ class BotJabber(sleekxmpp.ClientXMPP):
 
         logger.info("Connecting to %s", chat)
         #Connecting
+        self.use_ipv6 = use_ipv6
         con = self.connect(reattempt=False)
         if not con:
             logger.error(_("Unable to connect !"))

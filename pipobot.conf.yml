@@ -4,6 +4,8 @@ config:
     logpath: /var/log/pipobot/pipobot.log
     #OPTIONAL: if provided, all XMPP messages sent by the bot will be logged here
     #xmpp_logpath: /var/log/pipobot/pipobot_xmpp.log
+    #Connection to the XMPP server in ipv6 ?
+    ipv6: False
     #Language of the application
     lang: en
     #A list of directories where modules will be stored
