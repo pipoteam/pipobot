@@ -28,7 +28,7 @@ class PipoBotManager(object):
     Object managing all bot instances.
     """
 
-    __slots__ = ('_config', '_db_session', 'is_running')
+    __slots__ = ('_config', '_db_session', 'is_running', 'test_room')
 
     def __init__(self):
         self.is_running = True
@@ -135,6 +135,8 @@ class PipoBotManager(object):
         bots = []
 
         for room in self._config.rooms:
+            if room.testing:
+                continue
             try:
                 bot = BotJabber(room.login, room.passwd, room.resource,
                                 room.chan, room.nick, modules[room],
@@ -168,8 +170,9 @@ class PipoBotManager(object):
 
         test_mods = []
         if unit_test:
-            test_mods, modules = loader.get_modules(self._config.testing_modules,
-                                                    self._config.check_modules,
+            room = self.get_test_room()
+
+            test_mods, modules = loader.get_modules(room.modules,
                                                     unit_test=True)
         else:
             modules = {}
@@ -182,6 +185,12 @@ class PipoBotManager(object):
         del loader
         return test_mods, modules
 
+    def get_test_room(self):
+        for room in self._config.rooms:
+            if room.testing:
+                return room
+        _abort("You must define a chan with testing: True parameter")
+
     def run(self):
         test_mods, modules = self._load_modules(self._config.unit_test or
                                                 self._config.script or
@@ -190,15 +199,20 @@ class PipoBotManager(object):
         self._configure_database()
 
         if not self._config.check_modules:
+
             if self._config.unit_test:
-                bot = TestBot(modules, self._db_session)
+                test_room = self.get_test_room()
+                bot = TestBot(test_room.nick, test_room.login,
+                              test_room.chan, modules, self._db_session)
                 suite = unittest.TestSuite()
                 for test in test_mods:
                     suite.addTests(ModuleTest.parametrize(test, bot=bot))
                 unittest.TextTestRunner(verbosity=2).run(suite)
 
             elif self._config.script:
-                bot = TestBot(modules, self._db_session)
+                test_room = self.get_test_room()
+                bot = TestBot(test_room.nick, test_room.login,
+                              test_room.chan, modules, self._db_session)
                 for msg in self._config.script.split(";"):
                     LOGGER.info("<< %s" % msg)
                     LOGGER.info(">> %s" % bot.create_msg("bob", msg))
@@ -206,7 +220,9 @@ class PipoBotManager(object):
                 # We import it here so the bot does not 'depend' on twisted
                 # unless you *really* want to use the --interract mode
                 from pipobot.bot_twisted import TwistedBot
-                bot = TwistedBot(modules, self._db_session)
+                test_room = self.get_test_room()
+                bot = TwistedBot(test_room.nick, test_room.login,
+                                 test_room.chan, modules, self._db_session)
             else:
                 self._jabber_bot(modules)
 

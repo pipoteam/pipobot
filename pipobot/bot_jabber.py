@@ -32,7 +32,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
     """The implementation of a bot for jabber MUC"""
 
     def __init__(self, login, passwd, res, chat, name, modules, session, use_ipv6):
-        sleekxmpp.ClientXMPP.__init__(self, login, passwd, ssl=True)
+        sleekxmpp.ClientXMPP.__init__(self, "%s/%s" % (login, res), passwd, ssl=True)
 
         logger.info("Connecting to %s", chat)
         self.use_ipv6 = use_ipv6
@@ -52,7 +52,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
         self.add_event_handler("groupchat_presence", self.presence)
         self.add_event_handler("failed_auth", self.failed_auth)
 
-        PipoBot.__init__(self, name, chat, modules, session)
+        PipoBot.__init__(self, name, login, chat, modules, session)
 
         self.process(threaded=True)
 

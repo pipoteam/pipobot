@@ -40,7 +40,8 @@ class MultiClientEcho(Protocol):
             msg = "%s %s\n" % (color("<%s>" % self.username, self.color),
                                data.strip())
 
-            msg += "%s\n" % self.factory.bot.create_msg(self.username, data.strip())
+            msg += "%s %s\n" % (color("<%s>" % self.factory.bot.name, self.factory.bot.color),
+                                self.factory.bot.create_msg(self.username, data.strip()))
 
         #Broadcast message to all clients + bot answer
         for client in self.factory.clients:
@@ -63,8 +64,9 @@ class MultiClientEchoFactory(Factory):
 
 
 class TwistedBot(TestBot):
-    def __init__(self, modules, session):
-        TestBot.__init__(self, modules, session)
+    def __init__(self, name, login, chatname, modules, session):
+        TestBot.__init__(self, name, login, chatname, modules, session)
+        self.occupants.add_user(name, login, "moderator")
         self.client_facto = MultiClientEchoFactory(self)
         self.color = random.choice(nickname_colors)
 

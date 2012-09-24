@@ -29,7 +29,7 @@ class Configuration(object):
     __slots__ = ('log_level', 'daemonize', 'check_modules', 'pid_file',
                  'rooms', 'logpath', 'xmpp_logpath', 'database', 'lang',
                  'extra_modules', 'modules_conf', 'unit_test', 'script',
-                 'interract', 'testing_modules', 'use_ipv6')
+                 'interract', 'use_ipv6')
 
     # Default values
     DEFAULT_CONF_FILE = "/etc/pipobot.conf.yml"
@@ -111,9 +111,6 @@ class Configuration(object):
         else:
             _abort("You need to specify a database engine !")
 
-        # Unit test modules
-        self.testing_modules = data.get("testing", [])
-
         # Module groups
         module_groups = {}
         groups_conf = data.get('groups', {})
@@ -160,6 +157,8 @@ class Configuration(object):
 
                 kwargs[param] = value
 
+            kwargs["testing"] = conf_room.get("testing", False)
+
             kwargs['modules'] = modules = set()
             conf_modules = conf_room.get('modules')
             if conf_modules is None:
@@ -199,15 +198,16 @@ class Configuration(object):
 
 
 class Room(object):
-    __slots__ = ('chan', 'login', 'passwd', 'resource', 'nick', 'modules')
+    __slots__ = ('chan', 'login', 'passwd', 'resource', 'nick', 'modules', 'testing')
 
-    def __init__(self, chan, login, passwd, resource, nick, modules):
+    def __init__(self, chan, login, passwd, resource, nick, modules, testing=False):
         self.chan = chan
         self.login = login
         self.passwd = passwd
         self.resource = resource
         self.nick = nick
         self.modules = modules
+        self.testing = testing
 
 
 def get_configuration():

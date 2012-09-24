@@ -9,8 +9,9 @@ logger = logging.getLogger('pipobot.pipobot')
 
 
 class PipoBot:
-    def __init__(self, name, chatname, modules, session):
+    def __init__(self, name, login, chatname, modules, session):
         self.name = name
+        self.login = login
         self.chatname = chatname
         self.session = session
 

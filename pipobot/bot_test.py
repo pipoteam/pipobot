@@ -25,8 +25,9 @@ class ForgedMsg(dict):
 
 
 class TestBot(PipoBot):
-    def __init__(self, modules, session):
-        PipoBot.__init__(self, "pipotest", "test@unit_test.tld", modules, session)
+    def __init__(self, name, login, chatname, modules, session):
+        PipoBot.__init__(self, name, login, chatname, modules, session)
+        self.occupants.add_user(name, login, "moderator")
 
         logger.info("Starting console bot in fake room %s" % self.chatname)
 
