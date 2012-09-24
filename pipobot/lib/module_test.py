@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import logging
+import random
 import re
+import string
 import traceback
 import unittest
 
@@ -35,3 +37,6 @@ class ModuleTest(unittest.TestCase):
 
         if i == len(expected):
             raise AssertionError(_("No regexp from %s matches %s") % (expected_re, bot_rep))
+
+def string_gen(size):
+    return "".join([random.choice(string.letters) for i in xrange(size)])

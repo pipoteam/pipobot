@@ -7,11 +7,12 @@ from twisted.internet import reactor
 import logging
 import random
 from pipobot.bot_test import TestBot, ForgedMsg
-from pipobot.lib.unittest import color
+from pipobot.lib.utils import color
+
 
 logger = logging.getLogger('pipobot.bot_jabber')
-colors = ["blue", "cyan", "red", "purple", "yellow"]
-colors.extend(["bright %s" % col for col in colors])
+nickname_colors = ["blue", "cyan", "red", "purple", "yellow"]
+nickname_colors.extend(["bright %s" % col for col in nickname_colors])
 
 
 class MultiClientEcho(Protocol):
@@ -20,7 +21,7 @@ class MultiClientEcho(Protocol):
         self.username = ""
         self.jid = ""
         self.role = ""
-        self.color = random.choice(colors)
+        self.color = random.choice(nickname_colors)
 
     def connectionMade(self):
         self.factory.clients.append(self)
@@ -65,7 +66,7 @@ class TwistedBot(TestBot):
     def __init__(self, modules, session):
         TestBot.__init__(self, modules, session)
         self.client_facto = MultiClientEchoFactory(self)
-        self.color = random.choice(colors)
+        self.color = random.choice(nickname_colors)
 
         reactor.listenTCP(8123, self.client_facto)
         reactor.run()
