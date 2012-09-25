@@ -42,6 +42,36 @@ class BotModuleLoader(object):
         return (inspect.isclass(obj) and issubclass(obj, ModuleTest)
                 and not hasattr(obj, '_%s__usable' % obj.__name__))
 
+    def set_module_config(self, module_name, param_name, param_type, default_value):
+        # if the parameter is defined in the config file
+        if module_name in self._module_settings and param_name in self._module_settings[module_name]:
+            config_param = self._module_settings[module_name][param_name]
+            # If the parameter defined in the config file does not have the good structure
+            if type(config_param) != param_type:
+                #an empty value of type param_type
+                logger.error(_("Parameter ‘%s‘ of configuration of module ‘%s‘ must be a %s, but is "
+                               "currently a %s") % (param_name,
+                                                    module_name,
+                                                    param_type.__name__,
+                                                    type(config_param).__name__))
+                # In case of failure, we use a default_value if provided, else
+                config_param = param_type() if default_value is None else default_value
+        else:
+            # The parameter is not defined in the config file
+            # We use default_value if provided (not None), else an empty value of type param_type
+            if default_value is None:
+                logger.error(_("Configuration of ‘%s‘ requires ‘%s‘ parameter") % (module_name,
+                                                                                   param_name))
+                config_param = param_type()
+            else:
+                config_param = default_value
+                logger.info(_("Optional parameter for module ‘%s‘ : ‘%s‘ "
+                              "(default value ‘%s‘ will be used)") % (module_name,
+                                                                      param_name,
+                                                                      config_param))
+
+        return config_param
+
     def get_modules(self, module_names, check=False, unit_test=False):
         modules = []
         test_modules = []
@@ -72,40 +102,8 @@ class BotModuleLoader(object):
                     continue
                 # For each config parameter specified in the module
                 for (param_name, param_type, default_value) in module._config:
-                    # if the parameter is defined in the config file
-                    if name in self._module_settings and param_name in self._module_settings[name]:
-                        config_param = self._module_settings[name][param_name]
-                        # If the parameter defined in the config file does not have the good structure
-                        if type(config_param) != param_type:
-                            #an empty value of type param_type
-                            logger.error(_("Parameter ‘%s‘ of configuration of module ‘%s‘ must be a %s, but is "
-                                           "currently a %s") % (param_name,
-                                                                name,
-                                                                param_type.__name__,
-                                                                type(config_param).__name__))
-                            # In case of failure, we use a default_value if provided, else
-                            config_param = param_type() if default_value is None else default_value
-                    else:
-                        # The parameter is not defined in the config file
-                        # We use default_value if provided (not None), else an empty value of type param_type
-                        if default_value is None:
-                            logger.error(_("Configuration of ‘%s‘ requires ‘%s‘ parameter") % (name,
-                                                                                               param_name))
-                            config_param = param_type()
-                        else:
-                            config_param = default_value
-                            logger.info(_("Optional parameter for module ‘%s‘ : ‘%s‘ "
-                                          "(default value ‘%s‘ will be used)") % (name,
-                                                                                  param_name,
-                                                                                  config_param))
-
+                    config_param = self.set_module_config(name, param_name, param_type, default_value)
                     setattr(module, param_name, config_param)
-
-            if name in self._module_settings:
-                logger.debug("Configuration for ‘%s’: %s", name,
-                             self._module_settings[name])
-                for module in bot_modules:
-                    module._settings = self._module_settings[name]
 
             logger.debug("Bot modules for ‘%s’ : %s", name, bot_modules)
 
