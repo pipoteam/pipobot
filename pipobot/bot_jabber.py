@@ -32,7 +32,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
     """The implementation of a bot for jabber MUC"""
 
     def __init__(self, login, passwd, res, chat, name, modules, session, use_ipv6):
-        sleekxmpp.ClientXMPP.__init__(self, "%s/%s" % (login, res), passwd, ssl=True)
+        sleekxmpp.ClientXMPP.__init__(self, "%s/%s" % (login, res), passwd)
 
         logger.info("Connecting to %s", chat)
         self.use_ipv6 = use_ipv6

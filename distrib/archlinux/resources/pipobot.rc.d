@@ -1,7 +1,8 @@
 #!/bin/bash
 
 daemon_name=pipobot
-PID_FILE=/run/$daemon_name.pid
+user=pipobot
+PID_FILE=/run/pipobot/$daemon_name.pid
 
 . /etc/rc.conf
 . /etc/rc.d/functions
@@ -19,12 +20,14 @@ case "$1" in
 	start)
 		stat_busy "Starting $daemon_name daemon"
 
+    [ -d /run/$daemon_name ] || { mkdir -p /run/$daemon_name ; chown $user:$user /run/$daemon_name; }
+
 		PID=$(get_pid)
 		if [[ -z $PID ]]; then
 			[[ -f $PID_FILE ]] &&
 				rm -f $PID_FILE
 		# RUN
-		$daemon_name $CONFIG_FILE -b --pid $PID_FILE
+		su -s "/bin/sh" $user -c "$daemon_name $CONFIG_FILE -b --pid $PID_FILE"
 		#
 		if [[ $? -gt 0 ]]; then
 			stat_fail

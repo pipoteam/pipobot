@@ -2,7 +2,7 @@
 pkgname=pipobot-modules-git
 _projectname=pipobot-modules
 pkgver=20120925
-pkgrel=1
+pkgrel=2
 pkgdesc="Some modules for Pipobot, a bot for XMPP MUCs"
 arch=("any")
 url="https://github.com/pipoteam/pipobot-modules"
@@ -17,7 +17,6 @@ optdepends=('python2-beautifulsoup3: for modules parsing online content'
             'mercurial: for the mercurial module'
             'python2-pyenchant: for the spell module')
 makedepends=('python2' 'git')
-install=$pkgname.install
 _gitroot="https://github.com/pipoteam/pipobot-modules.git"
 _gitname="pipobot-modules"
 _gitbranch='testing-platform'

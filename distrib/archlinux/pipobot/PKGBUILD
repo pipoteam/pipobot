@@ -11,6 +11,7 @@ conflicts=("pipobot-git")
 optdepends=("pipobot-modules: a set of modules to add functionalities to pipobot"
             "twisted: used for the testing mode of pipobot (to test modules without an XMPP server)")
 makedepends=('python2')
+backup=('etc/pipobot.conf.yml')
 install=$pkgname.install
 #"https://github.com/pipoteam/pipobot/zipball/@$pkgver"
 
@@ -20,7 +21,7 @@ package() {
 
   install -d -m750 "$pkgdir"/var/lib/pipobot
   install -d -m750 "$pkgdir"/var/log/pipobot
-  install -D -m644 pipobot.conf.yml "$pkgdir"/etc
+  install -D -m660 pipobot.conf.yml "$pkgdir"/etc
 
   cd distrib/archlinux/resources
   install -D -m755 pipobot.rc.d "$pkgdir"/etc/rc.d/pipobot

@@ -2,7 +2,7 @@
 pkgname=pipobot-git
 _projectname=pipobot
 pkgver=20120925
-pkgrel=1
+pkgrel=2
 pkgdesc="A modular bot for jabber MUCs"
 arch=("any")
 url="https://github.com/pipoteam/pipobot"
@@ -12,6 +12,7 @@ conflicts=('pipobot')
 optdepends=("pipobot-modules-git: a set of modules to add functionalities to pipobot"
             "twisted: used for the testing mode of pipobot (to test modules without an XMPP server)")
 makedepends=('python2' 'git')
+backup=('etc/pipobot.conf.yml')
 install="$pkgname.install"
 _gitroot="https://github.com/pipoteam/pipobot.git"
 _gitname="pipobot"
@@ -44,7 +45,7 @@ package() {
 
   install -d -m750 "$pkgdir"/var/lib/pipobot
   install -d -m750 "$pkgdir"/var/log/pipobot
-  install -D -m644 pipobot.conf.yml "$pkgdir"/etc
+  install -D -m660 pipobot.conf.yml "$pkgdir"/etc
 
   cd "$srcdir/$_projectname"/distrib/archlinux/resources
   install -D -m755 pipobot.rc.d "$pkgdir"/etc/rc.d/pipobot

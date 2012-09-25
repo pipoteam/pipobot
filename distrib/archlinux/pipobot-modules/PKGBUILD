@@ -15,7 +15,6 @@ optdepends=('python2-beautifulsoup3: for modules parsing online content'
             'python2-pyinotify: for mail module'
             'mercurial: for the mercurial module'
             'python2-pyenchant: for the spell module')
-install=$pkgname.install
 #"https://github.com/pipoteam/pipobot-modules/zipball/@$pkgver"
 source=( )
 

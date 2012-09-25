@@ -31,7 +31,7 @@ rooms:
         resource: pipobot
         nick: Pipobot
         modules:
-            - _all
+            - _nodep
     -
         testing: True
         chan: testing@domain.tld
@@ -43,6 +43,25 @@ rooms:
             - _testing
 
 groups:
+    nodep:
+        - blague
+        - botanswers
+        - bourse
+        - canalplus
+        - chiffres_lettres
+        - cmdalacon
+        - coin
+        - date
+        - getjid
+        - nextprev
+        - pioche
+        - raced
+        - reminder
+        - roll
+        - scores
+        - todo
+        - url
+        - wiki
     all:
         - bashfr
         - bashorg
