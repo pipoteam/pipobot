@@ -7,6 +7,7 @@ arch=("any")
 url="https://github.com/pipoteam/pipobot-modules"
 license=('GPL')
 depends=('python2' 'pipobot')
+conflicts=("pipobot-modules-git")
 optdepends=('python2-beautifulsoup3: for modules parsing online content'
             'python-mpd: for the MPD module'
             'python2-eyed3: to edit tags in the MPD module'

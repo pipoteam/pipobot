@@ -7,20 +7,12 @@ arch=("any")
 url="https://github.com/pipoteam/pipobot"
 license=('GPL')
 depends=('python2' 'python2-sleekxmpp' 'python2-yaml' 'python2-sqlalchemy' )
+conflicts=("pipobot-git")
 optdepends=("pipobot-modules: a set of modules to add functionalities to pipobot"
             "twisted: used for the testing mode of pipobot (to test modules without an XMPP server)")
 makedepends=('python2')
 install=$pkgname.install
 #"https://github.com/pipoteam/pipobot/zipball/@$pkgver"
-source=( 
-        "pipobot.rc.d"
-        "pipobot.conf"
-        "pipobot.service"
-        "pipobot.tmpfiles.d")
-md5sums=('56c5838d05214278229800a461369230'
-         '7f7f98d18e3cf9c926150ac7e3f9dfb1'
-         'a4b7868b9b4a70ad630c6eb6f54df9bd'
-         'dbbce7065622f7f6d753eed7f7a3bcea')
 
 package() {
   cd "$srcdir/$pkgname-$pkgver"
@@ -29,10 +21,12 @@ package() {
   install -d -m750 "$pkgdir"/var/lib/pipobot
   install -d -m750 "$pkgdir"/var/log/pipobot
   install -D -m644 pipobot.conf.yml "$pkgdir"/etc
-  install -D -m755 "$srcdir"/pipobot.rc.d "$pkgdir"/etc/rc.d/pipobot
-  install -D -m644 "$srcdir"/pipobot.conf "$pkgdir"/etc/conf.d/pipobot.conf
-  install -D -m644 "$srcdir"/pipobot.service "$pkgdir"/usr/lib/systemd/system/pipobot.service
-  install -D -m644 "$srcdir"/pipobot.tmpfiles.d "$pkgdir"/usr/lib/tmpfiles.d/pipobot.conf
+
+  cd distrib/archlinux/resources
+  install -D -m755 pipobot.rc.d "$pkgdir"/etc/rc.d/pipobot
+  install -D -m644 pipobot.conf "$pkgdir"/etc/conf.d/pipobot.conf
+  install -D -m644 pipobot.service "$pkgdir"/usr/lib/systemd/system/pipobot.service
+  install -D -m644 pipobot.tmpfiles.d "$pkgdir"/usr/lib/tmpfiles.d/pipobot.conf
 }
 
 # vim:set ts=2 sw=2 et:

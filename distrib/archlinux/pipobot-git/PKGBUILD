@@ -1,0 +1,56 @@
+# Maintainer: Sébastien Leduc <sebastien@sleduc.fr>
+pkgname=pipobot-git
+_projectname=pipobot
+pkgver=20120925
+pkgrel=1
+pkgdesc="A modular bot for jabber MUCs"
+arch=("any")
+url="https://github.com/pipoteam/pipobot"
+license=('GPL')
+depends=('python2' 'python2-sleekxmpp' 'python2-yaml' 'python2-sqlalchemy' )
+conflicts=('pipobot')
+optdepends=("pipobot-modules-git: a set of modules to add functionalities to pipobot"
+            "twisted: used for the testing mode of pipobot (to test modules without an XMPP server)")
+makedepends=('python2' 'git')
+install="$pkgname.install"
+_gitroot="https://github.com/pipoteam/pipobot.git"
+_gitname="pipobot"
+_gitbranch="testing-platform"
+
+build() {
+  cd "$srcdir"
+  msg "Connecting to GIT server...."
+
+  if [[ -d "$_gitname" ]]; then
+    cd "$_gitname" && git pull origin
+    msg "The local files are updated."
+  else
+    git clone "$_gitroot" "$_gitname" --branch "$_gitbranch"
+  fi
+
+  msg "GIT checkout done or server timeout"
+  msg "Starting build..."
+
+  rm -rf "$srcdir/$_gitname-build"
+  git clone "$srcdir/$_gitname" "$srcdir/$_gitname-build" --branch "$_gitbranch"
+
+  cd "$srcdir/$_projectname-build"
+  python2 setup.py build
+}
+
+package() {
+  cd "$srcdir/$_projectname-build"
+  python2 setup.py install --root="$pkgdir/" --optimize=1
+
+  install -d -m750 "$pkgdir"/var/lib/pipobot
+  install -d -m750 "$pkgdir"/var/log/pipobot
+  install -D -m644 pipobot.conf.yml "$pkgdir"/etc
+
+  cd "$srcdir/$_projectname"/distrib/archlinux/resources
+  install -D -m755 pipobot.rc.d "$pkgdir"/etc/rc.d/pipobot
+  install -D -m644 pipobot.conf "$pkgdir"/etc/conf.d/pipobot.conf
+  install -D -m644 pipobot.service "$pkgdir"/usr/lib/systemd/system/pipobot.service
+  install -D -m644 pipobot.tmpfiles.d "$pkgdir"/usr/lib/tmpfiles.d/pipobot.conf
+}
+
+# vim:set ts=2 sw=2 et:
