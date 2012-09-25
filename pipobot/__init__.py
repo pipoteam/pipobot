@@ -132,6 +132,11 @@ class PipoBotManager(object):
         signal.signal(signal.SIGQUIT, self._signal_handler)
         signal.signal(signal.SIGHUP, self._signal_handler)
 
+        if self._config.daemonize:
+            LOGGER.debug("Running in daemon mode")
+            lock_fd = self._setup_lock_file()
+            lock_fh = self._daemonize(lock_fd)
+
         bots = []
 
         for room in self._config.rooms:
@@ -148,10 +153,6 @@ class PipoBotManager(object):
 
             bots.append(bot)
 
-        if self._config.daemonize:
-            LOGGER.debug("Running in daemon mode")
-            lock_fd = self._setup_lock_file()
-            lock_fh = self._daemonize(lock_fd)
 
         while self.is_running:
             signal.pause()
