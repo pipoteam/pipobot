@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
 
 """
-Internationalisation and translation functions.
+Internationalization and translation functions.
 """
 
 from os.path import dirname, join

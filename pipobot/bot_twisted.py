@@ -70,8 +70,11 @@ class TwistedBot(TestBot):
         self.client_facto = MultiClientEchoFactory(self)
         self.color = random.choice(nickname_colors)
 
+        # Have to disable this error in pylint, why ?
+        # pylint: disable=E1101
         reactor.listenTCP(8123, self.client_facto)
         reactor.run()
+        # pylint: enable=E1101
 
     def say(self, *args, **kwargs):
         ret = []

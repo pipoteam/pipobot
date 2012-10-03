@@ -1,10 +1,11 @@
-#!/usr/bin/python
-#-*- coding: utf-8 -*-
+# !/usr/bin/python
+# -*- coding: utf-8 -*-
 """This file contains the class 'BotJabber' which is a bot for jabber MUC"""
 
 import logging
 import sleekxmpp
 import threading
+import time
 
 from pipobot.lib.modules import (AsyncModule, ListenModule,
                                  MultiSyncModule, PresenceModule,
@@ -25,18 +26,18 @@ class XMPPException(Exception):
         return self.msg
 
 XML_NAMESPACE = 'http://www.w3.org/1999/xhtml'
-_muc_xml = "{http://jabber.org/protocol/muc#user}status"
+_muc_xml = "{http://jabber.org/protocol/muc# user}status"
 
 
 class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
     """The implementation of a bot for jabber MUC"""
 
-    def __init__(self, login, passwd, res, chat, name, modules, session, use_ipv6):
+    def __init__(self, login, passwd, res, chat, name, modules, session, force_ipv4):
         sleekxmpp.ClientXMPP.__init__(self, "%s/%s" % (login, res), passwd)
 
         logger.info("Connecting to %s", chat)
-        self.use_ipv6 = use_ipv6
-        #Connecting
+        self.use_ipv6 = not force_ipv4
+        # Connecting
         con = self.connect(reattempt=False)
         if not con:
             logger.error(_("Unable to connect !"))
@@ -47,7 +48,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
         # When the session start (bot connected) the connect_muc method will be called
         self.add_event_handler("session_start", self.connect_muc)
 
-        #sleekxmpp handlers to XMPP stanzas
+        # sleekxmpp handlers to XMPP stanzas
         self.add_event_handler("message", self.message)
         self.add_event_handler("groupchat_presence", self.presence)
         self.add_event_handler("failed_auth", self.failed_auth)
@@ -68,7 +69,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
 
     def message(self, mess):
         """Method called when the bot receives a message"""
-        #We ignore messages in some cases :
+        # We ignore messages in some cases :
         #   - the bot is muted
         #   - it has a subject (change of room topic for instance)
         #   - the message is empty
@@ -91,9 +92,9 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
     def kill(self):
         """Method used to kill the bot"""
 
-        #The bot says goodbye
+        # The bot says goodbye
         self.say(_(u"I’ve been asked to leave you"))
-        #The bot leaves the room
+        # The bot leaves the room
         self.disconnect(wait=True)
 
         self.stop_modules()
@@ -119,8 +120,8 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
     def forge(self, mess, priv=None, in_reply_to=None):
         """Sending an xhtml message in the room"""
 
-        #It is an XHTML message !
-        #The message is created from mess, in case some clients does not support XHTML (xep-0071)
+        # It is an XHTML message !
+        # The message is created from mess, in case some clients does not support XHTML (xep-0071)
         if type(mess) is dict:
             if "xhtml" not in mess:
                 mess = self.gen_xhtml(mess)
@@ -138,7 +139,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
 
     def say(self, msg, priv=None, in_reply_to=None):
         """The method to call to make the bot sending messages"""
-        #If the bot has not been disabled
+        # If the bot has not been disabled
         if not self.mute:
             if type(msg) is str or type(msg) is unicode:
                 self.forge(msg, priv=priv, in_reply_to=in_reply_to).send()
@@ -159,7 +160,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
             if code == 110:
                 self.name = mess["muc"]["nick"]
         except AttributeError:
-            #No "status code" in the message
+            # No "status code" in the message
             pass
 
         for module in self.presence_mods:

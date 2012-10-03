@@ -73,28 +73,31 @@ class NotifyModule(SyncModule, AsyncModule):
 
     def __init__(self, bot, desc, command,
                  pm_allowed=True, lock_time=0, delay=0):
-        AsyncModule.__init__(self, bot, command, desc, delay, pm_allowed)
+        AsyncModule.__init__(self, bot, command, desc, delay)
         SyncModule.__init__(self, bot, desc, command, pm_allowed, lock_time)
-        self.mute = True
+        self._mute = True
 
     @answercmd("mute")
     def mute(self, sender, message):
         """ Disables notifications """
-        self.mute = True
+        self._mute = True
         return _("Disabling notifications for command %s") % self.command
 
     @answercmd("unmute")
     def unmute(self, sender, message):
         """ Enables notifications """
-        self.mute = False
+        self._mute = False
         self.update(silent=True)
         return _("Enabling notifications for command %s") % self.command
 
     def action(self):
         """ What will the module do every [delay] second """
-        if not self.mute:
+        if not self._mute:
             self.do_action()
 
     def update(self, silent=False):
         """ Updates the ressource that is polled each [delay] second """
         return _("Not implemented")
+
+    def do_action(self) :
+        raise NotImplementedError("Must be subclassed")

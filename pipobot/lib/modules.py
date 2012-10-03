@@ -72,15 +72,12 @@ class BotModule(object):
         if not self.is_concerned(msg_body):
             return
 
-        # If `mess` is a private message but privmsg are not allowed for the module
-        if mess["type"] == "chat" and not self.pm_allowed:
-            return
         try:
             #Calling the answer method of the module
             if isinstance(self, SyncModule):
                 # Separates command/args and get answer from module
-                command, args = self.parse(msg_body, self.prefixs)
-                send = self._answer(sender, args)
+                command, args = SyncModule.parse(msg_body, self.prefixs)
+                send = self._answer(sender, args, pm=(mess["type"] == "chat"))
             elif isinstance(self, ListenModule):
                 # In a Listen module the name of the command is not specified
                 # so nothing to parse
@@ -88,7 +85,7 @@ class BotModule(object):
             elif isinstance(self, MultiSyncModule):
                 # Separates command/args and get answer from module
                 command, args = SyncModule.parse(msg_body, self.prefixs)
-                send = self._answer(sender, command, args)
+                send = self._answer(sender, command, args, pm=(mess["type"] == "chat"))
             else:
                 # A not specified module type !
                 return
@@ -99,6 +96,14 @@ class BotModule(object):
             logger.error(_("Error from module %s : %s") % (self.__class__,
                                                            traceback.format_exc().decode("utf-8")))
 
+    def is_concerned(self, msg) :
+        raise NotImplementedError("Must be subclassed")
+
+    def answer(self, *args, **kwargs) :
+        raise NotImplementedError("Must be subclassed")
+
+    def _answer(self, *args, **kwargs) :
+        raise NotImplementedError("Must be subclassed")
 
 class SyncModule(BotModule):
     """ Defines a bot module that will answer/execute an action
@@ -126,6 +131,7 @@ class SyncModule(BotModule):
             self.lock_time = lock_time
             self.lock_name = "%s_lock" % self.__class__.__name__
             self.enable()
+        self.pm_allowed = pm_allowed
 
     @staticmethod
     def parse(body, prefixs):
@@ -153,7 +159,11 @@ class SyncModule(BotModule):
         t = threading.Timer(self.lock_time, self.enable)
         t.start()
 
-    def _answer(self, sender, args):
+    def _answer(self, sender, args, pm=False):
+        # If `mess` is a private message but privmsg are not allowed for the module
+        if pm and not self.pm_allowed:
+            return
+
         if hasattr(self, "lock_name"):
             if getattr(self.bot, self.lock_name):
                 return _("Please do not flood !")
@@ -215,7 +225,11 @@ class MultiSyncModule(BotModule):
     def is_concerned(self, body):
         return SyncModule.parse(body, self.prefixs)[0] in self.commands
 
-    def _answer(self, sender, command, args):
+    def _answer(self, sender, command, args, pm=False):
+        # If `mess` is a private message but privmsg are not allowed for the module
+        if pm and not self.pm_allowed:
+            return
+
         if command not in self.commands:
             raise ModuleException(_("Command %s not handled by this module") % command)
 
@@ -238,7 +252,7 @@ class AsyncModule(BotModule, threading.Thread):
     such as mail, etc... """
     __usable = False
 
-    def __init__(self, bot, name, desc, delay=0, pm_allowed=True):
+    def __init__(self, bot, name, desc, delay=0):
         threading.Thread.__init__(self)
         BotModule.__init__(self, bot, desc)
 
@@ -250,8 +264,6 @@ class AsyncModule(BotModule, threading.Thread):
         self.delay = delay
         self.name = name
 
-        self.pm_allowed = pm_allowed
-
     def is_concerned(self, command):
         return False
 
@@ -261,9 +273,12 @@ class AsyncModule(BotModule, threading.Thread):
             try:
                 self.action()
             except:
-                logger.error(_("Error from module %s : %s") % (self.__class__,
+               logger.error(_("Error from module %s : %s") % (self.__class__,
                                                                traceback.format_exc().decode("utf-8")))
 
+    def action(self) :
+        raise NotImplementedError("Must be subclassed")
+ 
     def stop(self):
         self.alive = False
 
@@ -278,10 +293,9 @@ class ListenModule(BotModule):
     on it. Be careful with those modules"""
     __usable = False
 
-    def __init__(self, bot, name, desc, pm_allowed=True):
+    def __init__(self, bot, name, desc):
         BotModule.__init__(self, bot, desc)
         self.name = name
-        self.pm_allowed = pm_allowed
 
     def is_concerned(self, command):
         return True
@@ -395,10 +409,9 @@ class PresenceModule(BotModule):
     on it. Be careful with those modules"""
     __usable = False
 
-    def __init__(self, bot, name, desc, pm_allowed=True):
+    def __init__(self, bot, name, desc):
         BotModule.__init__(self, bot, desc)
         self.name = name
-        self.pm_allowed = pm_allowed
 
     def help(self, body):
         if body == self.name:
@@ -436,10 +449,9 @@ class RecordUsers(PresenceModule):
 class IQModule(BotModule):
     __usable = False
 
-    def __init__(self, bot, name, desc, pm_allowed=True):
+    def __init__(self, bot, name, desc):
         BotModule.__init__(self, bot, desc)
         self.name = name
-        self.pm_allowed = pm_allowed
 
     def help(self, body):
         if body == self.name:
