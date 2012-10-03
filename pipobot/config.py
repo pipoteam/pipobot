@@ -26,10 +26,10 @@ class Configuration(object):
     This class holds all settings used by the program.
     """
 
-    __slots__ = ('log_level', 'daemonize', 'check_modules', 'pid_file',
+    __slots__ = ('log_level', 'daemonize', 'only_check', 'pid_file',
                  'rooms', 'logpath', 'xmpp_logpath', 'database', 'lang',
-                 'extra_modules', 'modules_conf', 'unit_test', 'script',
-                 'interract', 'use_ipv6')
+                 'modules_path', 'modules_conf', 'unit_test', 'script',
+                 'interract', 'force_ipv4', 'test_room')
 
     # Default values
     DEFAULT_CONF_FILE = "/etc/pipobot.conf.yml"
@@ -38,7 +38,7 @@ class Configuration(object):
     def __init__(self, cmd_options, conf_file):
         self.log_level = cmd_options.log_level
         self.daemonize = cmd_options.daemonize
-        self.check_modules = cmd_options.check_modules
+        self.only_check = cmd_options.only_check
         self.pid_file = cmd_options.pid_file
         self.unit_test = cmd_options.unit_test
         self.script = cmd_options.script
@@ -60,6 +60,8 @@ class Configuration(object):
                    "corrupt: %s%s", err.problem, err.problem_mark)
 
         # Global configuration
+        self.lang = 'en'
+        self.logpath = None
         global_conf = data.get('config', {})
         for param in ['logpath', 'lang']:
             value = global_conf.get(param, "")
@@ -69,13 +71,13 @@ class Configuration(object):
             setattr(self, param, value)
 
         self.xmpp_logpath = global_conf.get('xmpp_logpath', None)
-        self.use_ipv6 = global_conf.get('ipv6', True)
+        self.force_ipv4 = global_conf.get('force_ipv4', False)
 
-        self.extra_modules = global_conf.get('extra_modules', [])
-        if isinstance(self.extra_modules, basestring):
-            self.extra_modules = [self.extra_modules]
-        elif type(self.extra_modules) != list:
-            _abort("Parameter ‘extra_modules’ should be a string or a list in "
+        self.modules_path = global_conf.get('modules_path', [])
+        if isinstance(self.modules_path, basestring):
+            self.modules_path = [self.modules_path]
+        elif type(self.modules_path) != list:
+            _abort("Parameter ‘modules_path’ should be a string or a list in "
                    "configuration file ‘%s’.", conf_file)
 
         database = data.get("database", {})
@@ -131,6 +133,37 @@ class Configuration(object):
                            conf_file)
                 group.add(group_item)
 
+        # Helper to load modules
+        def _load_modules(conf_modules) :
+            modules = set()
+            
+            if conf_modules is None:
+                conf_modules = []
+            elif isinstance(conf_modules, basestring):
+                conf_modules = [conf_modules]
+
+            for conf_module in conf_modules:
+                if not isinstance(conf_module, basestring):
+                    _abort("Parameter ‘modules’ should only contain"
+                           " strings in configuration file ‘%s’.", conf_file)
+
+                if not conf_module or conf_module == "_":
+                    continue
+
+                if conf_module[0] == '_':
+                    name = conf_module[1:]
+                    if name not in module_groups:
+                        _abort("Unknown module group ‘%s’ for room "
+                               "configuration ‘%s’ in configuration file ‘%s’.",
+                               name, conf_file)
+
+                    modules |= module_groups[name]
+
+                else:
+                    modules.add(conf_module)
+
+            return modules
+
         # Rooms
         self.rooms = []
         conf_rooms = data.get('rooms', [])
@@ -157,37 +190,22 @@ class Configuration(object):
 
                 kwargs[param] = value
 
-            kwargs["testing"] = conf_room.get("testing", False)
-
-            kwargs['modules'] = modules = set()
             conf_modules = conf_room.get('modules')
-            if conf_modules is None:
-                conf_modules = []
-            elif isinstance(conf_modules, basestring):
-                conf_modules = [conf_modules]
-
-            for conf_module in conf_modules:
-                if not isinstance(conf_module, basestring):
-                    _abort("Parameter ‘rooms[%s][modules]’ should only contain"
-                           " strings in configuration file ‘%s’.", room_chan,
-                           conf_file)
-
-                if not conf_module or conf_module == "_":
-                    continue
-
-                if conf_module[0] == '_':
-                    name = conf_module[1:]
-                    if name not in module_groups:
-                        _abort("Unknown module group ‘%s’ for room "
-                               "configuration ‘%s’ in configuration file ‘%s’.",
-                               name, room_chan, conf_file)
-
-                    modules |= module_groups[name]
-
-                else:
-                    modules.add(conf_module)
-
+            kwargs['modules'] = _load_modules(conf_modules)
             self.rooms.append(Room(**kwargs))
+
+        # Tests
+        test = data.get('test')
+        if test :
+            # Create new test room
+            fake_nick = test.get('fake_nick', 'TestBot')
+            fake_chan = test.get('fake_chan', 'chan@unknown.org')
+            test_modules = _load_modules(test.get('modules'))
+            self.test_room = Room(chan=fake_chan, login='invalid', 
+                                  passwd='invalid', resource='invalid',
+                                  nick=fake_nick, modules=test_modules)
+        else :
+            self.test_room = None
 
         # Module parameters
         modules_conf = data.get('modules_config')
@@ -198,16 +216,15 @@ class Configuration(object):
 
 
 class Room(object):
-    __slots__ = ('chan', 'login', 'passwd', 'resource', 'nick', 'modules', 'testing')
+    __slots__ = ('chan', 'login', 'passwd', 'resource', 'nick', 'modules')
 
-    def __init__(self, chan, login, passwd, resource, nick, modules, testing=False):
+    def __init__(self, chan, login, passwd, resource, nick, modules):
         self.chan = chan
         self.login = login
         self.passwd = passwd
         self.resource = resource
         self.nick = nick
         self.modules = modules
-        self.testing = testing
 
 
 def get_configuration():
@@ -237,9 +254,9 @@ def get_configuration():
                       default=Configuration.DEFAULT_PIDFILE,
                       help="Specify a PID file (only used in background mode)")
 
-    parser.add_option("--check-modules", action="store_const",
-                      dest="check_modules", const=True, default=False,
-                      help="Checks if modules' configuration is correct")
+    parser.add_option("--only-check", action="store_const",
+                      dest="only_check", const=True, default=False,
+                      help="Check if modules configuration are correct and exit")
 
     parser.add_option("--unit-test", action="store_const",
                       dest="unit_test", const=True,

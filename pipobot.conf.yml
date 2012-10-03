@@ -1,28 +1,30 @@
-#Global parameters for all bots
+# Global parameters for all bots
 config:
-    #Log file for pipobot
-    logpath: /var/log/pipobot/pipobot.log
-    #OPTIONAL: if provided, all XMPP messages sent by the bot will be logged here
-    #xmpp_logpath: /var/log/pipobot/pipobot_xmpp.log
-    #Connection to the XMPP server in ipv6 ?
-    ipv6: False
-    #Language of the application
+    # Log file for pipobot
+    logpath: /tmp/pipobot.log
+
+    # OPTIONAL: if provided, all XMPP messages sent by the bot will be logged here
+    xmpp_logpath: /tmp/pipobot_xmpp.log
+
+    # Connection to the XMPP server in ipv6 ?
+    force_ipv4: True
+
+    # Language of the application
     lang: en
-    #A list of directories where modules will be stored
-    extra_modules:
-       - /usr/share/pipobot/modules
+
+    # A list of directories where modules will be stored
+    modules_path:
+       - ../pipobot-modules
 
 #Database configuration
 database:
-    #For sqlite you need to specify 'sqlite' as engine, and provide a 'src' parameter
-    #which will be the path to the database file.
+    # Engine used, see sqlalchemy doc (commons are : 'sqlite', 'mysql', 'postgresql')
     engine: sqlite
-    src: /var/lib/pipobot/pipobot.sqlite3
-    #For mysql, use 'mysql' as engine and provide parameters 'user', 'password', 'host', 'name'
-    #to define the database
-    #For postgresql, use 'postgresql' as engine and provide 'user', 'password', 'host', 'name' parameters
+    src: pipobot.sqlite3 # For sqlite, path to the database
 
-#List of rooms the bot will join when started
+    # For mysql or postgresql, provide 'user', 'password', 'host', 'name' parameters
+
+# List of rooms the bot will join when started
 rooms:
     -
         chan: root@muc.jabber.tld
@@ -32,16 +34,8 @@ rooms:
         nick: Pipobot
         modules:
             - _nodep
-    -
-        testing: True
-        chan: testing@domain.tld
-        login: bot@domain.tld
-        passwd: useless
-        resource: testing
-        nick: Pipo-test
-        modules:
-            - _testing
 
+# Groups of modules
 groups:
     nodep:
         - blague
@@ -86,7 +80,11 @@ groups:
         - vdm
         - xhtml
 
-    testing:
+# For test modes (--unit-test, --script, --interactive)
+test:
+    fake_nick: Pipotest
+    fake_chan: fake@example.org
+    modules:
         - bashfr
         - blague
         - bideetmusique
@@ -101,9 +99,12 @@ groups:
         - todo
         - url
         - vdm
+
 #
-#Specific configuration of modules
-#Please refer to the documentation of these modules
+# Specific configuration of modules
+# Please refer to the documentation of these modules
+#
+
 modules_config:
     botmpd:
         host: localhost

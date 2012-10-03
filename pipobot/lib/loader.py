@@ -5,6 +5,8 @@ import imp
 import logging
 import sys
 import unittest
+from collections import namedtuple
+
 from pipobot.lib.modules import Help, RecordUsers, BotModule
 from pipobot.lib.known_users import KnownUsersManager
 from pipobot.lib.module_test import ModuleTest
@@ -13,11 +15,11 @@ logger = logging.getLogger('pipobot.lib.loader')
 
 
 class BotModuleLoader(object):
-    def __init__(self, extra_modules_paths=None, modules_settings=None):
+    def __init__(self, modules_paths=None, modules_settings=None):
         self._paths = []
 
-        if extra_modules_paths:
-            self._paths.extend(extra_modules_paths)
+        if modules_paths:
+            self._paths.extend(modules_paths)
 
         self._module_settings = modules_settings or {}
         self._module_cache = {}
@@ -72,9 +74,13 @@ class BotModuleLoader(object):
 
         return config_param
 
-    def get_modules(self, module_names, check=False, unit_test=False):
+    def get_modules(self, module_names):
+        modules_tpl = namedtuple('modules_tpl', ['modules', 'test_mods'])
         modules = []
         test_modules = []
+        
+        error = 0
+
         for name in module_names:
             if name in self._module_cache:
                 modules.extend(self._module_cache[name])
@@ -84,14 +90,11 @@ class BotModuleLoader(object):
                 module_info = imp.find_module(name, self._paths)
             except ImportError:
                 logger.error(("Module ‘%s’ was not found." % name))
-                if check:
-                    continue
-                else:
-                    sys.exit(1)
+                error += 1
+                continue
 
             module_data = imp.load_module(name, *module_info)
-            if unit_test:
-                test_modules.extend(elt[1] for elt in inspect.getmembers(module_data, self.is_test_unit))
+            test_modules.extend(elt[1] for elt in inspect.getmembers(module_data, self.is_test_unit))
 
             bot_modules = inspect.getmembers(module_data, self.is_bot_module)
             bot_modules = [item[1] for item in bot_modules]
@@ -117,4 +120,4 @@ class BotModuleLoader(object):
             KnownUsersManager._settings = self._module_settings["user"]
 
         modules.append(KnownUsersManager)
-        return test_modules, modules
+        return error, modules_tpl(modules, test_modules)

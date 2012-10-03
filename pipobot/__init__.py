@@ -7,6 +7,7 @@ import pwd
 import signal
 import sys
 import unittest
+import errno
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -47,7 +48,7 @@ class PipoBotManager(object):
         console_handler = logging.StreamHandler()
         # If we want to log XMPP debug
         if self._config.xmpp_logpath is not None:
-            #filter to select sleekxmpp logs
+            # filter to select sleekxmpp logs
             sleek_filter = logging.Filter("sleekxmpp")
             try:
                 sleek_handler = logging.FileHandler(self._config.xmpp_logpath)
@@ -57,7 +58,7 @@ class PipoBotManager(object):
                 _abort("Unable to open the XMPP log file ‘%s’: %s",
                        self._config.xmpp_logpath, err.strerror)
 
-        #filter to select pipobot logs
+        # filter to select pipobot logs
         pipobot_filter = logging.Filter("pipobot")
         if self._config.daemonize:
             console_handler.setLevel(logging.WARNING)
@@ -126,7 +127,7 @@ class PipoBotManager(object):
             getattr(sys, desc).close()
             setattr(sys, desc, null)
 
-    def _jabber_bot(self, modules):
+    def _jabber_bot(self, rooms, modules):
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
         signal.signal(signal.SIGQUIT, self._signal_handler)
@@ -139,13 +140,11 @@ class PipoBotManager(object):
 
         bots = []
 
-        for room in self._config.rooms:
-            if room.testing:
-                continue
+        for room in rooms:
             try:
                 bot = BotJabber(room.login, room.passwd, room.resource,
-                                room.chan, room.nick, modules[room],
-                                self._db_session, self._config.use_ipv6)
+                                room.chan, room.nick, modules[room].modules,
+                                self._db_session, self._config.force_ipv4)
             except XMPPException, exc:
                 LOGGER.error("Unable to join room '%s': %s", room.chan,
                              exc)
@@ -164,67 +163,72 @@ class PipoBotManager(object):
 
         for bot in bots:
             bot.kill()
-
-    def _load_modules(self, unit_test=False):
-        loader = BotModuleLoader(self._config.extra_modules,
+    
+    def _load_modules(self, rooms) :
+        loader = BotModuleLoader(self._config.modules_path,
                                  self._config.modules_conf)
-
-        test_mods = []
-        if unit_test:
-            room = self.get_test_room()
-            test_mods, modules = loader.get_modules(room.modules,
-                                                    unit_test=True)
-        else:
-            modules = {}
-            for room in self._config.rooms:
-                if self._config.check_modules:
-                    LOGGER.info("Checking modules configuration for room %s" %
-                                room.chan)
-                _, modules[room] = loader.get_modules(room.modules,
-                                                      self._config.check_modules)
+        modules = {}
+        errors  = 0
+        for room in rooms:
+            e, modules[room] = loader.get_modules(room.modules)
+            errors += e
         del loader
-        return test_mods, modules
 
-    def get_test_room(self):
-        for room in self._config.rooms:
-            if room.testing:
-                return room
-        _abort("You must define a chan with testing: True parameter")
-
+        return errors, modules
+ 
     def run(self):
-        test_mods, modules = self._load_modules(self._config.unit_test or
-                                                self._config.script or
-                                                self._config.interract)
-
         self._configure_database()
+        
+        #
+        # The different types of execution
+        #
 
-        if not self._config.check_modules:
+        # Only check modules: exit right after loading
+        if self._config.only_check:
+            self._load_modules(self._config.rooms)
+            LOGGER.info("All modules checked, exiting…")
 
+        # Test mode : load test room
+        elif self._config.unit_test or self._config.script or \
+             self._config.interract :
+
+            test_room = self._config.test_room
+            if test_room is None :
+                _abort("Please define a test section in the configuration")
+            e, m = self._load_modules([test_room])
+            if e :
+                _abort("Unable to load all test modules")
+
+            # Unit test mode : run unittest
             if self._config.unit_test:
-                test_room = self.get_test_room()
                 bot = TestBot(test_room.nick, test_room.login,
-                              test_room.chan, modules, self._db_session)
+                              test_room.chan, m[test_room].modules, self._db_session)
                 suite = unittest.TestSuite()
-                for test in test_mods:
+                for test in m[test_room].test_mods:
                     suite.addTests(ModuleTest.parametrize(test, bot=bot))
                 unittest.TextTestRunner(verbosity=2).run(suite)
-
+            # Script mode
             elif self._config.script:
-                test_room = self.get_test_room()
                 bot = TestBot(test_room.nick, test_room.login,
-                              test_room.chan, modules, self._db_session)
+                              test_room.chan, m[test_room].modules, self._db_session)
                 for msg in self._config.script.split(";"):
                     print "--> %s" % msg
                     print "<== %s" % bot.create_msg("bob", msg)
+            # Interract/twisted mode
             elif self._config.interract:
                 # We import it here so the bot does not 'depend' on twisted
                 # unless you *really* want to use the --interract mode
                 from pipobot.bot_twisted import TwistedBot
-                test_room = self.get_test_room()
                 bot = TwistedBot(test_room.nick, test_room.login,
-                                 test_room.chan, modules, self._db_session)
-            else:
-                self._jabber_bot(modules)
+                                 test_room.chan, m[test_room].modules, self._db_session)
+        # Standard mode
+        else:
+            rooms = self._config.rooms
+            e, m = self._load_modules(rooms)
+            if e :
+                _abort("Unable to load all modules")
+
+            self._jabber_bot(rooms, m)
 
         LOGGER.debug("Exiting…")
         logging.shutdown()
