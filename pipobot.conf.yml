@@ -1,12 +1,12 @@
 # Global parameters for all bots
 config:
     # Log file for pipobot
-    logpath: /tmp/pipobot.log
+    logpath: /var/log/pipobot/pipobot.log
 
     # OPTIONAL: if provided, all XMPP messages sent by the bot will be logged here
-    xmpp_logpath: /tmp/pipobot_xmpp.log
+    # xmpp_logpath: /var/log/pipobot/pipobot_xmpp.log
 
-    # Connection to the XMPP server in ipv6 ?
+    # Force the connection to the XMPP server in ipv4
     force_ipv4: True
 
     # Language of the application
@@ -14,13 +14,13 @@ config:
 
     # A list of directories where modules will be stored
     modules_path:
-       - ../pipobot-modules
+       - /usr/share/pipobot/modules
 
 #Database configuration
 database:
     # Engine used, see sqlalchemy doc (commons are : 'sqlite', 'mysql', 'postgresql')
     engine: sqlite
-    src: pipobot.sqlite3 # For sqlite, path to the database
+    src: /var/lib/pipobot/pipobot.sqlite3 # For sqlite, path to the database
 
     # For mysql or postgresql, provide 'user', 'password', 'host', 'name' parameters
 
