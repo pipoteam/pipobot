@@ -134,7 +134,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
                 mess_xhtml = mess_xhtml.encode("utf-8")
             msg["html"]["body"] = mess_xhtml
         else:
-            msg = self.forge_message(mess, priv=None, in_reply_to=None)
+            msg = self.forge_message(mess, priv=priv, in_reply_to=in_reply_to)
         return msg
 
     def say(self, msg, priv=None, in_reply_to=None):
