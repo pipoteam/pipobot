@@ -101,12 +101,11 @@ class BotModuleLoader(object):
 
             # We search for _config parameter (ie required configuration parameter) in each module
             for module in bot_modules:
-                if not hasattr(module, "_config"):
-                    continue
-                # For each config parameter specified in the module
-                for (param_name, param_type, default_value) in module._config:
-                    config_param = self.set_module_config(name, param_name, param_type, default_value)
-                    setattr(module, param_name, config_param)
+                if hasattr(module, "_config"):
+                    # For each config parameter specified in the module
+                    for (param_name, param_type, default_value) in module._config:
+                        config_param = self.set_module_config(name, param_name, param_type, default_value)
+                        setattr(module, param_name, config_param)
 
             logger.debug("Bot modules for ‘%s’ : %s", name, bot_modules)
 
