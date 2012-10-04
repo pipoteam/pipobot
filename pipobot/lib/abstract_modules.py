@@ -29,15 +29,14 @@ class FortuneModule(SyncModule):
         self.url_random = url_random
         self.url_indexed = url_indexed
 
-    @answercmd(r"(?P<index>\d+)$")
-    def answer_int(self, sender, message):
+    @answercmd(r"(?P<index>\d+)")
+    def answer_int(self, sender, index):
         """ Called with !function [some int]"""
-        index = message.group("index")
         page = self.url_indexed % index
         return self.retrieve_data(page)
 
-    @answercmd(r"^$")
-    def answer_random(self, sender, message):
+    @answercmd("")
+    def answer_random(self, sender):
         """ Called with !function and returns a random quote"""
         page = self.url_random
         return self.retrieve_data(page)
@@ -78,13 +77,13 @@ class NotifyModule(SyncModule, AsyncModule):
         self._mute = True
 
     @answercmd("mute")
-    def mute(self, sender, message):
+    def mute(self, sender):
         """ Disables notifications """
         self._mute = True
         return _("Disabling notifications for command %s") % self.command
 
     @answercmd("unmute")
-    def unmute(self, sender, message):
+    def unmute(self, sender):
         """ Enables notifications """
         self._mute = False
         self.update(silent=True)

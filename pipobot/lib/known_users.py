@@ -121,9 +121,9 @@ class KnownUsersManager(SyncModule):
         desc += _("\nuser show: prints the whole Knows Users database")
         desc += _("\nuser show <pseudo>: prints informations about <pseudo> (can also be 'me')")
         desc += _("\nuser hllvl [<pseudo>]: prints the Highlight Level of <pseudo> (defaults: you)")
-        desc += _("\nuser hllvl [<pseudo>] <lvl> [<pseudo>]: sets the Highlight Level of <pseudo> (defaults: you) to <lvl>")
+        desc += _("\nuser hllvl [<pseudo>] <lvl>: sets the Highlight Level of <pseudo> (defaults: you) to <lvl>")
         desc += _("\nuser permlvl [<pseudo>]: prints the Permission Level of <pseudo> (defaults: you)")
-        desc += _("\nuser permlvl [<pseudo>] <lvl> [<pseudo>]: sets the Permission Level of <pseudo> (defaults: you) to <lvl>")
+        desc += _("\nuser permlvl [<pseudo>] <lvl>: sets the Permission Level of <pseudo> (defaults: you) to <lvl>")
         desc += _("\nuser nick <pseudo>: sets your pseudo to <pseudo>")
         SyncModule.__init__(self,
                 bot,
@@ -150,19 +150,14 @@ class KnownUsersManager(SyncModule):
         except KeyError:
             self.logger.error(_('You shall add an admin section in your configuration file'))
 
-    @answercmd(r'^register')
-    def answer_register(self, sender, message):
-        pseudo = ''
-        jids = []
-        for arg in message.string.strip().split(' ')[1:]:
-            if '@' in arg:
-                jids.append(arg)
-            else:
-                pseudo = arg
+    @answercmd('register', r'register (?P<nickname>\S+)(?P<jids>.*)')
+    def answer_register(self, sender, pseudo="", jids=""):
         if not pseudo:
             pseudo = sender
         if not jids:
-            jids.append(self.bot.occupants.pseudo_to_jid(pseudo))
+            jids = self.bot.occupants.pseudo_to_jid(pseudo)
+        else:
+            jids = jids.strip().split()
 
         senderuser = KnownUser.get(sender, self.bot, authviapseudo=False)
         if pseudo != sender:
@@ -202,21 +197,7 @@ class KnownUsersManager(SyncModule):
 
         return _("pseudo %s is now associated to jid(s) %s" % (pseudo, jids))
 
-    @answercmd(r'^show')
-    def answer_show(self, sender, message):
-        user = ''
-        if message.string[5:] == 'me':
-            user = sender
-        elif message.string[5:]:
-            user = message.string[5:].strip()
-        if user:
-            knownuser = KnownUser.get(user, self.bot, authviapseudo=True)
-            if not knownuser:
-                return _("I don't know that %s…" % user)
-            ret = _('%s: Your Highlight Level is %i, your Permission Level is %s, and your JID(s) are:' % (knownuser.pseudo, knownuser.hllvl, knownuser.permlvl))
-            for jid in knownuser.jids:
-                ret += ' %s' % jid.jid
-            return ret
+    def show_all_users(self):
         ret = _('Registered users:')
         users = self.bot.session.query(KnownUser).all()
         for user in users:
@@ -227,15 +208,24 @@ class KnownUsersManager(SyncModule):
                 ret += _("\n    special permissions: %s" % user.chanperms)
         return ret
 
-    @answercmd(r'^hllvl')
-    def answer_hllvl(self, sender, message):
-        lvl = 0
-        pseudo = ''
-        for arg in message.string.strip().split(' ')[1:]:
-            try:
-                lvl = int(arg)
-            except ValueError:
-                pseudo = arg
+    def show_one_user(self, user):
+        knownuser = KnownUser.get(user, self.bot, authviapseudo=True)
+        if not knownuser:
+            return _("I don't know that %s…" % user)
+        ret = _('%s: Your Highlight Level is %i, your Permission Level is %s, and your JID(s) are:' % (knownuser.pseudo, knownuser.hllvl, knownuser.permlvl))
+        for jid in knownuser.jids:
+            ret += ' %s' % jid.jid
+        return ret
+
+    @answercmd('show', r'show (?P<user>\S+)')
+    def answer_show(self, sender, user=""):
+        if user == "me":
+            user = sender
+        return self.show_one_user(user) if user else self.show_all_users()
+
+
+    @answercmd(r'hllvl (?P<pseudo>\S+) (?P<lvl>\d+)')
+    def answer_hllvl(self, sender, pseudo="", lvl=0):
         if not pseudo:
             pseudo = sender
         user = KnownUser.get(pseudo, self.bot, authviapseudo=True)
@@ -260,15 +250,8 @@ class KnownUsersManager(SyncModule):
 
         return _("%s's Highlight Level modified to %i" % (pseudo, lvl))
 
-    @answercmd(r'^permlvl')
-    def answer_permlvl(self, sender, message):
-        lvl = 0
-        pseudo = ''
-        for arg in message.string.strip().split(' ')[1:]:
-            try:
-                lvl = int(arg)
-            except ValueError:
-                pseudo = arg
+    @answercmd(r'permlvl (?P<pseudo>\S+) (?P<lvl>\d+)')
+    def answer_permlvl(self, sender, pseudo="", lvl=0):
         if not pseudo:
             pseudo = sender
         user = KnownUser.get(pseudo, self.bot, authviapseudo=True)
@@ -315,13 +298,13 @@ class KnownUsersManager(SyncModule):
 
         return _("%s's Permission Level modified to %i" % (pseudo, lvl))
 
-    @answercmd(r'nick')
-    def answer_nick(self, sender, message):
+    @answercmd(r'nick (?P<nickname>\S+)')
+    def answer_nick(self, sender, nickname):
         senderuser = KnownUser.get(sender, self.bot, authviapseudo=False)
         if not senderuser:
             return _("I don't know you, %s…" % sender)
         try:
-            senderuser.pseudo = message.strip()
+            senderuser.pseudo = nickname
             self.bot.session.commit()
             return _("%s: your pseudo is now %s" % (sender, senderuser.pseudo))
         except IntegrityError:
