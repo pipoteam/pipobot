@@ -174,10 +174,11 @@ class PipoBotManager(object):
             errors += e
         del loader
 
+        self._configure_database()
+
         return errors, modules
  
     def run(self):
-        self._configure_database()
         
         #
         # The different types of execution
