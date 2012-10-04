@@ -15,7 +15,7 @@ logger = logging.getLogger('pipobot.lib.modules')
 def defaultcmd(funct):
     """This defines a decorator to indicate the default answer method
         for a module"""
-    setattr(funct, "subcommand", "default")
+    setattr(funct, "dflcommand", True)
     return funct
 
 
@@ -117,14 +117,20 @@ class SyncModule(BotModule):
         self.default_cmd = None
         for _, method in inspect.getmembers(self, predicate=inspect.ismethod):
             try:
-                handlerarg = getattr(method, "subcommand")
-                if handlerarg == "default":
+                getattr(method, "dflcommand")
+                if self.default_cmd is not None :
+                    logger.warn("Another default command defined for this module, the other will be ignored")
+                else :
                     self.default_cmd = method
-                elif type(handlerarg) == tuple:
-                    for sub_fct in handlerarg:
-                        self.fcts.append((sub_fct, method))
+            except AttributeError :
+                pass
+            try:
+                regexp = getattr(method, "subcommand")
+                if type(regexp) == tuple:
+                    for sub_re in regexp:
+                        self.fcts.append((sub_re, method))
                 else:
-                    self.fcts.append((handlerarg, method))
+                    self.fcts.append((regexp, method))
             except AttributeError:
                 pass
         if lock_time > 0:
@@ -170,22 +176,15 @@ class SyncModule(BotModule):
             else:
                 self.disable()
         args = args.strip()
-        splitted_args = args.split(" ", 1)
-        cmd_name = splitted_args[0].strip()
-        cmd_args = splitted_args[1].strip() if len(splitted_args) > 1 else ""
+        cmd_name = args.split(" ", 1)[0].strip()
 
-        for key, fct in self.fcts:
-            # if in the module there is a method with @answercmd(cmd_name)
-            if key == cmd_name:
-                try:
-                    return fct(sender, cmd_args)
-                except KeyError:
-                    return _("The %s command requires args") % self.command
-            else:
-                # We check if the method is not defined by a regexp matching cmd_name
-                s = re.match(key, args)
-                if s is not None:
-                    return fct(sender, s)
+        for regexp, fct in self.fcts:
+            # We check if the method is not defined by a regexp matching cmd_name
+            m = re.match("^"+regexp+"$", args)
+            if m is not None:
+                return fct(sender, **m.groupdict())
+
+        # No function were found
         if self.default_cmd is not None:
             return self.default_cmd(sender, args)
         else:
