@@ -432,7 +432,7 @@ class RecordUsers(PresenceModule):
         #The user [pseudo] leaves the room
         if message["type"] == 'unavailable':
             self.bot.occupants.rm_user(pseudo)
-        elif message["type"] == "available":
+        else :
             role = message["muc"]['role']
             try:
                 jid = message["muc"]["jid"].bare
