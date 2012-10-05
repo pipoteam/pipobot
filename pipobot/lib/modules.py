@@ -117,11 +117,11 @@ class SyncModule(BotModule):
         self.default_cmd = None
         for _, method in inspect.getmembers(self, predicate=inspect.ismethod):
             try:
-                getattr(method, "dflcommand")
-                if self.default_cmd is not None :
-                    logger.warn("Another default command defined for this module, the other will be ignored")
-                else :
-                    self.default_cmd = method
+                if method.dflcommand:
+                    if self.default_cmd is not None :
+                        logger.warn("Another default command defined for this module, the other will be ignored")
+                    else :
+                        self.default_cmd = method
             except AttributeError :
                 pass
             try:
@@ -207,17 +207,23 @@ class MultiSyncModule(BotModule):
         self.commands = commands
         self.pm_allowed = pm_allowed
         self.fcts = []
-        self.default = None
+        self.default_cmd = None
         for _, method in inspect.getmembers(self, predicate=inspect.ismethod):
             try:
-                handlerarg = getattr(method, "subcommand")
-                if handlerarg == "default":
-                    self.default = method
-                elif type(handlerarg) == tuple:
-                    for sub_fct in handlerarg:
-                        self.fcts.append((sub_fct, method))
+                if method.dflcommand:
+                    if self.default_cmd is not None :
+                        logger.warn("Another default command defined for this module, the other will be ignored")
+                    else :
+                        self.default_cmd = method
+            except AttributeError :
+                pass
+            try:
+                regexp = getattr(method, "subcommand")
+                if type(regexp) == tuple:
+                    for sub_re in regexp:
+                        self.fcts.append((sub_re, method))
                 else:
-                    self.fcts.append((handlerarg, method))
+                    self.fcts.append((regexp, method))
             except AttributeError:
                 pass
 
@@ -232,8 +238,8 @@ class MultiSyncModule(BotModule):
         if command not in self.commands:
             raise ModuleException(_("Command %s not handled by this module") % command)
 
-        if self.default is not None:
-            module_answer = self.default(command, sender, args)
+        if self.default_cmd is not None:
+            module_answer = self.default_cmd(command, sender, args)
         else:
             logger.error(_("MultisyncModule must define a “@defaultcmd” method"))
             module_answer = None
