@@ -150,7 +150,7 @@ class KnownUsersManager(SyncModule):
         except KeyError:
             self.logger.error(_('You shall add an admin section in your configuration file'))
 
-    @answercmd('register', r'register (?P<nickname>\S+)(?P<jids>.*)')
+    @answercmd('register', r'register (?P<pseudo>\S+)(?P<jids>.*)')
     def answer_register(self, sender, pseudo="", jids=""):
         if not pseudo:
             pseudo = sender
