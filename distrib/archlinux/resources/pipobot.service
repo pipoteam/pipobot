@@ -7,3 +7,6 @@ EnvironmentFile=/etc/conf.d/pipobot.conf
 User=pipobot
 PIDFile=/run/pipobot/pipobot.pid
 ExecStart=/usr/bin/pipobot -b --pid /run/pipobot/pipobot.pid $CONFIG_FILE
+
+[Install]
+WantedBy=multi-user.target
