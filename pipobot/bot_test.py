@@ -49,7 +49,7 @@ class TestBot(PipoBot):
             if type(msg) is dict:
                 res = msg["text"]
             elif type(msg) is list:
-                res = "\n".join(msg)
+                res = "\n".join(self.decode_module_messages(m) for m in msg)
             elif type(msg) is tuple:
                 res = msg[0]
             elif type(msg) is str:

@@ -126,13 +126,18 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
             if "xhtml" not in mess:
                 mess = self.gen_xhtml(mess)
 
+            if "nopriv" in mess:
+                priv = None
+                in_reply_to = None
+
             msg = self.forge_message(mess["text"],
                                      priv=priv,
                                      in_reply_to=in_reply_to)
-            mess_xhtml = mess["xhtml"]
-            if type(mess_xhtml) is unicode:
-                mess_xhtml = mess_xhtml.encode("utf-8")
-            msg["html"]["body"] = mess_xhtml
+            if "xhtml" in mess:
+                mess_xhtml = mess["xhtml"]
+                if type(mess_xhtml) is unicode:
+                    mess_xhtml = mess_xhtml.encode("utf-8")
+                msg["html"]["body"] = mess_xhtml
         else:
             msg = self.forge_message(mess, priv=priv, in_reply_to=in_reply_to)
         return msg

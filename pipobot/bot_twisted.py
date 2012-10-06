@@ -66,7 +66,6 @@ class MultiClientEchoFactory(Factory):
 class TwistedBot(TestBot):
     def __init__(self, name, login, chatname, modules, session):
         TestBot.__init__(self, name, login, chatname, modules, session)
-        self.occupants.add_user(name, login, "moderator")
         self.client_facto = MultiClientEchoFactory(self)
         self.color = random.choice(nickname_colors)
 
