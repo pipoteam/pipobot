@@ -86,19 +86,26 @@ test:
     fake_chan: fake@example.org
     modules:
         - bashfr
-        - blague
+        - bashorg
         - bideetmusique
-        - botanswers
+        - bourse
         - chiffres_lettres
+        - cmdfu
+        - coin
         - date
         - getjid
         - google
+        - nextprev
         - ola
-        - scores
+        - pendu
+        - pioche
+        - roll
+        - rps
+        - scmb
         - spell
         - todo
-        - url
         - vdm
+        - wiki
 
 #
 # Specific configuration of modules

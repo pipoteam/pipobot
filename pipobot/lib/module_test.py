@@ -31,7 +31,7 @@ class ModuleTest(unittest.TestCase):
         regex = expected[0]
         i = 0
 
-        while not regex.match(bot_rep) and i < len(expected):
+        while not regex.match(bot_rep) and i < len(expected) - 1:
             i += 1
             regex = expected[i]
 
