@@ -56,7 +56,7 @@ class TestBot(PipoBot):
                 res = msg
             elif type(msg) is unicode:
                 res = msg.decode("utf-8")
-            return res.strip()
+            return res
 
     def message(self, mess):
         """Method called when the bot receives a message"""
