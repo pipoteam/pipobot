@@ -9,6 +9,7 @@ use the following functions to render your module translatable.
 
     These functions take a string in argument and return the translated string.
     Sample usage::
+
         self.bot.say(_("Hello, World!"))
 
     When one of these two functions are used, the string passed in parameter

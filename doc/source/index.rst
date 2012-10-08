@@ -7,51 +7,35 @@
 Welcome to Pipobot's documentation!
 ===================================
 
-Code documentation
-==================
-
-.. toctree::
-   :maxdepth: 3
-   :numbered:
-
-   pipobot
-
 Documentation
 =============
 
-General informations about modules
-----------------------------------
+Installation/Configuration
+--------------------------
 
 .. toctree::
    :maxdepth: 3
    :numbered:
 
-   modules_presentation
+   install_config
 
-Specific description of modules
--------------------------------
+
+Modules API
+-----------
 
 .. toctree::
    :maxdepth: 3
    :numbered:
 
-   modules_specs
+   modules
 
-Some internal modules
----------------------
+Writing unit-test
+-----------------
 .. toctree::
    :maxdepth: 3
    :numbered:
 
-   internal_modules
-
-Some "High-level" modules
--------------------------
-.. toctree::
-   :maxdepth: 3
-   :numbered:
-
-   high_level
+   unit_test
 
 Internationalisation and Localisation
 -------------------------------------
@@ -60,6 +44,16 @@ Internationalisation and Localisation
    :numbered:
 
    internat_loc
+
+
+Code documentation
+==================
+
+.. toctree::
+   :maxdepth: 3
+   :numbered:
+
+   pipobot
 
 Indices and tables
 ==================

@@ -1,10 +1,18 @@
 Pipobot Package
 ===============
 
-:mod:`pipobot` Module
----------------------
+:mod:`config` Module
+-------------------------
 
-.. automodule:: bot
+.. automodule:: pipobot.config
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`bot` Module
+-----------------
+
+.. automodule:: pipobot.bot
     :members:
     :undoc-members:
     :show-inheritance:
@@ -12,7 +20,23 @@ Pipobot Package
 :mod:`bot_jabber` Module
 ------------------------
 
-.. automodule:: bot_jabber
+.. automodule:: pipobot.bot_jabber
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`bot_test` Module
+----------------------
+
+.. automodule:: pipobot.bot_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`bot_twisted` Module
+-------------------------
+
+.. automodule:: pipobot.bot_twisted
     :members:
     :undoc-members:
     :show-inheritance:

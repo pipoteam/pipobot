@@ -1,18 +1,18 @@
 lib Package
-===============
+===========
 
 :mod:`bdd` Module
 ------------------
 
-.. automodule:: lib.bdd
+.. automodule:: pipobot.lib.bdd
     :members:
     :undoc-members:
     :show-inheritance:
 
 :mod:`exceptions` Module
----------------------
+------------------------
 
-.. automodule:: lib.exceptions
+.. automodule:: pipobot.lib.exceptions
     :members:
     :undoc-members:
     :show-inheritance:
@@ -20,7 +20,7 @@ lib Package
 :mod:`modules` Module
 ---------------------
 
-.. automodule:: lib.modules
+.. automodule:: pipobot.lib.modules
     :members:
     :undoc-members:
     :show-inheritance:
@@ -28,7 +28,7 @@ lib Package
 :mod:`abstract_modules` Module
 ------------------------------
 
-.. automodule:: lib.abstract_modules
+.. automodule:: pipobot.lib.abstract_modules
     :members:
     :undoc-members:
     :show-inheritance:
@@ -36,7 +36,7 @@ lib Package
 :mod:`parsedates` Module
 ------------------------
 
-.. automodule:: lib.parsedates
+.. automodule:: pipobot.lib.parsedates
     :members:
     :undoc-members:
     :show-inheritance:
@@ -44,7 +44,21 @@ lib Package
 :mod:`user` Module
 ------------------
 
-.. automodule:: lib.user
+.. automodule:: pipobot.lib.user
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`known_users` Module
+-------------------------
+.. automodule:: pipobot.lib.known_users
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`loader` Module
+-------------------------
+.. automodule:: pipobot.lib.loader
     :members:
     :undoc-members:
     :show-inheritance:
@@ -52,7 +66,17 @@ lib Package
 :mod:`utils` Module
 -------------------
 
-.. automodule:: lib.utils
+.. automodule:: pipobot.lib.utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. _module_test:
+
+:mod:`module_test` Module
+-------------------------
+
+.. automodule:: pipobot.lib.module_test
     :members:
     :undoc-members:
     :show-inheritance:
