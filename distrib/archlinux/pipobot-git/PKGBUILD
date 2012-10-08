@@ -1,8 +1,8 @@
 # Maintainer: Sébastien Leduc <sebastien@sleduc.fr>
 pkgname=pipobot-git
 _projectname=pipobot
-pkgver=20120925
-pkgrel=2
+pkgver=20121008
+pkgrel=1
 pkgdesc="A modular bot for jabber MUCs"
 arch=("any")
 url="https://github.com/pipoteam/pipobot"
@@ -16,7 +16,7 @@ backup=('etc/pipobot.conf.yml')
 install="$pkgname.install"
 _gitroot="https://github.com/pipoteam/pipobot.git"
 _gitname="pipobot"
-_gitbranch="testing-platform"
+_gitbranch="master"
 
 build() {
   cd "$srcdir"

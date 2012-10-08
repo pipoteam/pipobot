@@ -1,8 +1,8 @@
 # Maintainer: Sébastien Leduc <sebastien@sleduc.fr>
 pkgname=pipobot-modules-git
 _projectname=pipobot-modules
-pkgver=20120925
-pkgrel=2
+pkgver=20121008
+pkgrel=1
 pkgdesc="Some modules for Pipobot, a bot for XMPP MUCs"
 arch=("any")
 url="https://github.com/pipoteam/pipobot-modules"
@@ -19,7 +19,7 @@ optdepends=('python2-beautifulsoup3: for modules parsing online content'
 makedepends=('python2' 'git')
 _gitroot="https://github.com/pipoteam/pipobot-modules.git"
 _gitname="pipobot-modules"
-_gitbranch='testing-platform'
+_gitbranch='master'
 
 build() {
   cd "$srcdir"
