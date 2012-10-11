@@ -2,11 +2,11 @@
 #-*- coding: utf-8 -*-
 
 import re
-from xml.etree import cElementTree as ET
 import utils
 import urllib
 import httplib
 import htmlentitydefs
+from xml.etree import cElementTree as ET
 from BeautifulSoup import BeautifulSoup, SoupStrainer
 from HTMLParser import HTMLParseError
 
@@ -47,8 +47,10 @@ def xhtml2text(html):
     html = re.sub('<[^>]*strong>', '*', html)
     # le souligné par "_"
     html = re.sub('<[^>]*u>', '_', html)
+    # On récupère le lien dans les balises <a>
+    p = re.compile('<a.*?(?<=href=\")((?:http|www)[^"]*)[^>]*>(.*?)</a>', re.S)
+    html = p.sub(r'\2 (\1)', html)
     # on enlève toutes les autres balises
-    #TODO: récuppérer le lien dans les balises <a>
     html = re.sub('<[^>]*>', '', html)
 
     return unescape(html)

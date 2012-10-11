@@ -11,9 +11,9 @@ Pipobot is written in python and compatible with versions of python2>=2.5.
 
 It is based on these Python modules:
 
-    - `python-sleekxmpp` : engine of connection to XMPP servers
-    - `python-yaml` : configuration files are yaml files
-    - `python-sqlalchemy` : Pipobot is storing data to database through sqlalchemy library.
+    - `python-sleekxmpp`: engine of connection to XMPP servers
+    - `python-yaml`: configuration files are yaml files
+    - `python-sqlalchemy`: Pipobot is storing data to database through sqlalchemy library.
 
 Invoking the bot from repository
 --------------------------------
@@ -28,7 +28,7 @@ Default configuration file used is /etc/pipobot.conf.yml
 
 Deploying the bot
 -----------------
-You can use setup.py script ton install pipobot on your system.
+You can use setup.py script to install pipobot on your system.
 `python setup.py install`
 
 Then start it with the command `pipobot`.
