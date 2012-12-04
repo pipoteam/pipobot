@@ -17,4 +17,5 @@ pipobot.egg-info/*
 *.debhelper
 *.substvars
 /distrib/debian/pipobot/
-/distrib/debian/python-module-stampdir/
+/distrib/debian/*stamp*
+/distrib/debian/files
