@@ -13,3 +13,8 @@ build/*
 dist/*
 MANIFEST
 pipobot.egg-info/*
+/debian
+*.debhelper
+*.substvars
+/distrib/debian/pipobot/
+/distrib/debian/python-module-stampdir/
