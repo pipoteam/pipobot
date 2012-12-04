@@ -15,6 +15,7 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Pipobot"
 NAME=pipobot
 USER=pipobot
+CONFFILE=/etc/pipobot.conf.yml
 DAEMON=/usr/bin/python
 DAEMON_ARGS="-W ignore::DeprecationWarning /usr/bin/pipobot -b --pid /var/run/$NAME.pid"
 PIDFILE=/var/run/$NAME.pid

@@ -24,7 +24,7 @@ case "$1" in
 			addgroup --system --quiet pipobot
 		fi
 		
-		chperms pipobot pipobot /var/log/pipobot
+		chperms pipobot pipobot 0755 /var/log/pipobot
   ;;
 esac
 
