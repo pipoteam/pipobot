@@ -1,0 +1,33 @@
+#!/bin/sh
+
+set -e
+
+test $DEBIAN_SCRIPT_DEBUG && set -v -x
+
+chperms() {
+	# chperms <user> <group> <perms> <file>
+	if ! OVERRIDE=`dpkg-statoverride --list $4 2>&1`; then
+		if [ -e $4 ]; then
+			chown $1:$2 $4
+			chmod $3 $4
+		fi
+	fi
+}
+
+case "$1" in
+	configure|upgrade)
+		if ! getent passwd pipobot > /dev/null; then
+			adduser --system --group --no-create-home --quiet pipobot
+		fi
+		
+		if ! getent group pipobot > /dev/null; then
+			addgroup --system --quiet pipobot
+		fi
+		
+		chperms pipobot pipobot 0755 /var/log/pipobot
+  ;;
+esac
+
+#DEBHELPER#
+
+exit 0;

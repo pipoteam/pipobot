@@ -1,0 +1,15 @@
+diff --git a/setup.py b/setup.py
+index fcbfdb1..67a27c3 100755
+--- a/setup.py
++++ b/setup.py
+@@ -53,8 +53,8 @@ if __name__ == '__main__':
+         url="http://github.com/pipoteam/pipobot",
+         packages=packages,
+         package_data={'pipobot': data_files},
+-        data_files=[('/etc', ['pipobot.conf.yml'])],
++        data_files=[('/usr/share/doc/pipobot/example/', ['pipobot.conf.yml'])],
+         requires=['yaml', 'sqlalchemy'],
+-        scripts=['bin/pipobot', 'bin/pipobot-twisted'],
++        scripts=['bin/pipobot'],
+         **kwargs
+     )
