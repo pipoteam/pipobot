@@ -1,0 +1,38 @@
+.TH "pipobot" "1" "1.0.0 " "Pipoteam" ""
+.SH "NAME"
+.LP 
+pipobot \- Bot for XMPP chatrooms
+.SH "SYNOPSIS"
+.LP 
+.B pipobot
+[
+.B \-\fIoptions \fP
+] [
+.B \fIconfiguration file\fP
+]
+.SH "DESCRIPTION"
+.I Pipobot
+is a modular Python-based bot for XMPP chat rooms. It provides
+modules which can react on specific commands from the room participants or
+on any text sent.
+
+.SH "COMMAND-LINE OPTIONS"
+.TP
+\fB\-q\fR, \fB\-\-quiet\fR
+Log and print only critical information
+.TP
+\fB\-d\fR, \fB\-\-debug\fR
+Log and print debug messages
+.TP
+\fB\-b\fR, \fB\-\-background\fR
+Run in background, with reduced privileges
+.TP
+\fB\-\-pid\fR
+Specify a PID file (only used in background mode)
+.TP
+\fB\-\-only-check\fR
+Check if modules configuration are correct and exit
+
+.SH "AUTHOR"
+.LP 
+Pipoteam

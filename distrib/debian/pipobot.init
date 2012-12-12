@@ -1,8 +1,8 @@
 #! /bin/sh
 ### BEGIN INIT INFO
 # Provides:          skeleton
-# Required-Start:    $remote_fs $networking
-# Required-Stop:     $remote_fs $networking
+# Required-Start:    $remote_fs $network
+# Required-Stop:     $remote_fs $network
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: Pipobot
@@ -11,61 +11,43 @@
 
 # Author: Vincent Duvert <vincent@duvert.net>
 
-# PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Pipobot"
 NAME=pipobot
+USER=pipobot
+CONFFILE=/etc/pipobot.conf.yml
 DAEMON=/usr/bin/python
 DAEMON_ARGS="-W ignore::DeprecationWarning /usr/bin/pipobot -b --pid /var/run/$NAME.pid"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
-# Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
+[ -x "/usr/bin/pipobot" ] || exit 0
 
-# Read configuration variable file if it is present
 [ -r /etc/default/$NAME ] && . /etc/default/$NAME
 
-# Exit if the daemon is disabled
-[ "$PIPOBOT_DAEMON" = "false" ] && exit 0
-
-# Load the VERBOSE setting and other rcS variables
-. /lib/init/vars.sh
-
-# Define LSB log_* functions.
-# Depend on lsb-base (>= 3.2-14) to ensure that this file is present
-# and status_of_proc is working.
 . /lib/lsb/init-functions
 
-#
-# Function that starts the daemon/service
-#
 do_start()
 {
-	# Return
-	#   0 if daemon has been started
-	#   1 if daemon was already running
-	#   2 if daemon could not be started
-	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
-		|| return 1
-	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON -- \
-		$DAEMON_ARGS \
-		|| return 2
-	# Add code here, if necessary, that waits for the process to be ready
-	# to handle requests from services started subsequently which depend
-	# on this one.  As a last resort, sleep for some time.
+	if [ "$ENABLE_DAEMON" != 1 ]; then
+        	log_progress_msg "(disabled, see /etc/default/${NAME})"
+		return
+	fi
+
+	if [ ! -f "$CONFFILE" ]; then
+		log_progress_msg "(not started, $CONFFILE not found - see /usr/share/doc/pipobot for sample configuration)"  
+		return
+	fi
+
+	mkdir -p /var/run/pipobot
+	chown pipobot:pipobot /var/run/pipobot
+	
+	start-stop-daemon --start --quiet --chuid $USER --pidfile $PIDFILE --exec $DAEMON -- $DAEMON_ARGS
 }
 
-#
-# Function that stops the daemon/service
-#
 do_stop()
 {
-	# Return
-	#   0 if daemon has been stopped
-	#   1 if daemon was already stopped
-	#   2 if daemon could not be stopped
-	#   other if a failure occurred
 	start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE
 	RETVAL="$?"
 	rm -f $PIDFILE

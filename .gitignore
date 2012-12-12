@@ -13,3 +13,9 @@ build/*
 dist/*
 MANIFEST
 pipobot.egg-info/*
+/debian
+*.debhelper
+*.substvars
+/distrib/debian/pipobot/
+/distrib/debian/*stamp*
+/distrib/debian/files

@@ -2,6 +2,7 @@
 
 from distutils.core import setup
 from os.path import dirname, join, isdir, splitext
+from sphinx.setup_command import BuildDoc
 import os
 import sys
 
@@ -37,6 +38,8 @@ if __name__ == '__main__':
         }
     else:
         cmdclass = {}
+    
+    kwargs['cmdclass']['build_sphinx'] = BuildDoc
 
     packages = ['pipobot', 'pipobot.lib']
     data_files = ["i18n/*/LC_MESSAGES/pipobot.mo"]

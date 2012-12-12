@@ -19,6 +19,8 @@ config:
 #Database configuration
 database:
     # Engine used, see sqlalchemy doc (commons are : 'sqlite', 'mysql', 'postgresql')
+    # If sqlite3 is used, the database file, and the *folder* containing the database
+    # must be readable/writable by the user executing the bot
     engine: sqlite
     src: /var/lib/pipobot/pipobot.sqlite3 # For sqlite, path to the database
 
