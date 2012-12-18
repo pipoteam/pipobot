@@ -95,7 +95,13 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
         # The bot says goodbye
         self.say(_(u"I’ve been asked to leave you"))
         # The bot leaves the room
-        self.disconnect(wait=True)
+        if getattr(self, 'disconnect_wait', None):
+            # sleekxmpp supports wait on disconnect
+            self.disconnect(wait=True)
+        else:
+            while not self.send_queue.empty():
+                time.sleep(.1)
+            self.disconnect()
 
         self.stop_modules()
 

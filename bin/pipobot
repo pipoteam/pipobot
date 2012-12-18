@@ -6,8 +6,8 @@ try:
     imp.find_module('pipobot')
 except ImportError:
     import sys
-    sys.stderr.write("The pipobot module was not found. Check your "
-        "PipoBot installation and the PYTHONPATH variable.\n")
+    sys.stderr.write("The pipobot module was not found in %r. Check your "
+        "PipoBot installation and the PYTHONPATH variable.\n" % sys.path)
     sys.exit(-1)
 
 from pipobot import PipoBotManager
