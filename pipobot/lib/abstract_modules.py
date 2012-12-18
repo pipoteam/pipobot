@@ -18,12 +18,12 @@ class FortuneModule(SyncModule):
     """A module designed for html-parsing functions"""
     __usable = False
 
-    def __init__(self, bot, desc, command, url_random,
+    def __init__(self, bot, desc, name, url_random,
                  url_indexed, lock_time=2):
         SyncModule.__init__(self,
                             bot,
                             desc=desc,
-                            command=command,
+                            name=name,
                             lock_time=lock_time,
                             )
         self.url_random = url_random
@@ -62,7 +62,7 @@ class FortuneModule(SyncModule):
     def extract_data(self, html_content):
         """ This *MUST* be overriden : it is the function that will extract
             content from retrieved HTML pages """
-        return _("You must override extract_data for %s !!!") % self.command
+        return _("You must override extract_data for %s !!!") % self.name
 
 
 class NotifyModule(SyncModule, AsyncModule):
@@ -70,24 +70,24 @@ class NotifyModule(SyncModule, AsyncModule):
         control with synchronous commands"""
     __usable = False
 
-    def __init__(self, bot, desc, command,
+    def __init__(self, bot, desc, name,
                  pm_allowed=True, lock_time=0, delay=0):
-        AsyncModule.__init__(self, bot, command, desc, delay)
-        SyncModule.__init__(self, bot, desc, command, pm_allowed, lock_time)
+        AsyncModule.__init__(self, bot, name, desc, delay)
+        SyncModule.__init__(self, bot, desc, name, pm_allowed, lock_time)
         self._mute = True
 
     @answercmd("mute")
     def mute(self, sender):
         """ Disables notifications """
         self._mute = True
-        return _("Disabling notifications for command %s") % self.command
+        return _("Disabling notifications for command %s") % self.name
 
     @answercmd("unmute")
     def unmute(self, sender):
         """ Enables notifications """
         self._mute = False
         self.update(silent=True)
-        return _("Enabling notifications for command %s") % self.command
+        return _("Enabling notifications for command %s") % self.name
 
     def action(self):
         """ What will the module do every [delay] second """
