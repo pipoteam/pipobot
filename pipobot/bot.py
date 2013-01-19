@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import traceback
 from pipobot.lib.modules import (AsyncModule, ListenModule,
                                  MultiSyncModule, PresenceModule,
                                  SyncModule, IQModule)
@@ -23,7 +24,13 @@ class PipoBot:
         self.sync_mods = []
 
         for classe in modules:
-            obj = classe(self)
+            try:
+                obj = classe(self)
+            except:
+                msg = _("An exception was raised starting module %s for room %s : %s")
+                msg %= (classe, chatname, traceback.format_exc().decode("utf-8"))
+                logger.error(msg)
+                continue
             if isinstance(obj, AsyncModule):
                 obj.start()
                 self.async_mods.append(obj)
