@@ -115,6 +115,9 @@ test:
 #
 
 modules_config:
+    user:
+        admins:
+            - admin@example.org
     botmpd:
         host: localhost
         port: 6600

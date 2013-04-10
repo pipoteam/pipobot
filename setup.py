@@ -37,7 +37,7 @@ if __name__ == '__main__':
             'update_catalog': babel.update_catalog,
         }
     else:
-        cmdclass = {}
+        kwargs['cmdclass'] = {}
     
     kwargs['cmdclass']['build_sphinx'] = BuildDoc
 
