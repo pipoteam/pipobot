@@ -160,8 +160,18 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
                     time.sleep(0.3)
                     self.forge(line, priv=priv, in_reply_to=in_reply_to).send()
             elif type(msg) is dict:
-                if not "user" in msg:
+                if not "users" in msg:
                     self.forge(msg, priv=priv, in_reply_to=in_reply_to).send()
+                else:
+                    # Syntax for this type of messages is :
+                    # {"users": {"user1": msg1,
+                    #            "user2": msg2}}
+                    # so user1(2) will receive in private msg1(2)
+                    # msg1(2) can be 'complex' messages (list, dict, unicode, str)
+                    # Private / non private messages can be "mixed" if for instance
+                    # msg1 = {"text": "some_text", "nopriv": True}
+                    for user, send_user in msg["users"].iteritems():
+                        self.say(send_user, priv=user)
 
     def presence(self, mess):
         """Method called when the bot receives a presence message.
