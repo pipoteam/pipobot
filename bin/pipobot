@@ -10,7 +10,7 @@ except ImportError:
         "PipoBot installation and the PYTHONPATH variable.\n" % sys.path)
     sys.exit(-1)
 
-from pipobot import PipoBotManager
+from pipobot.manager import PipoBotManager
 
 if __name__ == "__main__":
     PipoBotManager().run()
