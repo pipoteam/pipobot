@@ -1,79 +1,11 @@
 import logging
-from sqlalchemy.schema import UniqueConstraint, Index
-from sqlalchemy import Table, Column, String, Integer, ForeignKey
-from sqlalchemy.orm import relationship
+import traceback
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import FlushError
-from pipobot.lib.bdd import Base
+from pipobot.lib.users.models import *
 
 
 logger = logging.getLogger("pipobot.lib.users.known_users")
-
-
-class KnownUser(Base):
-    __tablename__ = "knownuser"
-    uid = Column(Integer, primary_key=True)
-    jids = relationship("KnownUsersJIDs")
-    chans = relationship("ChanParticipant")
-
-    def __init__(self):
-        self.chans = []
-
-    def __str__(self):
-        return "uid %s, jids %s, chans %s" % (self.uid, self.jids, self.chans)
-
-
-class Chan(Base):
-    __tablename__ = "chans"
-    jid = Column(String(250), primary_key=True)
-
-    def __init__(self, chan_name):
-        self.jid = chan_name
-
-
-class ChanParticipant(Base):
-    __tablename__ = "chanparticipant"
-    chan_id = Column(String(250), ForeignKey("chans.jid"), primary_key=True)
-    knownuser_uid = Column(Integer, ForeignKey("knownuser.uid"), primary_key=True)
-    nickname = Column(String(50))
-    user = relationship(KnownUser, primaryjoin=knownuser_uid == KnownUser.uid)
-
-    __table_args__ = (UniqueConstraint('chan_id', 'nickname', name='chan_nickname'),)
-
-    def __init__(self, chan_id, nickname):
-        self.chan_id = chan_id
-        self.nickname = nickname
-
-
-chan_group_association = Table("chan_group_association", Base.metadata,
-                        Column("knownuser_uid", Integer, ForeignKey('knownuser.uid')),
-                        Column("changroup_groupname", String(50), ForeignKey("changroup.groupname")))
-
-
-class ChanGroup(Base):
-    __tablename__ = "changroup"
-    chan_id = Column(String(250), ForeignKey("chans.jid"), primary_key=True)
-    groupname = Column(String(50))
-    chan = relationship(Chan, primaryjoin=Chan.jid == chan_id)
-    members = relationship("KnownUser", secondary=chan_group_association)
-    __table_args__ = (UniqueConstraint('chan_id', 'groupname', name='chan_groupname'),)
-
-    def __init__(self, chan_id, groupname):
-        self.chan_id = chan_id
-        self.groupname = groupname
-
-
-class KnownUsersJIDs(Base):
-    __tablename__ = "knownusersjids"
-    jid = Column(String(250), primary_key=True)
-    users_kuid = Column(Integer, ForeignKey('knownuser.uid'))
-    user = relationship(KnownUser, primaryjoin=users_kuid == KnownUser.uid)
-
-    def __init__(self, jid):
-        self.jid = jid
-
-    def __str__(self):
-        return self.jid
 
 
 class KnownUserManager(object):
@@ -84,6 +16,8 @@ class KnownUserManager(object):
         try:
             self.db_session.commit()
         except (IntegrityError, FlushError):
+            print traceback.format_exc()
+            logger.debug(traceback.format_exc().decode("utf-8"))
             logger.info(error_msg)
             self.db_session.rollback()
             return None
@@ -98,19 +32,36 @@ class KnownUserManager(object):
     def create_known_user(self, jids=[]):
         user = KnownUser()
         self.db_session.add(user)
-        ret = self.add_jids_to_user(user, jids)
+        ret = self._add_jids_to_user(user, jids)
         if ret is None:
             return ret
         return user
 
-    def get_known_user(self, pseudo, chan):
-        user = self.db_session.query(ChanParticipant).filter(ChanParticipant.chan_id==chan,
-                                                             ChanParticipant.nickname==pseudo).first()
-        if user is None:
-            logger.info("No KnownUser with pseudo %s", pseudo)
+    def get_assoc_user(self, pseudo, chan):
+        particip = self.db_session.query(ChanParticipant).filter(ChanParticipant.chan_id==chan,
+                                                                 ChanParticipant.nickname==pseudo).first()
+        return particip
+
+    def get_known_user(self, pseudo=None, chan=None, jid=None):
+        if chan is not None and pseudo is not None:
+            particip = self.db_session.query(ChanParticipant).filter(ChanParticipant.chan_id==chan,
+                                                                     ChanParticipant.nickname==pseudo).first()
+            if particip is None:
+                logger.info("No KnownUser with pseudo %s on chan %s", pseudo, chan)
+            else:
+                user = particip.user
+        elif jid is not None:
+            knownjid = self.db_session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid==jid).first()
+            user = knownjid.user if knownjid is not None else None
+            if user is None:
+                logger.info("No KnownUser with jid %s", jid)
+        else:
+            logger.info("You must provide (pseudo, chan) or (jid) to search for a Known User")
+            return None
+
         return user
 
-    def add_jids_to_user(self, user, jids=[]):
+    def _add_jids_to_user(self, user, jids=[]):
         for jid in jids:
             new_jid = KnownUsersJIDs(jid)
             user.jids.append(new_jid)
@@ -118,6 +69,21 @@ class KnownUserManager(object):
             commit = self.safe_commit(user, "")
             if commit is None:
                 return None
+        return user
+
+    def remove_known_user(self, pseudo=None, chan=None, jid=None):
+        user = self.get_known_user(pseudo=pseudo, chan=chan, jid=jid)
+        if user is None:
+            logger.info("Can't find a user with jid %s", jid)
+        else:
+            for jid in user.jids:
+                self.db_session.delete(jid)
+            # Remove each subscriptions of the user to chans
+            for chan in user.chans:
+                self.db_session.delete(chan)
+            # Remove the user
+            self.db_session.delete(user)
+            self.db_session.commit()
         return user
 
     def set_nickname(self, user_jid, chan, nickname):
@@ -138,12 +104,35 @@ class KnownUserManager(object):
             return user
 
     def change_nickname(self, old_pseudo, new_pseudo, chan):
-        assoc = self.db_session.query(ChanParticipant).filter(ChanParticipant.chan_id==chan,
-                                                              ChanParticipant.nickname==old_pseudo).first()
+        assoc = self.get_assoc_user(old_pseudo, chan)
         if assoc is not None:
             assoc.nickname = new_pseudo
             assoc = self.safe_commit(assoc, "Try to use an already existing pseudo : %s" % new_pseudo)
         return assoc
+
+    def remove_nickname(self, pseudo=None, chan=None, jid=None):
+        if chan is not None:
+            logger.error("You must provide a chan to remove a nickname from a chan")
+        else:
+            if pseudo is None and jid is None:
+                logger.error("You must provide either a jid or a pseudo to remove a nickname from a chan")
+                return
+
+            if pseudo is not None:
+                assoc = self.get_assoc_user(pseudo=pseudo, chan=chan)
+            elif jid is not None:
+                user = self.get_known_user(jid=jid)
+                if user is None:
+                    return None
+                assoc = self.db_session.query(ChanParticipant).filter(ChanParticipant.chan_id==chan,
+                                                                      ChanParticipant.knownuser_uid==user.uid).first()
+
+            if assoc is not None:
+                self.db_session.delete(assoc)
+                self.db_session.commit()
+            else:
+                logger.error("Can't find a user registerd with pseudo %s in chan %s with jid %s", pseudo, chan, jid)
+                return None
 
     def create_group(self, groupname, chan):
         group = ChanGroup(chan, groupname)
@@ -165,4 +154,32 @@ class KnownUserManager(object):
         assoc = self.db_session.query(ChanParticipant).filter(ChanParticipant.chan_id==chan,
                                                               ChanParticipant.nickname==user).first()
         group.members.append(assoc.user)
+        self.db_session.commit()
+        return group
+
+    def remove_user_from_group(self, groupname, chan, nickname):
+        group = self.get_group(groupname, chan)
+        if group is None:
+            log.error("The group %s does not exist on chan %s so it can't be removed !", groupname, chan)
+            return group
+
+        user = self.get_known_user(pseudo=nickname, chan=chan)
+        if user is None:
+            log.error("The user %s does not exist in chan %s so can't be removed from the group %s", nickname, chan, groupname)
+            return None
+
+        if user in group.members:
+            group.members.remove(user)
+            self.db_session.commit()
+            return user
+        else:
+            log.error("User %s not in group %s for chan %s : nothing to remove !", nickname, groupname, chan)
+            return None
+
+    def remove_group(self, groupname, chan):
+        group = self.get_group(groupname, chan)
+        if group is None:
+            return None
+        self.db_session.delete(group)
+        self.db_session.commit()
         return group
