@@ -137,7 +137,7 @@ class KnownUserManager(object):
     def create_group(self, groupname, chan):
         group = ChanGroup(chan, groupname)
         self.db_session.add(group)
-        self.safe_commit(group, "The group %s already exists in %s" % (groupname, chan))
+        group = self.safe_commit(group, "The group %s already exists in %s" % (groupname, chan))
         return group
 
     def get_group(self, groupname, chan):
@@ -153,7 +153,8 @@ class KnownUserManager(object):
                                                         ChanGroup.chan_id == chan).first()
         assoc = self.db_session.query(ChanParticipant).filter(ChanParticipant.chan_id==chan,
                                                               ChanParticipant.nickname==user).first()
-        group.members.append(assoc.user)
+        changroup = GroupMember(assoc.user, group)
+        group.members.append(changroup)
         self.db_session.commit()
         return group
 
@@ -168,10 +169,11 @@ class KnownUserManager(object):
             log.error("The user %s does not exist in chan %s so can't be removed from the group %s", nickname, chan, groupname)
             return None
 
-        if user in group.members:
-            group.members.remove(user)
-            self.db_session.commit()
-            return user
+        for member in group.members:
+            if member.user == user:
+                group.members.remove(member)
+                self.db_session.commit()
+                return user
         else:
             log.error("User %s not in group %s for chan %s : nothing to remove !", nickname, groupname, chan)
             return None
@@ -183,3 +185,14 @@ class KnownUserManager(object):
         self.db_session.delete(group)
         self.db_session.commit()
         return group
+
+    def set_permission(self, groupname, user, chan, admin=True, moderator=True):
+        member = self.db_session.query(GroupMember).filter(ChanGroup.groupname==groupname,
+                                                           ChanGroup.chan_id==chan,
+                                                           ChanParticipant.nickname==user).first()
+        if member is None:
+            return None
+        member.admin = admin
+        member.moderator = moderator
+        self.db_session.commit()
+        return member

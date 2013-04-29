@@ -82,13 +82,16 @@ class TestKnownUser(unittest.TestCase):
         self.assertEqual(group.groupname, "admin")
         self.assertEqual(group.chan, chan)
 
+        group2 = self.manager.create_group("admin", TEST_CHAN)
+        self.assertIsNone(group2)
+
         # Add the user to the group
         group = self.manager.add_user_to_group("admin", TEST_CHAN, "pouet")
         # Check that we modified the appropriate group
         self.assertEqual(group.groupname, "admin")
         self.assertEqual(group.chan, chan)
         # Check that the user were correctly added to the group
-        self.assertEqual(group.members[0], pouet)
+        self.assertEqual(group.members[0].user, pouet)
 
         # Try to retrieve a group
         admin = self.manager.get_group("admin", TEST_CHAN)
@@ -96,7 +99,7 @@ class TestKnownUser(unittest.TestCase):
         self.assertEqual(admin.groupname, "admin")
         self.assertEqual(admin.chan, chan)
         # Check that the user is still in the group
-        self.assertEqual(admin.members[0], pouet)
+        self.assertEqual(admin.members[0].user, pouet)
 
         # Try to retrieve a non-existing group
         group = self.manager.get_group("pipo", TEST_CHAN)
@@ -107,8 +110,8 @@ class TestKnownUser(unittest.TestCase):
         group = self.manager.add_user_to_group("admin", TEST_CHAN, "pipo")
         # The group now contains pipo and pouet
         self.assertEqual(len(group.members), 2)
-        self.assertEqual(group.members[0], pouet)
-        self.assertEqual(group.members[1], pipo)
+        self.assertEqual(group.members[0].user, pouet)
+        self.assertEqual(group.members[1].user, pipo)
 
         # Remove an user from the group
         user = self.manager.remove_user_from_group("admin", TEST_CHAN, "pipo")
@@ -117,7 +120,7 @@ class TestKnownUser(unittest.TestCase):
         # Retrieve the group and check that it contains only pouet
         admin = self.manager.get_group("admin", TEST_CHAN)
         self.assertEqual(len(group.members), 1)
-        self.assertEqual(group.members[0], pouet)
+        self.assertEqual(group.members[0].user, pouet)
 
         # Remove a group
         group = self.manager.remove_group("admin", TEST_CHAN)
@@ -126,3 +129,34 @@ class TestKnownUser(unittest.TestCase):
         # Check that the group was removed
         admin = self.manager.get_group("admin", TEST_CHAN)
         self.assertIsNone(admin)
+
+    def test_group_permission(self):
+        pouet, chan = self.add_known_user(TEST_CHAN, "pouet@domain.tld", "pouet")
+
+        # Create a group
+        group = self.manager.create_group("pipoteam", TEST_CHAN)
+        self.assertEqual(group.groupname, "pipoteam")
+        self.assertEqual(group.chan, chan)
+
+        # Add the user to the group
+        group = self.manager.add_user_to_group("pipoteam", TEST_CHAN, "pouet")
+        # Check that we modified the appropriate group
+        self.assertEqual(group.groupname, "pipoteam")
+        self.assertEqual(group.chan, chan)
+        # Check that the user were correctly added to the group
+        self.assertEqual(group.members[0].user, pouet)
+
+        # pouet is not yet admin
+        self.assertFalse(group.members[0].admin)
+        self.assertFalse(group.members[0].moderator)
+
+        member = self.manager.set_permission("pipoteam", "pouet", TEST_CHAN, admin=True, moderator=False)
+
+        # pouet is admin and not moderator
+        self.assertEqual(group.members[0], member)
+        self.assertTrue(group.members[0].admin)
+        self.assertFalse(group.members[0].moderator)
+
+        member = self.manager.set_permission("pipoteam", "pouet", TEST_CHAN, moderator=True)
+        self.assertEqual(group.members[0], member)
+        self.assertTrue(group.members[0].moderator)

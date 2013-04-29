@@ -1,5 +1,5 @@
 from sqlalchemy.schema import UniqueConstraint, Index
-from sqlalchemy import Table, Column, String, Integer, ForeignKey
+from sqlalchemy import Table, Column, String, Integer, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from pipobot.lib.bdd import Base
 
@@ -38,23 +38,33 @@ class ChanParticipant(Base):
         self.chan_id = chan_id
         self.nickname = nickname
 
-
-chan_group_association = Table("chan_group_association", Base.metadata,
-                        Column("knownuser_uid", Integer, ForeignKey('knownuser.uid')),
-                        Column("changroup_groupname", String(50), ForeignKey("changroup.groupname")))
-
-
 class ChanGroup(Base):
     __tablename__ = "changroup"
     chan_id = Column(String(250), ForeignKey("chans.jid"), primary_key=True)
     groupname = Column(String(50))
     chan = relationship(Chan, primaryjoin=Chan.jid == chan_id)
-    members = relationship("KnownUser", secondary=chan_group_association)
+    members = relationship("GroupMember")
     __table_args__ = (UniqueConstraint('chan_id', 'groupname', name='chan_groupname'),)
 
     def __init__(self, chan_id, groupname):
         self.chan_id = chan_id
         self.groupname = groupname
+
+
+class GroupMember(Base):
+    __tablename__ = "chan_group_association"
+    knownuser_uid = Column(Integer, ForeignKey('knownuser.uid'), primary_key=True)
+    changroup_groupname = Column(String(50), ForeignKey("changroup.groupname"))
+    admin = Column(Boolean)
+    moderator = Column(Boolean)
+    user = relationship(KnownUser, primaryjoin=KnownUser.uid == knownuser_uid)
+    group = relationship(ChanGroup, primaryjoin=ChanGroup.groupname == changroup_groupname)
+
+    def __init__(self, user, group, admin=False, moderator=False):
+        self.user = user
+        self.group = group
+        self.admin = admin
+        self.moderator = moderator
 
 
 class KnownUsersJIDs(Base):
