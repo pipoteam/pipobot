@@ -10,14 +10,14 @@ Configuration
 Pipobot configuration is centralized in a single yaml file. In this file you will configure *global* parameters, select rooms
 the bot will join, choose modules to use and configure them.
 An example of such file is distributed with pipobot under the name of `pipobot.conf.yml`. You can find in it a full example of
-configuration and can refer to it for syntax questions. 
+configuration and can refer to it for syntax questions.
 In this documentation we will develop parameters you can use and what they mean.
 
 Config section
 ++++++++++++++
 
 In this section you will have to provide general parameters for pipobot, eg parameters independent of rooms and modules.
-Here is a list of parameters you can use: 
+Here is a list of parameters you can use:
 
     * logpath: a *relative or absolute path* to a log file for pipobot
     * xmpp_logpath: a *relative or absolute* path to log all debug related to XMPP communication. This will only be useful
@@ -35,7 +35,7 @@ Supported engines are: *MySQL*, *PostgreSQL*, *SQLite*, with their respecting co
 SQLite configuration
 ^^^^^^^^^^^^^^^^^^^^
 These parameters are required with this engine:
-    
+
     * engine: must be *sqlite*
     * src: a relative or absolute path to a file where the database will be stored
 
@@ -68,7 +68,7 @@ Group section
 +++++++++++++
 
 A group is a list of modules we create that can be referenced in a room configuration (see the Room section above).
-example: ::
+Example:
 
 groups:
     group1:
@@ -108,10 +108,10 @@ Modules configuration are defined this way:
 Testing section
 +++++++++++++++
 
-The *testing* section is what will define which parameters and which modules the bot will use when started in testing modes 
+The *testing* section is what will define which parameters and which modules the bot will use when started in testing modes
 (see :ref:`unit_test_mode`).
 You will need to provide these parameters:
-    
+
     * fake_nick: a nickname for the bot.
     * fake_chan: a fake chan name (like XMPP MUC name).
     * modules: a list of modules, just like in a real room.
@@ -120,7 +120,7 @@ You will need to provide these parameters:
 Invocation
 ----------
 
-`pipobot` can be started in serveral modes: 
+`pipobot` can be started in serveral modes:
     - *XMPP* mode : this is the principal mode for the bot : it will connect to a Jabber MUC and start listening for commands.
     - *Testing* modes : they do not require an XMPP server : they are provided in order to easily test modules and bot functionalities.
 
@@ -130,7 +130,7 @@ General command-line options
 ++++++++++++++++++++++++++++
 
 When you start the bot in *XMPP* mode, you can use these options (use ``pipobot -h`` to retrieve them): ::
-    
+
   --version         show program's version number and exit
   -h, --help        show this help message and exit
   -q, --quiet       Log and print only critical information
@@ -193,7 +193,7 @@ Example: ::
     pipobot --script=":help;http://www.google.fr;:todo list all"
 
     --> :help
-    <== I can execute: 
+    <== I can execute:
     -todo
     --> http://www.google.fr
     <== [Lien] Titre : Google
@@ -224,18 +224,18 @@ and see the result : ::
     *** foo has joined
     !help
     <foo> !help
-    <Pipo-test> I can execute: 
+    <Pipo-test> I can execute:
     -todo
     !todo add liste un test
     <foo> !todo add my_list a test
     <Pipo-test> TODO added
     !todo list
     <foo> !todo list
-    <Pipo-test> All TODO-lists: 
+    <Pipo-test> All TODO-lists:
     my_list
     !todo list my_list
     <foo> !todo list my_list
     <Pipo-test> my_list :
     1 - a test (by foo on 2012/03/10 at 16:20)
- 
+
 You can start multiple client to the room as long as they have different nicknames.
