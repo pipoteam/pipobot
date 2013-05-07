@@ -4,6 +4,7 @@ import unittest
 
 from pipobot.lib.bdd import Base
 from pipobot.lib.users.known_users import KnownUserManager
+from pipobot.lib.users.exceptions import *
 
 TEST_CHAN = "test@chan.domain.tld"
 
@@ -18,7 +19,10 @@ class TestKnownUser(unittest.TestCase):
 
     def add_known_user(self, chan, jid, nickname):
         # Create a room
-        chan = self.manager.create_chan(chan)
+        try:
+            chan = self.manager.create_chan(chan)
+        except ChanConflict:
+            pass
 
         # Add a KnownUser
         usr = self.manager.create_known_user([jid])
@@ -38,8 +42,12 @@ class TestKnownUser(unittest.TestCase):
         self.assertEqual(assoc.nickname, "pouet")
 
         # Add a KnownUser that already exists : returns None and does nothing
-        add = self.manager.create_known_user(["pouet@domain.tld"])
-        self.assertIsNone(add)
+        self.assertRaises(JIDConflict, callable=self.manager.create_known_user, args=(["pouet@domain.tld"]))
+
+        pouet, chan = self.add_known_user(TEST_CHAN, "pipo@domain.tld", "pipo")
+        self.assertRaises(NicknameConflict, callable=self.manager.set_nickname, args=("pipo@domain.tld", TEST_CHAN, "pouet"))
+
+        self.assertRaises(JIDConflict, callable=self.add_known_user, args=(TEST_CHAN, "pouet@domain.tld", "qsdf"))
 
     def test_remove_knownuser(self):
         pouet, chan = self.add_known_user(TEST_CHAN, "pouet@domain.tld", "pouet")
@@ -65,14 +73,11 @@ class TestKnownUser(unittest.TestCase):
         plop = self.manager.get_assoc_user(pseudo="plop", chan=TEST_CHAN)
         self.assertEqual(plop.user, pouet)
 
-        # Try to change the nickname of a user who does not exist : return None and do nothing
-        ret = self.manager.change_nickname("unknown", "pipo", TEST_CHAN)
-        self.assertIsNone(ret)
+        # Try to change the nickname of a user who does not exist : raises an exception
+        self.assertRaises(NoKnownUser, callable=self.manager.change_nickname, args=("unknown", "pipo", TEST_CHAN))
 
         # Try to use a new nickname that already exists : nothing happens, "plop" is still "plop"
-        ret = self.manager.change_nickname("plop", "pipo", TEST_CHAN)
-        self.assertEqual(plop.nickname, "plop")
-        self.assertIsNone(ret)
+        self.assertRaises(NicknameConflict, callable=self.manager.change_nickname, args=("plop", "pipo", TEST_CHAN))
 
     def test_group(self):
         pouet, chan = self.add_known_user(TEST_CHAN, "pouet@domain.tld", "pouet")
@@ -82,8 +87,7 @@ class TestKnownUser(unittest.TestCase):
         self.assertEqual(group.groupname, "admin")
         self.assertEqual(group.chan, chan)
 
-        group2 = self.manager.create_group("admin", TEST_CHAN)
-        self.assertIsNone(group2)
+        self.assertRaises(GroupConflict, callable=self.manager.create_group, args=("admin", TEST_CHAN))
 
         # Add the user to the group
         group = self.manager.add_user_to_group("admin", TEST_CHAN, "pouet")
@@ -92,6 +96,9 @@ class TestKnownUser(unittest.TestCase):
         self.assertEqual(group.chan, chan)
         # Check that the user were correctly added to the group
         self.assertEqual(group.members[0].user, pouet)
+
+        # Try to add twice the same user to the group
+        self.assertRaises(GroupMemberConflict, callable=self.manager.add_user_to_group, args=("admin", TEST_CHAN, "pouet"))
 
         # Try to retrieve a group
         admin = self.manager.get_group("admin", TEST_CHAN)
@@ -102,8 +109,7 @@ class TestKnownUser(unittest.TestCase):
         self.assertEqual(admin.members[0].user, pouet)
 
         # Try to retrieve a non-existing group
-        group = self.manager.get_group("pipo", TEST_CHAN)
-        self.assertIsNone(group)
+        self.assertRaises(NoGroupFound, callable=self.manager.get_group, args=("pipo", TEST_CHAN))
 
         # Add a second user to the group
         pipo, chan = self.add_known_user(TEST_CHAN, "pipo@domain.tld", "pipo")
@@ -117,6 +123,9 @@ class TestKnownUser(unittest.TestCase):
         user = self.manager.remove_user_from_group("admin", TEST_CHAN, "pipo")
         self.assertEqual(user, pipo)
 
+        # Remove a user from a group that does not exist
+        self.assertRaises(NoGroupFound, callable=self.manager.remove_user_from_group, args=("unknown", TEST_CHAN, "whatever"))
+
         # Retrieve the group and check that it contains only pouet
         admin = self.manager.get_group("admin", TEST_CHAN)
         self.assertEqual(len(group.members), 1)
@@ -127,8 +136,7 @@ class TestKnownUser(unittest.TestCase):
         self.assertEqual(group, admin)
 
         # Check that the group was removed
-        admin = self.manager.get_group("admin", TEST_CHAN)
-        self.assertIsNone(admin)
+        self.assertRaises(NoGroupFound, callable=self.manager.get_group, args=("pipo", TEST_CHAN))
 
     def test_group_permission(self):
         pouet, chan = self.add_known_user(TEST_CHAN, "pouet@domain.tld", "pouet")
