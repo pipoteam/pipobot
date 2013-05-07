@@ -8,7 +8,7 @@ import unittest
 from collections import namedtuple
 
 from pipobot.lib.modules import Help, RecordUsers, BotModule
-from pipobot.lib.known_users import KnownUsersManager
+from pipobot.lib.users.known_users import KnownUserManager
 from pipobot.lib.module_test import ModuleTest
 
 logger = logging.getLogger('pipobot.lib.loader')
@@ -78,7 +78,7 @@ class BotModuleLoader(object):
         modules_tpl = namedtuple('modules_tpl', ['modules', 'test_mods'])
         modules = []
         test_modules = []
-        
+
         error = 0
 
         for name in module_names:

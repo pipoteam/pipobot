@@ -49,12 +49,13 @@ lib Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`known_users` Module
--------------------------
-.. automodule:: pipobot.lib.known_users
-    :members:
-    :undoc-members:
-    :show-inheritance:
+:mod:`users` Module
+----------------------
+.. toctree::
+    :maxdepth: 3
+    :numbered:
+
+    user_lib
 
 :mod:`loader` Module
 -------------------------
