@@ -283,7 +283,7 @@ class AsyncModule(BotModule, threading.Thread):
 
     def action(self) :
         raise NotImplementedError("Must be subclassed")
- 
+
     def stop(self):
         self.alive = False
 
@@ -437,12 +437,14 @@ class RecordUsers(PresenceModule):
         #The user [pseudo] leaves the room
         if message["type"] == 'unavailable':
             self.bot.occupants.rm_user(pseudo)
+            self.bot.users.rm_user(pseudo)
         else :
             role = message["muc"]['role']
             try:
                 jid = message["muc"]["jid"].bare
             except AttributeError:
                 jid = ""
+            self.bot.users.add_user(pseudo, jid, role, self.bot.chatname)
             self.bot.occupants.add_user(pseudo, jid, role)
 
 

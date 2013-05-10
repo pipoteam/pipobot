@@ -8,7 +8,7 @@ import unittest
 from collections import namedtuple
 
 from pipobot.lib.modules import Help, RecordUsers, BotModule
-from pipobot.lib.users.known_users import KnownUserManager
+from pipobot.lib.users.bot_commands import CmdKnownUser
 from pipobot.lib.module_test import ModuleTest
 
 logger = logging.getLogger('pipobot.lib.loader')
@@ -114,9 +114,9 @@ class BotModuleLoader(object):
 
         modules.append(RecordUsers)
         modules.append(Help)
-        KnownUsersManager._settings = {}
+        CmdKnownUser._settions = {}
         if "user" in self._module_settings:
-            KnownUsersManager._settings = self._module_settings["user"]
+            CmdKnownUser._settings = self._module_settings["user"]
 
-        modules.append(KnownUsersManager)
+        modules.append(CmdKnownUser)
         return error, modules_tpl(modules, test_modules)

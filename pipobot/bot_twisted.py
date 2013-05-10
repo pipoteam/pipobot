@@ -30,7 +30,7 @@ class MultiClientEcho(Protocol):
     def dataReceived(self, data):
         if not self.username:
             username, jid, role = data.strip().split(";")
-            self.factory.bot.occupants.add_user(username, jid, role)
+            self.factory.bot.users.add_user(username, jid, role, self.factory.bot.chatname)
             print "%s joined : jid=%s; role=%s" % (username, jid, role)
             self.username = username
             self.jid = jid
@@ -51,7 +51,7 @@ class MultiClientEcho(Protocol):
         self.factory.clients.remove(self)
         for client in self.factory.clients:
             client.transport.write("*** %s has left\n" % self.username)
-        self.factory.bot.occupants.rm_user(self.username)
+        self.factory.bot.users.rm_user(self.username)
 
 
 class MultiClientEchoFactory(Factory):

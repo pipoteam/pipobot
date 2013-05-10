@@ -4,7 +4,6 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import FlushError, NoResultFound
 from pipobot.lib.users.models import *
 from pipobot.lib.users.exceptions import *
-from pipobot.lib.users.exceptions import ChanConflict
 
 
 logger = logging.getLogger("pipobot.lib.users.known_users")
@@ -190,6 +189,10 @@ class KnownUserManager(object):
 
         if assoc is None:
             raise NoKnownUser(pseudo=pseudo, chan=chan)
+        return assoc
+
+    def get_all_users(self, chan):
+        assoc = self.db_session.query(ChanParticipant).filter(ChanParticipant.chan_id==chan).all()
         return assoc
 
     #############################################################################################

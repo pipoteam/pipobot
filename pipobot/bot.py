@@ -5,6 +5,8 @@ from pipobot.lib.modules import (AsyncModule, ListenModule,
                                  MultiSyncModule, PresenceModule,
                                  SyncModule, IQModule)
 from pipobot.lib.user import Occupants
+from pipobot.lib.users.known_users import KnownUserManager
+from pipobot.lib.users.live_user import UserManager
 
 logger = logging.getLogger('pipobot.pipobot')
 
@@ -15,6 +17,8 @@ class PipoBot:
         self.login = login
         self.chatname = chatname
         self.session = session
+        self.KUmanager = KnownUserManager(self.session)
+        self.users = UserManager()
 
         self.async_mods = []
         self.iq_mods = []

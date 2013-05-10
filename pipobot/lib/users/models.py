@@ -16,6 +16,11 @@ class KnownUser(Base):
     def __str__(self):
         return "uid %s, jids %s, chans %s" % (self.uid, self.jids, self.chans)
 
+    def list_jids(self):
+        return [jid.jid for jid in self.jids]
+
+    def print_jids(self):
+        return ",".join(self.list_jids())
 
 class Chan(Base):
     __tablename__ = "chans"
@@ -37,6 +42,9 @@ class ChanParticipant(Base):
     def __init__(self, chan_id, nickname):
         self.chan_id = chan_id
         self.nickname = nickname
+
+    def __str__(self):
+        return "Nickname is %s and jids are %s" % (self.nickname, ",".join(str(jid) for jid in self.user.jids))
 
 class ChanGroup(Base):
     __tablename__ = "changroup"
