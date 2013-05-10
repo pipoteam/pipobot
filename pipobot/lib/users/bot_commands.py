@@ -6,6 +6,7 @@ class CmdKnownUser(SyncModule):
     def __init__(self, bot):
         desc = {"": "Known User management",
                 "register": "\nuser register <pseudo> [registered_pseudo]: register user <pseudo> from the room to the database",
+                "create": "\nuser create <pseudo> <jids>: create a new user with <pseudo> in the database and jids <jids>",
                 "show": "user show <who> : show informations about <who> (or show all known users if no parameter)",
                 "nick": "user nick <pseudo>: change your pseudo to <pseudo> in this room",
                 "list": "list all known users"}
@@ -16,18 +17,48 @@ class CmdKnownUser(SyncModule):
     def rtfm(self, sender):
         return "See !help user for details on available commands : %s" % ",".join(self.desc.iterkeys())
 
-    @answercmd("register", r"register\s+(?P<pseudo>\S+)", r"register(?P<pseudo>)\s+(?P<alias>\S*)")
+    @answercmd(r'create (?P<pseudo>\S+)(?P<jids>.*)')
+    def create(self, sender, pseudo, jids):
+        manager = self.bot.KUmanager
+        sender = self.bot.users.getuser(sender)
+        jids = jids.strip().split()
+
+        if sender.role != "moderator":
+            return _("You must be an XMPP moderator of the room to create new users, you are just a %s !" % sender.role)
+
+        try:
+            assoc = manager.get_assoc_user(pseudo=pseudo, chan=self.bot.chatname)
+            return _("A user is already register with the nickname %s in this room !" % pseudo)
+        except NoKnownUser:
+            pass
+
+        user = None
+        for jid in jids:
+            try:
+                user = manager.get_known_user(jid=jid)
+            except NoKnownUser:
+                pass
+
+        if user is None:
+            user = manager.create_known_user(jids)
+
+        # All jids are associated to the same person so we can use jids[0]
+        assoc = manager.set_nickname(jids[0], self.bot.chatname, pseudo)
+        return _("User %s is now one of us !" % pseudo)
+
+
+    @answercmd(r"register\s+(?P<pseudo>\S+)", r"register(?P<pseudo>)\s+(?P<alias>\S*)")
     def register(self, sender, pseudo="", alias=""):
         if alias == "":
             alias = pseudo
         sender = self.bot.users.getuser(sender)
 
-        try:
-            sender.assoc_user_chan(self.bot.KUmanager)
-        except NoKnownUser:
-            return _("You must be registered in the room to create new users !")
+        if sender.role != "moderator":
+            return _("You must be an XMPP moderator of the room to create new users, you are just a %s !" % sender.role)
 
         target = self.bot.users.getuser(pseudo)
+        if target is None:
+            return _("%s is not present in the room : you should use ':user create' and provide jids" % pseudo)
 
         try:
             target.create_known_user(self.bot.KUmanager, alias)
@@ -40,6 +71,8 @@ class CmdKnownUser(SyncModule):
         msg = ""
         chan = self.bot.chatname
         all_users = self.bot.KUmanager.get_all_users(chan)
+        if all_users == []:
+            return _("Nobody is registered here !")
         for user in all_users:
             msg += _("%s with jid(s) %s") % (user.nickname, user.user.print_jids())
             live = self.bot.users.known_to_live(user)
@@ -47,7 +80,7 @@ class CmdKnownUser(SyncModule):
                 msg += _(", present in this room as %s") % live.nickname
             msg += "\n"
 
-        return msg
+        return msg.strip()
 
     @answercmd("show", r"show\s+(?P<pseudo>\S+)")
     def show(self, sender, pseudo=""):
@@ -73,7 +106,7 @@ class CmdKnownUser(SyncModule):
             return _("There is no user %s in the room, or registered with this nickname" % (pseudo))
         try:
             kutarget = target.assoc_user_chan(self.bot.KUmanager)
-            return _("User %s is registered as %s the database with jids %s" % (pseudo, kutarget.nickname,
+            return _("User %s is registered as %s in the database with jids %s" % (pseudo, kutarget.nickname,
                                                                                 kutarget.user.print_jids()))
         except NoKnownUser:
             return _("User %s is in the room but not registered (yet)" % pseudo)
