@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 import logging
 import traceback
+from sqlalchemy import event
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import FlushError, NoResultFound
 from pipobot.lib.users.models import *
@@ -10,8 +12,20 @@ logger = logging.getLogger("pipobot.lib.users.known_users")
 
 
 class KnownUserManager(object):
-    def __init__(self, db_session):
-        self.db_session = db_session
+    def __init__(self, bot):
+        self.bot = bot
+        self.db_session = bot.session
+        self._hooks_database()
+
+    def _hooks_database(self):
+        event.listen(ChanParticipant, 'load', self._load_chan_participant, propagate=True)
+
+    def _load_chan_participant(self, target, context):
+        """ This hook is used to associate a LiveUser to a ChanParticipant automatically """
+        # If a user with one of the jids of the target is present in the room, we retrieve
+        # the corresponding LiveUser, and associate it to the target
+        # Else target.live will be None, which means that the user is offline
+        target.live = self.bot.users.getuser_byjid(target.user.list_jids())
 
     def safe_commit(self, exc, error_msg):
         try:
@@ -35,7 +49,6 @@ class KnownUserManager(object):
             :rtype: KnownUser
             :raises: :class:`pipobot.lib.users.exceptions.JIDConflict`
         """
-
         for jid in jids:
             new_jid = KnownUsersJIDs(jid)
             user.jids.append(new_jid)
@@ -89,7 +102,7 @@ class KnownUserManager(object):
             :param user_jid: The jid of the user we want to associate to a chan
             :param chan: The name of the chan
             :param nickname: The nickname of the user in the chan
-            :rtype: KnownUser
+            :rtype: ChanParticipant
             :raises: NoKnownUser, NicknameConflict
         """
 
@@ -109,7 +122,7 @@ class KnownUserManager(object):
             self.db_session.add(assoc)
 
         self.safe_commit(NicknameConflict, [nickname, chan])
-        return user
+        return assoc
 
     def add_user_to_group(self, groupname, chan, pseudo):
         """ Creation of a GroupMember : a user is associated to a group in a chan

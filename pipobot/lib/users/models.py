@@ -46,6 +46,13 @@ class ChanParticipant(Base):
     def __str__(self):
         return "Nickname is %s and jids are %s" % (self.nickname, ",".join(str(jid) for jid in self.user.jids))
 
+    def list_jids(self):
+        return [jid.jid for jid in self.user.jids]
+
+    def print_jids(self):
+        return ",".join(self.list_jids())
+
+
 class ChanGroup(Base):
     __tablename__ = "changroup"
     chan_id = Column(String(250), ForeignKey("chans.jid"), primary_key=True)

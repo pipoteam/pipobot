@@ -27,11 +27,11 @@ class ForgedMsg(dict):
 class TestBot(PipoBot):
     def __init__(self, name, login, chatname, modules, session):
         PipoBot.__init__(self, name, login, chatname, modules, session)
+        # XXX remove that when modules are updated (getjid)
         self.occupants.add_user(name, login, "moderator")
+        self.users.add_user(name, login, "moderator", chatname)
 
         logger.info("Starting console bot in fake room %s" % self.chatname)
-
-        self.session = session
 
         # Since we are in test mode, we remove time constraints
         for module in self.sync_mods:

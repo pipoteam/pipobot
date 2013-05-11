@@ -71,16 +71,14 @@ class CmdKnownUser(SyncModule):
         msg = ""
         chan = self.bot.chatname
         all_users = self.bot.KUmanager.get_all_users(chan)
-        if all_users == []:
-            return _("Nobody is registered here !")
+
         for user in all_users:
             msg += _("%s with jid(s) %s") % (user.nickname, user.user.print_jids())
-            live = self.bot.users.known_to_live(user)
-            if live is not None:
-                msg += _(", present in this room as %s") % live.nickname
+            if user.live is not None:
+                msg += _(", present in this room as %s") % user.live.nickname
             msg += "\n"
 
-        return msg.strip()
+        return _("Nobody is registered here !") if msg == "" else msg.strip()
 
     @answercmd("show", r"show\s+(?P<pseudo>\S+)")
     def show(self, sender, pseudo=""):
@@ -91,10 +89,9 @@ class CmdKnownUser(SyncModule):
         try:
             ku = self.bot.KUmanager.get_assoc_user(pseudo, self.bot.chatname)
             msg = _("User %s is registered as %s in the database with jid(s) %s" % (pseudo, ku.nickname,
-                                                                                    ku.user.print_jids()))
-            live = self.bot.users.known_to_live(ku)
-            if live is not None:
-                msg += _(" and is here with us with the name %s") % live.nickname
+                                                                                    ku.print_jids()))
+            if ku.live is not None:
+                msg += _(" and is here with us with the name %s") % ku.live.nickname
             return msg
         except NoKnownUser:
             pass
@@ -105,9 +102,8 @@ class CmdKnownUser(SyncModule):
         if target is None:
             return _("There is no user %s in the room, or registered with this nickname" % (pseudo))
         try:
-            kutarget = target.assoc_user_chan(self.bot.KUmanager)
-            return _("User %s is registered as %s in the database with jids %s" % (pseudo, kutarget.nickname,
-                                                                                kutarget.user.print_jids()))
+            return _("User %s is registered as %s in the database with jids %s" % (pseudo, target.known.nickname,
+                                                                                   target.known.print_jids()))
         except NoKnownUser:
             return _("User %s is in the room but not registered (yet)" % pseudo)
 
@@ -116,12 +112,12 @@ class CmdKnownUser(SyncModule):
         sender = self.bot.users.getuser(sender)
 
         try:
-            sender.assoc_user_chan(self.bot.KUmanager)
+            sender.assoc_user_chan()
         except NoKnownUser:
             return _("You must be registered in the room to change your nickname (see :user register)")
 
         try:
-            self.bot.KUmanager.set_nickname(sender.jid, self.bot.chatname, pseudo)
+            sender.register_to_room(pseudo)
             return _("Your nickname in this chan is now %s" % pseudo)
         except NicknameConflict:
             return _("User %s already exist in this chan !" % pseudo)

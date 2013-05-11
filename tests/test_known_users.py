@@ -2,6 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import unittest
 
+from pipobot.bot_test import TestBot
 from pipobot.lib.bdd import Base
 from pipobot.lib.users.known_users import KnownUserManager
 from pipobot.lib.users.exceptions import *
@@ -15,7 +16,8 @@ class TestKnownUser(unittest.TestCase):
         Session = sessionmaker(bind=engine)
         session = Session()
         Base.metadata.create_all(engine)
-        self.manager = KnownUserManager(session)
+        bot = TestBot("pipotest", "login", TEST_CHAN, [], session)
+        self.manager = KnownUserManager(bot)
 
     def add_known_user(self, chan, jid, nickname):
         # Create a room
@@ -30,8 +32,8 @@ class TestKnownUser(unittest.TestCase):
 
         # Add the user to the room with nickname 'pouet'
         ret = self.manager.set_nickname(jid, TEST_CHAN, nickname)
-        self.assertEqual(ret.chans[0].nickname, nickname)
-        self.assertEqual(ret, usr)
+        self.assertEqual(ret.nickname, nickname)
+        self.assertEqual(ret.user, usr)
         return usr, chan
 
     def test_add_knownuser(self):

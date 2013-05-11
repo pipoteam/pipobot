@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import unittest
+from pipobot.bot_test import TestBot
 from pipobot.lib.users.live_user import LiveUser
 from pipobot.lib.users.known_users import KnownUserManager
 from pipobot.lib.bdd import Base
@@ -16,7 +17,17 @@ class TestLiveUser(unittest.TestCase):
         Session = sessionmaker(bind=engine)
         session = Session()
         Base.metadata.create_all(engine)
-        self.manager = KnownUserManager(session)
+        self.bot = TestBot("pipotest", "login", CHAN, [], session)
+        self.manager = KnownUserManager(self.bot)
+
+    def create_room(self, chan):
+        # Create a room
+        try:
+            chan = self.manager.create_chan(chan)
+        except ChanConflict:
+            pass
+        return chan
+
 
     def add_known_user(self, chan, jid, nickname):
         # Create a room
@@ -31,31 +42,55 @@ class TestLiveUser(unittest.TestCase):
 
         # Add the user to the room with nickname 'pouet'
         ret = self.manager.set_nickname(jid, CHAN, nickname)
-        self.assertEqual(ret.chans[0].nickname, nickname)
-        self.assertEqual(ret, usr)
+        self.assertEqual(ret.nickname, nickname)
+        self.assertEqual(ret.user, usr)
         return usr, chan
 
-    def test_access(self):
-        live_pipo = LiveUser("pipo", "pipo@%s" % DOMAIN, "administrator", CHAN)
-        self.assertRaises(NoKnownUser, callable=live_pipo.known_user, args=(self.manager))
+    def test_join_leave(self):
+        self.bot.users.add_user("XMPPpouet", "pouet@domain.tld", "moderator", CHAN)
+        pouet, chan = self.add_known_user(CHAN, "pouet@domain.tld", "pouet")
 
-        pipo, chan = self.add_known_user(CHAN, "pipo@%s" % DOMAIN, "pipo")
-        pouet, chan = self.add_known_user(CHAN, "pouet@%s" % DOMAIN, "pouet")
+        # Get a KnownUser
+        assoc = self.manager.get_assoc_user(pseudo="pouet", chan=CHAN)
+        self.assertEqual(assoc.nickname, "pouet")
+        self.assertEqual(assoc.live.nickname, "XMPPpouet")
 
-        self.assertEqual(live_pipo.known_user(self.manager), pipo)
-        live_pouet = LiveUser("pouet", "pouet@%s" % DOMAIN, "administrator", CHAN)
+        fresh_pouet = self.manager.get_known_user(pseudo="pouet", chan=CHAN)
+        self.manager._add_jids_to_user(fresh_pouet, ["qsdf@domain.tld"])
+        self.bot.users.rm_user("XMPPpouet")
+        self.assertEqual(assoc.live, None)
 
-        self.assertEqual(live_pipo.known_user(self.manager), pipo)
-        self.assertEqual(live_pouet.known_user(self.manager), pouet)
+    def test_live(self):
+        # If pipo is not in the room, we can't find him
+        self.assertEqual(self.bot.users.getuser("pipo"), None)
 
-        bdd_pipo = self.manager.get_known_user("pipo", CHAN)
+        # pipo, with jid pipo@domain.tld joins the room
+        self.bot.users.add_user("pipo", "pipo@%s" % DOMAIN, "administrator", CHAN)
 
-        # Verify that the LiveUser.create_known_user works correctly
-        self.assertEqual(bdd_pipo, live_pipo.create_known_user(self.manager))
+        # We search for the associated KnownUser
+        live_pipo = self.bot.users.getuser("pipo")
+        # It does not exist
+        self.assertIsNone(live_pipo.known)
 
-        # Verify that the getter LiveUser.known_user works correctly
-        self.assertEqual(bdd_pipo, live_pipo.known_user(self.manager))
+        chan = self.create_room(CHAN)
 
-        pipo_chan = self.manager.get_assoc_user(pseudo="pipo", chan=CHAN)
-        self.assertEqual(live_pipo.assoc_user_chan(self.manager), pipo_chan)
+        # We register pipo to the database
+        live_pipo.register_to_room()
 
+        registered_pipo = self.bot.users.getuser("pipo").known
+
+        # Verify that the LiveUser.register_to_room works correctly
+        self.assertEqual(registered_pipo.nickname, "pipo")
+        self.assertEqual(registered_pipo.chan_id, CHAN)
+        bdd_pipo = self.manager.get_assoc_user("pipo", CHAN)
+        self.assertEqual(bdd_pipo, registered_pipo)
+
+        # From the LiveUser live_pipo, we can retrieve the KnownUser
+        self.assertEqual(live_pipo.known, registered_pipo)
+
+        # From a ChanParticipant we can retrieve the LiveUser
+        self.assertEqual(bdd_pipo.live, live_pipo)
+
+        # When pipo leaves the room, the ChanParticipant.live becomes None
+        self.bot.users.rm_user("pipo")
+        self.assertEqual(bdd_pipo.live, None)

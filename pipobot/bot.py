@@ -17,8 +17,8 @@ class PipoBot:
         self.login = login
         self.chatname = chatname
         self.session = session
-        self.KUmanager = KnownUserManager(self.session)
-        self.users = UserManager()
+        self.KUmanager = KnownUserManager(self)
+        self.users = UserManager(self)
 
         self.async_mods = []
         self.iq_mods = []

@@ -436,6 +436,7 @@ class RecordUsers(PresenceModule):
 
         #The user [pseudo] leaves the room
         if message["type"] == 'unavailable':
+            # XXX remove that when modules are updated (getjid)
             self.bot.occupants.rm_user(pseudo)
             self.bot.users.rm_user(pseudo)
         else :
@@ -445,6 +446,7 @@ class RecordUsers(PresenceModule):
             except AttributeError:
                 jid = ""
             self.bot.users.add_user(pseudo, jid, role, self.bot.chatname)
+            # XXX remove that when modules are updated (getjid)
             self.bot.occupants.add_user(pseudo, jid, role)
 
 
