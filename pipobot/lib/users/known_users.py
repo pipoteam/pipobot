@@ -131,9 +131,12 @@ class KnownUserManager(object):
             :param chan: Name of the chan in which we search the group and the user
             :param pseudo: Pseudo of the user in the chan
             :rtype: ChanGroup
-            :raises: NoGroupFound, RequestError, NoKnownUser"""
+            :raises: GroupMemberConflict, NoGroupFound, RequestError, NoKnownUser"""
         group = self.get_group(groupname, chan)
         assoc = self.get_assoc_user(pseudo=pseudo, chan=chan)
+
+        if assoc in group:
+            raise GroupMemberConflict()
 
         changroup = GroupMember(assoc.user, group)
         group.members.append(changroup)
@@ -203,6 +206,9 @@ class KnownUserManager(object):
         if assoc is None:
             raise NoKnownUser(pseudo=pseudo, chan=chan)
         return assoc
+
+    def get_chan(self, chan):
+        return self.db_session.query(Chan).filter(ChanGroup.chan_id==chan).first()
 
     def get_all_users(self, chan):
         assoc = self.db_session.query(ChanParticipant).filter(ChanParticipant.chan_id==chan).all()
@@ -316,7 +322,6 @@ class KnownUserManager(object):
         """
         group = self.get_group(groupname, chan)
         user = self.get_known_user(pseudo=nickname, chan=chan)
-
         for member in group.members:
             if member.user == user:
                 group.members.remove(member)

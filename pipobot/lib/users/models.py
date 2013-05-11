@@ -22,25 +22,41 @@ class KnownUser(Base):
     def print_jids(self):
         return ",".join(self.list_jids())
 
+    def __contains__(self, data):
+        if isinstance(data, KnownUsersJIDs):
+            return data in self.jids
+        elif isinstance(data, (str, unicode)):
+            return data in [jid.jid for jid in self.jids]
+
+
 class Chan(Base):
     __tablename__ = "chans"
     jid = Column(String(250), primary_key=True)
+    participants = relationship("ChanParticipant")
+    groups = relationship("ChanGroup")
 
     def __init__(self, chan_name):
         self.jid = chan_name
+
+    def __contains__(self, data):
+        if isinstance(data, KnownUser):
+            return any(usr.user == data for usr in self.participants)
+        elif isinstance(data, (str, unicode)):
+            return any(user.nickname == data for user in self.participants)
 
 
 class ChanParticipant(Base):
     __tablename__ = "chanparticipant"
     chan_id = Column(String(250), ForeignKey("chans.jid"), primary_key=True)
+    chan = relationship(Chan, primaryjoin=Chan.jid == chan_id)
     knownuser_uid = Column(Integer, ForeignKey("knownuser.uid"), primary_key=True)
     nickname = Column(String(50))
     user = relationship(KnownUser, primaryjoin=knownuser_uid == KnownUser.uid)
 
     __table_args__ = (UniqueConstraint('chan_id', 'nickname', name='chan_nickname'),)
 
-    def __init__(self, chan_id, nickname):
-        self.chan_id = chan_id
+    def __init__(self, chan, nickname):
+        self.chan_id = chan
         self.nickname = nickname
 
     def __str__(self):
@@ -51,6 +67,10 @@ class ChanParticipant(Base):
 
     def print_jids(self):
         return ",".join(self.list_jids())
+
+    def __contains__(self, jid):
+        """ Checks if the corresponding KnownUser contains this jid """
+        return jid in self.user
 
 
 class ChanGroup(Base):
@@ -64,6 +84,16 @@ class ChanGroup(Base):
     def __init__(self, chan_id, groupname):
         self.chan_id = chan_id
         self.groupname = groupname
+
+    def __contains__(self, user):
+        if isinstance(user, GroupMember):
+            return user in self.members
+        elif isinstance(user, KnownUser):
+            return any(user == member.user for member in self.members)
+        elif isinstance(user, ChanParticipant):
+            return user.user in self
+        elif isinstance(user, (str, unicode)):
+            return any(any(chan.nickname == user for chan in member.user.chans) for member in self.members)
 
 
 class GroupMember(Base):

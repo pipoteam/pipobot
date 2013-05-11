@@ -26,11 +26,9 @@ class CmdKnownUser(SyncModule):
         if sender.role != "moderator":
             return _("You must be an XMPP moderator of the room to create new users, you are just a %s !" % sender.role)
 
-        try:
-            assoc = manager.get_assoc_user(pseudo=pseudo, chan=self.bot.chatname)
+        chan = manager.get_chan(chan)
+        if sender in chan:
             return _("A user is already register with the nickname %s in this room !" % pseudo)
-        except NoKnownUser:
-            pass
 
         user = None
         for jid in jids:

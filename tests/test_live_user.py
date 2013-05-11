@@ -2,10 +2,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import unittest
 from pipobot.bot_test import TestBot
-from pipobot.lib.users.live_user import LiveUser
 from pipobot.lib.users.known_users import KnownUserManager
 from pipobot.lib.bdd import Base
-from pipobot.lib.users.exceptions import *
+from pipobot.lib.users.exceptions import ChanConflict
 
 DOMAIN = "domain.tld"
 CHAN = "test@%s" % DOMAIN
@@ -20,7 +19,7 @@ class TestLiveUser(unittest.TestCase):
         self.bot = TestBot("pipotest", "login", CHAN, [], session)
         self.manager = KnownUserManager(self.bot)
 
-    def create_room(self, chan):
+    def _create_room(self, chan):
         # Create a room
         try:
             chan = self.manager.create_chan(chan)
@@ -31,10 +30,7 @@ class TestLiveUser(unittest.TestCase):
 
     def add_known_user(self, chan, jid, nickname):
         # Create a room
-        try:
-            chan = self.manager.create_chan(chan)
-        except ChanConflict:
-            pass
+        chan = self._create_room(chan)
 
         # Add a KnownUser
         usr = self.manager.create_known_user([jid])
@@ -48,15 +44,15 @@ class TestLiveUser(unittest.TestCase):
 
     def test_join_leave(self):
         self.bot.users.add_user("XMPPpouet", "pouet@domain.tld", "moderator", CHAN)
-        pouet, chan = self.add_known_user(CHAN, "pouet@domain.tld", "pouet")
+        self.add_known_user(CHAN, "pouet@domain.tld", "pouet")
 
         # Get a KnownUser
         assoc = self.manager.get_assoc_user(pseudo="pouet", chan=CHAN)
+        # Check its registered nickname
         self.assertEqual(assoc.nickname, "pouet")
+        # Check its current nickname in the room
         self.assertEqual(assoc.live.nickname, "XMPPpouet")
 
-        fresh_pouet = self.manager.get_known_user(pseudo="pouet", chan=CHAN)
-        self.manager._add_jids_to_user(fresh_pouet, ["qsdf@domain.tld"])
         self.bot.users.rm_user("XMPPpouet")
         self.assertEqual(assoc.live, None)
 
@@ -69,10 +65,10 @@ class TestLiveUser(unittest.TestCase):
 
         # We search for the associated KnownUser
         live_pipo = self.bot.users.getuser("pipo")
-        # It does not exist
+        # 'pipo' is not registered in the database yet
         self.assertIsNone(live_pipo.known)
 
-        chan = self.create_room(CHAN)
+        self._create_room(CHAN)
 
         # We register pipo to the database
         live_pipo.register_to_room()
