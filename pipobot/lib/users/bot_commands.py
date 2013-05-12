@@ -14,7 +14,7 @@ class CmdKnownUser(SyncModule):
         SyncModule.__init__(self, bot, desc=desc, name="user")
 
     @defaultcmd
-    def rtfm(self, sender):
+    def rtfm(self, sender, message):
         return "See !help user for details on available commands : %s" % ",".join(self.desc.iterkeys())
 
     @answercmd(r'create (?P<pseudo>\S+)(?P<jids>.*)')
@@ -26,7 +26,7 @@ class CmdKnownUser(SyncModule):
         if sender.role != "moderator":
             return _("You must be an XMPP moderator of the room to create new users, you are just a %s !" % sender.role)
 
-        chan = manager.get_chan(chan)
+        chan = manager.get_chan(self.bot.chatname)
         if sender in chan:
             return _("A user is already register with the nickname %s in this room !" % pseudo)
 
@@ -45,8 +45,11 @@ class CmdKnownUser(SyncModule):
         return _("User %s is now one of us !" % pseudo)
 
 
-    @answercmd(r"register\s+(?P<pseudo>\S+)", r"register(?P<pseudo>)\s+(?P<alias>\S*)")
+    @answercmd(r"register", r"register\s+(?P<pseudo>\S+)", r"register\s+(?P<pseudo>\S+)\s+(?P<alias>\S*)")
     def register(self, sender, pseudo="", alias=""):
+        if pseudo == "":
+            pseudo = sender
+
         if alias == "":
             alias = pseudo
         sender = self.bot.users.getuser(sender)
@@ -59,7 +62,7 @@ class CmdKnownUser(SyncModule):
             return _("%s is not present in the room : you should use ':user create' and provide jids" % pseudo)
 
         try:
-            target.create_known_user(self.bot.KUmanager, alias)
+            target.register_to_room(alias)
             return _("User %s with jid %s sucessfully created !") % (alias, target.jid)
         except NicknameConflict:
             return _("A user is already registered with the name %s" % alias)
@@ -78,11 +81,19 @@ class CmdKnownUser(SyncModule):
 
         return _("Nobody is registered here !") if msg == "" else msg.strip()
 
-    @answercmd("show", r"show\s+(?P<pseudo>\S+)")
-    def show(self, sender, pseudo=""):
-        if pseudo == "":
-            pseudo = sender
+    @answercmd("show")
+    def show_sender(self, sender):
+        return self.show_live(sender)
 
+    @answercmd(r"show\s+(?P<pseudo>\S+)")
+    def show(self, sender, pseudo):
+        known = self.show_known(pseudo)
+        if known is None:
+            return self.show_live(pseudo)
+        else:
+            return known
+
+    def show_known(self, pseudo):
         # Searchs in the KU database someone registered as <pseudo>
         try:
             ku = self.bot.KUmanager.get_assoc_user(pseudo, self.bot.chatname)
@@ -94,16 +105,18 @@ class CmdKnownUser(SyncModule):
         except NoKnownUser:
             pass
 
+
+    def show_live(self, pseudo):
         # Checks if the user <pseudo> *in the room* is registered
         target = self.bot.users.getuser(pseudo)
 
         if target is None:
             return _("There is no user %s in the room, or registered with this nickname" % (pseudo))
-        try:
-            return _("User %s is registered as %s in the database with jids %s" % (pseudo, target.known.nickname,
-                                                                                   target.known.print_jids()))
-        except NoKnownUser:
+        if target.known is None:
             return _("User %s is in the room but not registered (yet)" % pseudo)
+        else:
+            return _("User %s is registered as %s in the database with jid(s) %s" % (pseudo, target.known.nickname,
+                                                                                   target.known.print_jids()))
 
     @answercmd(r"nick (?P<pseudo>\S+)")
     def nick(self, sender, pseudo):

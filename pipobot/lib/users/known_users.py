@@ -208,7 +208,7 @@ class KnownUserManager(object):
         return assoc
 
     def get_chan(self, chan):
-        return self.db_session.query(Chan).filter(ChanGroup.chan_id==chan).first()
+        return self.db_session.query(Chan).filter(Chan.jid==chan).first()
 
     def get_all_users(self, chan):
         assoc = self.db_session.query(ChanParticipant).filter(ChanParticipant.chan_id==chan).all()

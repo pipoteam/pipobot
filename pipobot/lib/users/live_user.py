@@ -37,7 +37,6 @@ class LiveUser(object):
         self.bot = bot
 
     def get_known(self):
-        """ :raises: NoKnownUser """
         try:
             return self.bot.KUmanager.get_known_user(jid=self.jid)
         except NoKnownUser:
