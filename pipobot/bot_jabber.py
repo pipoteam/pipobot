@@ -12,6 +12,7 @@ from pipobot.lib.modules import (AsyncModule, ListenModule,
                                  SyncModule, IQModule)
 from pipobot.lib.user import Occupants
 from pipobot.bot import PipoBot
+from pipobot.lib.users.exceptions import ChanConflict
 
 logger = logging.getLogger('pipobot.bot_jabber')
 
@@ -66,6 +67,11 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
         join = muc.joinMUC(self.chatname, self.name)
         hello_msg = _("Hello everyone !")
         self.send_message(mto=self.chatname, mbody=hello_msg, mtype="groupchat")
+        try:
+            self.KUmanager.create_chan(self.chatname)
+        except ChanConflict:
+            # The chan already exist, nothing to do
+            pass
 
     def message(self, mess):
         """Method called when the bot receives a message"""
