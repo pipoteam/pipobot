@@ -2,8 +2,9 @@ Source: pipobot
 Section: net
 Priority: optional
 Maintainer: Vincent Duvert (VinDuv) <vincent@duvert.net>
-Build-Depends: debhelper (>=8.0.0), python, python-support (>= 0.6), python-yaml, python-sleekxmpp, python-beautifulsoup, cdbs (>=0.4.49)
-Standards-Version: 3.9.1
+Build-Depends: debhelper (>=8.0.0), python, python-support (>= 0.6), python-yaml, python-sleekxmpp, python-beautifulsoup, python-sphinx, cdbs (>=0.4.49)
+X-Python-Version: >= 2.7
+Standards-Version: 3.9.4
 
 Package: pipobot
 Architecture: all
