@@ -110,9 +110,9 @@ class SyncModule(BotModule):
     after a command. This is the most common case """
     __usable = False
 
-    def __init__(self, bot, desc, command, pm_allowed=True, lock_time=1):
+    def __init__(self, bot, desc, name, pm_allowed=True, lock_time=1):
         BotModule.__init__(self, bot, desc)
-        self.command = command
+        self.name = name
         self.fcts = []
         self.default_cmd = None
         for _, method in inspect.getmembers(self, predicate=inspect.ismethod):
@@ -151,7 +151,7 @@ class SyncModule(BotModule):
 
     def is_concerned(self, body):
         """Checks if a message [body] is in fact a call to this module"""
-        return SyncModule.parse(body, self.prefixs)[0] == self.command
+        return SyncModule.parse(body, self.prefixs)[0] == self.name
 
     def enable(self):
         """Unsets the lock attribute which prevent a user from flooding
@@ -189,10 +189,10 @@ class SyncModule(BotModule):
             return self.default_cmd(sender, args)
         else:
             return "La commande %s n'existe pas pour %s ou la syntaxe de !%s %s est incorrecte → !help %s pour plus d'information" %  \
-                        (cmd_name, self.command, self.command, cmd_name, self.command)
+                        (cmd_name, self.name, self.name, cmd_name, self.name)
 
     def help(self, body):
-        if body == self.command:
+        if body == self.name:
             return self.desc
 
 
@@ -201,10 +201,10 @@ class MultiSyncModule(BotModule):
     after a command defined in a list. """
     __usable = False
 
-    def __init__(self, bot, commands, pm_allowed=True):
+    def __init__(self, bot, names, pm_allowed=True):
         BotModule.__init__(self, bot, '')
 
-        self.commands = commands
+        self.names = names
         self.pm_allowed = pm_allowed
         self.fcts = []
         self.default_cmd = None
@@ -228,26 +228,26 @@ class MultiSyncModule(BotModule):
                 pass
 
     def is_concerned(self, body):
-        return SyncModule.parse(body, self.prefixs)[0] in self.commands
+        return SyncModule.parse(body, self.prefixs)[0] in self.names
 
-    def _answer(self, sender, command, args, pm=False):
+    def _answer(self, sender, name, args, pm=False):
         # If `mess` is a private message but privmsg are not allowed for the module
         if pm and not self.pm_allowed:
             return
 
-        if command not in self.commands:
-            raise ModuleException(_("Command %s not handled by this module") % command)
+        if name not in self.names:
+            raise ModuleException(_("Command %s not handled by this module") % name)
 
         if self.default_cmd is not None:
-            module_answer = self.default_cmd(command, sender, args)
+            module_answer = self.default_cmd(name, sender, args)
         else:
             logger.error(_("MultisyncModule must define a “@defaultcmd” method"))
             module_answer = None
         return module_answer
 
     def help(self, body):
-        for command, desc in self.commands.iteritems():
-            if body == command:
+        for name, desc in self.names.iteritems():
+            if body == name:
                 return desc
 
 
@@ -366,8 +366,8 @@ class Help(SyncModule):
     def genHelp(self):
         multi_lst = []
         for cmd in self.bot.multisync_mods:
-            multi_lst.extend(cmd.commands.keys())
-        sync_lst = sorted([cmd.command for cmd in self.bot.sync_mods])
+            multi_lst.extend(cmd.names.keys())
+        sync_lst = sorted([cmd.name for cmd in self.bot.sync_mods])
         listen_lst = sorted([cmd.name for cmd in self.bot.listen_mods])
         pres_lst = sorted([cmd.name for cmd in self.bot.presence_mods])
 

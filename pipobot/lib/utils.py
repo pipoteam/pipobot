@@ -2,7 +2,6 @@
 #-*- coding: utf-8 -*-
 
 import re
-import utils
 import urllib
 import httplib
 import htmlentitydefs
@@ -20,10 +19,10 @@ from HTMLParser import HTMLParseError
 def unescape(text):
     def fixup(m):
         text = m.group(0)
-        if text[:2] == "&#":
+        if text.startswith("&#"):
             # character reference
             try:
-                if text[:3] == "&#x":
+                if text.startswith("&#x"):
                     return unichr(int(text[3:-1], 16))
                 else:
                     return unichr(int(text[2:-1]))
@@ -56,11 +55,11 @@ def xhtml2text(html):
     return unescape(html)
 
 
-def kick(toKick, msg, bot):
+def change_status(user, msg, bot, perm):
     iq = bot.makeIqSet()
     iq["to"] = bot.chatname
     query = ET.Element('{http://jabber.org/protocol/muc#admin}query')
-    item = ET.Element('{http://jabber.org/protocol/muc#admin}item', {'nick': toKick, 'role': 'none'})
+    item = ET.Element('{http://jabber.org/protocol/muc#admin}item', {'nick': user, 'role': perm})
     reason_el = ET.Element('{http://jabber.org/protocol/muc#admin}reason')
     reason_el.text = msg
     item.append(reason_el)
@@ -69,27 +68,16 @@ def kick(toKick, msg, bot):
     bot.send(iq)
 
 
-def mute(toKick, msg, bot):
-    iq = bot.makeIqSet()
-    iq["to"] = bot.chatname
-    query = ET.Element('{http://jabber.org/protocol/muc#admin}query')
-    item = ET.Element('{http://jabber.org/protocol/muc#admin}item', {'nick': toKick, 'role': 'visitor'})
-    reason_el = ET.Element('{http://jabber.org/protocol/muc#admin}reason')
-    reason_el.text = msg
-    item.append(reason_el)
-    query.append(item)
-    iq.append(query)
-    bot.send(iq)
+def kick(to_kick, msg, bot):
+    change_status(to_kick, msg, bot, 'none')
 
 
-def unmute(toKick, bot):
-    iq = bot.makeIqSet()
-    iq["to"] = bot.chatname
-    query = ET.Element('{http://jabber.org/protocol/muc#admin}query')
-    item = ET.Element('{http://jabber.org/protocol/muc#admin}item', {'nick': toKick, 'role': 'participant'})
-    query.append(item)
-    iq.append(query)
-    bot.send(iq)
+def mute(to_mute, msg, bot):
+    change_status(to_mute, msg, bot, 'visitor')
+
+
+def unmute(to_unmute, msg, bot):
+    change_status(to_unmute, msg, bot, "participant")
 
 
 class AppURLopener(urllib.FancyURLopener):
@@ -110,14 +98,14 @@ def check_url(url, geturl=False):
             title = 'Pas de titre'
             html = o.read(1000000)
             try:
-                SoupList = BeautifulSoup(utils.unescape(html),
+                SoupList = BeautifulSoup(unescape(html),
                                          parseOnlyThese=SoupStrainer('title'))
             except UnicodeDecodeError:
-                SoupList = BeautifulSoup(utils.unescape(html.decode("latin1", "ignore")),
+                SoupList = BeautifulSoup(unescape(html.decode("latin1", "ignore")),
                                          parseOnlyThese=SoupStrainer('title'))
             try:
                 titles = [title for title in SoupList]
-                title = utils.xhtml2text(titles[0].renderContents())
+                title = xhtml2text(titles[0].renderContents())
             except IndexError:
                 title = "Pas de titre"
             except HTMLParseError:

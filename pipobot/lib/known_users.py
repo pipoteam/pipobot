@@ -128,7 +128,7 @@ class KnownUsersManager(SyncModule):
         SyncModule.__init__(self,
                 bot,
                 desc=desc,
-                command="user")
+                name="user")
         self.logger = logging.getLogger("pipobot.knownusers")
 
         try:

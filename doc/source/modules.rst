@@ -222,7 +222,7 @@ A *SyncModule* is a module that can be called *explicitly* by a user
     <bot> Today is `insert the date of the day here !`
 
 Some parameters must be specified to define a command :
-    - *command* : its name (`date` in the previous example)
+    - *name* : its name (`date` in the previous example)
     - *desc* : a description of the module which will be used by the `help` module (see :ref:`desc_syntax`.)
 
 Writing handlers

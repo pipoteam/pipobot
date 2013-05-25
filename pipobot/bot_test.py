@@ -47,16 +47,24 @@ class TestBot(PipoBot):
         """ Extracts the 'text' value of a message return by BotJabber.answer """
         if msg is not None:
             if type(msg) is dict:
-                res = msg["text"]
+                res = ""
+                if "users" in msg:
+                    for usr, message in msg["users"].iteritems():
+                        if "nopriv" in message and message["nopriv"]:
+                            res += "\n%s" % (self.decode_module_message(message))
+                        else:
+                            res += "\n<priv %s> : %s" % (usr, self.decode_module_message(message))
+                else:
+                    res = msg["text"]
             elif type(msg) is list:
-                res = "\n".join(self.decode_module_messages(m) for m in msg)
+                res = "\n".join(self.decode_module_message(m) for m in msg)
             elif type(msg) is tuple:
                 res = msg[0]
             elif type(msg) is str:
                 res = msg
             elif type(msg) is unicode:
                 res = msg.decode("utf-8")
-            return res
+            return res.strip()
 
     def message(self, mess):
         """Method called when the bot receives a message"""
