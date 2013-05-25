@@ -2,7 +2,6 @@
 
 from distutils.core import setup
 from os.path import dirname, join, isdir, splitext
-from sphinx.setup_command import BuildDoc
 import os
 import sys
 
@@ -12,6 +11,11 @@ except ImportError:
     sys.stderr.write("The babel module is not installed. Translation tools "
                      "will not be available.\n")
     babel = None
+
+try:
+    from sphinx.setup_command import BuildDoc
+except ImportError:
+    BuildDoc = None
 
 if sys.hexversion < 0x02060000 or sys.hexversion >= 0x03000000:
     sys.stderr.write(
@@ -38,8 +42,9 @@ if __name__ == '__main__':
         }
     else:
         cmdclass = {}
-    
-    kwargs['cmdclass']['build_sphinx'] = BuildDoc
+
+    if BuildDoc:
+        kwargs['cmdclass']['build_sphinx'] = BuildDoc
 
     packages = ['pipobot', 'pipobot.lib']
     data_files = ["i18n/*/LC_MESSAGES/pipobot.mo"]
