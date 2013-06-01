@@ -1,7 +1,7 @@
 # Maintainer: Sébastien Leduc <sebastien@sleduc.fr>
 pkgname=pipobot-git
 _projectname=pipobot
-pkgver=a4bb2ea
+pkgver=298.572da78
 pkgrel=1
 pkgdesc="A modular bot for jabber MUCs"
 arch=("any")
@@ -19,7 +19,7 @@ md5sums=('SKIP')
 
 pkgver () {
   cd $_projectname
-  git describe --always | sed 's|-|.|g'
+  echo $(git rev-list --count HEAD).$(git rev-parse --short HEAD)
 }
 build() {
   cd "$srcdir/$_projectname"
