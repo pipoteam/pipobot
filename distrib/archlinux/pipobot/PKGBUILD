@@ -23,9 +23,7 @@ package() {
   install -d -m750 "$pkgdir"/var/log/pipobot
   install -D -m660 pipobot.conf.yml "$pkgdir"/etc
 
-  cd distrib/archlinux/resources
-  install -D -m755 pipobot.rc.d "$pkgdir"/etc/rc.d/pipobot
-  install -D -m644 pipobot.conf "$pkgdir"/etc/conf.d/pipobot.conf
+  cd "$srcdir/distrib/systemd"
   install -D -m644 pipobot.service "$pkgdir"/usr/lib/systemd/system/pipobot.service
   install -D -m644 pipobot.tmpfiles.d "$pkgdir"/usr/lib/tmpfiles.d/pipobot.conf
 }
