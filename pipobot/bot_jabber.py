@@ -185,10 +185,10 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
             # No "status code" in the message
             pass
 
-        for module in self.presence_mods:
+        for module in self._modules.presence.values():
             module.do_answer(mess)
 
     def iq(self, conn, iqdata):
         """Method called when the bot receives an IQ message"""
-        for module in self.iq_mods:
+        for module in self._modules.iq.values():
             module.do_answer(iqdata)

@@ -3,10 +3,6 @@
 """This module contains a class to test the bot in a CLI mode"""
 
 import logging
-from pipobot.lib.modules import (AsyncModule, ListenModule,
-                                 MultiSyncModule, PresenceModule,
-                                 SyncModule, IQModule)
-from pipobot.lib.user import Occupants
 from pipobot.bot import PipoBot
 
 logger = logging.getLogger('pipobot.bot_jabber')
@@ -34,7 +30,7 @@ class TestBot(PipoBot):
         self.session = session
 
         # Since we are in test mode, we remove time constraints
-        for module in self.sync_mods:
+        for module in self._modules.sync.values():
             if hasattr(module, "lock_name"):
                 del module.lock_name
 

@@ -109,6 +109,7 @@ class SyncModule(BotModule):
     """ Defines a bot module that will answer/execute an action
     after a command. This is the most common case """
     __usable = False
+    shortname = "sync"
 
     def __init__(self, bot, desc, name, pm_allowed=True, lock_time=1):
         BotModule.__init__(self, bot, desc)
@@ -200,6 +201,7 @@ class MultiSyncModule(BotModule):
     """ Defines a bot module that will answer/execute an action
     after a command defined in a list. """
     __usable = False
+    shortname = "multisync"
 
     def __init__(self, bot, names, pm_allowed=True):
         BotModule.__init__(self, bot, '')
@@ -241,7 +243,7 @@ class MultiSyncModule(BotModule):
         if self.default_cmd is not None:
             module_answer = self.default_cmd(name, sender, args)
         else:
-            logger.error(_("MultisyncModule must define a “@defaultcmd” method"))
+            logger.error(_("MultiSyncModule must define a “@defaultcmd” method"))
             module_answer = None
         return module_answer
 
@@ -250,12 +252,16 @@ class MultiSyncModule(BotModule):
             if body == name:
                 return desc
 
+    @property
+    def name(self):
+        return "_".join(self.names)
 
 class AsyncModule(BotModule, threading.Thread):
     """ Defines a bot module that will be executed as a
     daemon thread. Typically for waiting for asynchronous event
     such as mail, etc... """
     __usable = False
+    shortname = "async"
 
     def __init__(self, bot, name, desc, delay=0):
         threading.Thread.__init__(self)
@@ -283,7 +289,7 @@ class AsyncModule(BotModule, threading.Thread):
 
     def action(self) :
         raise NotImplementedError("Must be subclassed")
- 
+
     def stop(self):
         self.alive = False
 
@@ -297,6 +303,7 @@ class ListenModule(BotModule):
     the message sent on the chatroom and call answer
     on it. Be careful with those modules"""
     __usable = False
+    shortname = "listen"
 
     def __init__(self, bot, name, desc):
         BotModule.__init__(self, bot, desc)
@@ -365,11 +372,12 @@ class Help(SyncModule):
 
     def genHelp(self):
         multi_lst = []
-        for cmd in self.bot.multisync_mods:
+        modules = self.bot._modules
+        for cmd in modules.multisync.values():
             multi_lst.extend(cmd.names.keys())
-        sync_lst = sorted([cmd.name for cmd in self.bot.sync_mods])
-        listen_lst = sorted([cmd.name for cmd in self.bot.listen_mods])
-        pres_lst = sorted([cmd.name for cmd in self.bot.presence_mods])
+        sync_lst = sorted(modules.sync.keys())
+        listen_lst = sorted(modules.listen.keys())
+        pres_lst = sorted(modules.presence.keys())
 
         delim = "*" * 10
         sync = _(u"%s[Sync commands]%s\n%s") % (delim, delim, Help.genString(sync_lst))
@@ -413,6 +421,7 @@ class PresenceModule(BotModule):
     the presence sent on the chatroom and call answer
     on it. Be careful with those modules"""
     __usable = False
+    shortname = "presence"
 
     def __init__(self, bot, name, desc):
         BotModule.__init__(self, bot, desc)
@@ -453,6 +462,7 @@ class RecordUsers(PresenceModule):
 
 class IQModule(BotModule):
     __usable = False
+    shortname = "iq"
 
     def __init__(self, bot, name, desc):
         BotModule.__init__(self, bot, desc)
@@ -461,3 +471,5 @@ class IQModule(BotModule):
     def help(self, body):
         if body == self.name:
             return self.desc
+
+base_class = [AsyncModule, SyncModule, ListenModule, MultiSyncModule, PresenceModule, IQModule]
