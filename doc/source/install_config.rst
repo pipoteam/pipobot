@@ -58,6 +58,7 @@ A room is a reference to an XMPP MUC that the bot will join.
 It requires these parameters:
 
     * chat: the MUC it will join (room@domain.tld).
+    * address: the address of the server in the form *host:port* (optional).
     * login: the JID used to authenticate to an XMPP server.
     * passwd: the password used for the authentication.
     * resource: the resource of the bot

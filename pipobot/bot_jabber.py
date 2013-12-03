@@ -32,13 +32,13 @@ _muc_xml = "{http://jabber.org/protocol/muc# user}status"
 class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
     """The implementation of a bot for jabber MUC"""
 
-    def __init__(self, login, passwd, res, chat, name, modules, session, force_ipv4):
+    def __init__(self, address, login, passwd, res, chat, name, modules, session, force_ipv4):
         sleekxmpp.ClientXMPP.__init__(self, "%s/%s" % (login, res), passwd)
 
         logger.info("Connecting to %s", chat)
         self.use_ipv6 = not force_ipv4
         # Connecting
-        con = self.connect(reattempt=False)
+        con = self.connect(address=address, reattempt=False)
         if not con:
             logger.error(_("Unable to connect !"))
             raise XMPPException(_("Unable to connect !"))

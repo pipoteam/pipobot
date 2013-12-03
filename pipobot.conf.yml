@@ -30,6 +30,7 @@ database:
 rooms:
     -
         chan: root@muc.jabber.tld
+        # address: server.jabber.tld:5222
         login: jid@jabber.tld
         passwd: secret
         resource: pipobot
