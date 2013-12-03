@@ -1,4 +1,4 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 
 """
 Configuration parser module.
@@ -190,6 +190,10 @@ class Configuration(object):
 
                 kwargs[param] = value
 
+            addr = conf_room.get('address', "")
+            if addr:
+                kwargs['address'] = tuple(addr.split(':'))
+
             conf_modules = conf_room.get('modules')
             kwargs['modules'] = _load_modules(conf_modules)
             self.rooms.append(Room(**kwargs))
@@ -216,10 +220,11 @@ class Configuration(object):
 
 
 class Room(object):
-    __slots__ = ('chan', 'login', 'passwd', 'resource', 'nick', 'modules')
+    __slots__ = ('chan', 'address', 'login', 'passwd', 'resource', 'nick', 'modules')
 
-    def __init__(self, chan, login, passwd, resource, nick, modules):
+    def __init__(self, chan, login, passwd, resource, nick, modules, address=()):
         self.chan = chan
+        self.address = address
         self.login = login
         self.passwd = passwd
         self.resource = resource
