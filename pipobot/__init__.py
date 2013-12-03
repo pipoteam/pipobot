@@ -142,10 +142,10 @@ class PipoBotManager(object):
 
         for room in rooms:
             try:
-                bot = BotJabber(room.address, room.login, room.passwd,
-                                room.resource, room.chan, room.nick,
-                                modules[room].modules, self._db_session,
-                                self._config.force_ipv4)
+                bot = BotJabber(room.login, room.passwd, room.resource,
+                                room.chan, room.nick, modules[room].modules,
+                                self._db_session, self._config.force_ipv4,
+                                room.address, room.port)
             except XMPPException, exc:
                 LOGGER.error("Unable to join room '%s': %s", room.chan,
                              exc)
@@ -164,7 +164,7 @@ class PipoBotManager(object):
 
         for bot in bots:
             bot.kill()
-    
+
     def _load_modules(self, rooms) :
         loader = BotModuleLoader(self._config.modules_path,
                                  self._config.modules_conf)
@@ -178,9 +178,9 @@ class PipoBotManager(object):
         self._configure_database()
 
         return errors, modules
- 
+
     def run(self):
-        
+
         #
         # The different types of execution
         #

@@ -21,6 +21,14 @@ def _abort(message, *args):
     sys.exit(1)
 
 
+def _info(message, *args):
+    """
+    Prints a message on the console.
+    """
+    sys.stdout.write(message % args + "\n")
+
+
+
 class Configuration(object):
     """
     This class holds all settings used by the program.
@@ -136,7 +144,7 @@ class Configuration(object):
         # Helper to load modules
         def _load_modules(conf_modules) :
             modules = set()
-            
+
             if conf_modules is None:
                 conf_modules = []
             elif isinstance(conf_modules, basestring):
@@ -190,9 +198,18 @@ class Configuration(object):
 
                 kwargs[param] = value
 
-            addr = conf_room.get('address', "")
-            if addr:
-                kwargs['address'] = tuple(addr.split(':'))
+            kwargs['address'] = conf_room.get("address")
+
+            port = conf_room.get('port')
+
+            if port is not None:
+                try:
+                    port = int(conf_room.get("port"))
+                except ValueError:
+                    _info("Selected port %s is not valid : using default port 5222 instead", port)
+                    port = 5222
+
+            kwargs['port'] = port
 
             conf_modules = conf_room.get('modules')
             kwargs['modules'] = _load_modules(conf_modules)
@@ -205,7 +222,7 @@ class Configuration(object):
             fake_nick = test.get('fake_nick', 'TestBot')
             fake_chan = test.get('fake_chan', 'chan@unknown.org')
             test_modules = _load_modules(test.get('modules'))
-            self.test_room = Room(chan=fake_chan, login='invalid', 
+            self.test_room = Room(chan=fake_chan, login='invalid',
                                   passwd='invalid', resource='invalid',
                                   nick=fake_nick, modules=test_modules)
         else :
@@ -220,16 +237,17 @@ class Configuration(object):
 
 
 class Room(object):
-    __slots__ = ('chan', 'address', 'login', 'passwd', 'resource', 'nick', 'modules')
+    __slots__ = ('chan', 'login', 'passwd', 'resource', 'nick', 'modules', 'address', 'port')
 
-    def __init__(self, chan, login, passwd, resource, nick, modules, address=()):
+    def __init__(self, chan, login, passwd, resource, nick, modules, address=None, port=None):
         self.chan = chan
-        self.address = address
         self.login = login
         self.passwd = passwd
         self.resource = resource
         self.nick = nick
         self.modules = modules
+        self.address = address
+        self.port = port
 
 
 def get_configuration():
