@@ -30,8 +30,11 @@ database:
 rooms:
     -
         chan: root@muc.jabber.tld
-        # address: server.jabber.tld:5222
         login: jid@jabber.tld
+        # If not provided, default port is 5222 and the server's address will be guessed from the login
+        # You can overwrite these settings using a custom address/port
+        # address: server.other.domain.tld
+        # port: 5222
         passwd: secret
         resource: pipobot
         nick: Pipobot
