@@ -8,12 +8,22 @@ logger = logging.getLogger('pipobot.pipobot')
 
 
 class Modules(object):
-    def __init__(self):
+    def __init__(self, modules, bot):
         for modtype in base_class:
             setattr(self, modtype.shortname, [])
 
-    def add_mod(self, mod):
+        for classe in modules:
+            self.add_mod(classe, bot)
+
+    def add_mod(self, mod, bot):
         # Not an elif here because some modules can be Async *and* Sync
+        try:
+            mod = mod(bot)
+        except:
+            msg = _("An exception was raised starting module %s for room %s : %s")
+            msg %= (mod, bot.chatname, traceback.format_exc().decode("utf-8"))
+            logger.error(msg)
+            return
         for klass in base_class:
             if isinstance(mod, klass):
                 if klass is AsyncModule:
@@ -33,8 +43,25 @@ class Modules(object):
                     return mod
 
     def stop(self):
+        """ Stop all async modules registered """
         for module in self.async:
             module.stop()
+
+    def sync_answer(self, msg):
+        """ Try to find a SyncModule, or a MultiSyncModule that answers the `msg` """
+        for module in self.sync + self.multisync:
+            ret = module.do_answer(msg)
+            if ret is not None:
+                return ret
+
+    def listen_answer(self, msg):
+        """ Try to find all ListenModule that answer the `msg` """
+        result = []
+        for module in self.listen:
+            ret = module.do_answer(msg)
+            if ret is not None:
+                result.append(ret)
+        return result
 
 
 class PipoBot:
@@ -44,17 +71,7 @@ class PipoBot:
         self.chatname = chatname
         self.session = session
 
-        self._modules = Modules()
-
-        for classe in modules:
-            try:
-                obj = classe(self)
-            except:
-                msg = _("An exception was raised starting module %s for room %s : %s")
-                msg %= (classe, chatname, traceback.format_exc().decode("utf-8"))
-                logger.error(msg)
-                continue
-            self._modules.add_mod(obj)
+        self._modules = Modules(modules, self)
 
         self.mute = False
         self.occupants = Occupants()
@@ -77,28 +94,21 @@ class PipoBot:
         logger.info(u"Killing %s" % self.chatname)
         self._modules.stop()
 
-    def module_answer(self, mess):
+    def module_answer(self, msg):
         """ Given a text message, try each registered module for an answer.
             - Sync & Multisync first
             - If no module answered, try every known ListenModule
         """
-        # First we look if a SyncModule matches
         if self.mute:
             return
 
-        for module in self.sync + self.multisync:
-            ret = module.do_answer(mess)
-            if ret is not None:
-                return ret
+        # First we look if a SyncModule or a MultiSyncModule matches
+        sync = self._modules.sync_answer(msg)
+        if sync is not None:
+            return sync
 
-        result = []
-        # If no SyncModule was concerned by the message, we look for a ListenModule
-        for module in self.listen:
-            ret = module.do_answer(mess)
-            if ret is not None:
-                result.append(ret)
-
-        return result
+        # Else we try listen modules
+        return self._modules.listen_answer(msg)
 
     def disable_mute(self):
         """To give the bot its voice again"""
