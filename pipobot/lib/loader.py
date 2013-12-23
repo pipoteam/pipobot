@@ -5,6 +5,7 @@ import imp
 import logging
 import sys
 import unittest
+import traceback
 from collections import namedtuple
 
 from pipobot.lib.modules import Help, RecordUsers, BotModule
@@ -78,7 +79,7 @@ class BotModuleLoader(object):
         modules_tpl = namedtuple('modules_tpl', ['modules', 'test_mods'])
         modules = []
         test_modules = []
-        
+
         error = 0
 
         for name in module_names:
@@ -93,7 +94,14 @@ class BotModuleLoader(object):
                 error += 1
                 continue
 
-            module_data = imp.load_module(name, *module_info)
+            try:
+                module_data = imp.load_module(name, *module_info)
+            except ImportError:
+                logger.error(("Module ‘%s’ could not be imported." % name))
+                logger.error(traceback.format_exc().decode("utf-8"))
+                error += 1
+                continue
+
             test_modules.extend(elt[1] for elt in inspect.getmembers(module_data, self.is_test_unit))
 
             bot_modules = inspect.getmembers(module_data, self.is_bot_module)

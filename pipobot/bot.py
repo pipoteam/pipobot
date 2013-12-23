@@ -1,12 +1,40 @@
 # -*- coding: utf-8 -*-
 import logging
 import traceback
-from pipobot.lib.modules import (AsyncModule, ListenModule,
-                                 MultiSyncModule, PresenceModule,
-                                 SyncModule, IQModule)
+from pipobot.lib.modules import (AsyncModule, base_class)
 from pipobot.lib.user import Occupants
 
 logger = logging.getLogger('pipobot.pipobot')
+
+
+class Modules(object):
+    def __init__(self):
+        for modtype in base_class:
+            setattr(self, modtype.shortname, {})
+
+    def add_mod(self, mod):
+        short_type = mod.shortname
+        getattr(self, short_type)[mod.name] = mod
+        if isinstance(mod, AsyncModule):
+            mod.start()
+            getattr(self, AsyncModule.shortname)[mod.name] = mod
+        # Not an elif here because some modules can be Async *and* Sync
+        for klass in base_class:
+            if isinstance(mod, klass):
+                getattr(self, klass.shortname)[mod.name] = mod
+
+    def get_all(self):
+        ret = []
+        for klass in base_class:
+            ret.extend(getattr(self, klass.shortname).values())
+        return ret
+
+    def find(self, name):
+        for klass in base_class:
+            try:
+                return getattr(self, klass.shortname)[name]
+            except KeyError:
+                pass
 
 
 class PipoBot:
@@ -16,12 +44,7 @@ class PipoBot:
         self.chatname = chatname
         self.session = session
 
-        self.async_mods = []
-        self.iq_mods = []
-        self.listen_mods = []
-        self.multisync_mods = []
-        self.presence_mods = []
-        self.sync_mods = []
+        self._modules = Modules()
 
         for classe in modules:
             try:
@@ -31,32 +54,18 @@ class PipoBot:
                 msg %= (classe, chatname, traceback.format_exc().decode("utf-8"))
                 logger.error(msg)
                 continue
-            if isinstance(obj, AsyncModule):
-                obj.start()
-                self.async_mods.append(obj)
-            # Not an elif here because some modules can be Async *and* Sync
-            if isinstance(obj, SyncModule):
-                self.sync_mods.append(obj)
-            elif isinstance(obj, ListenModule):
-                self.listen_mods.append(obj)
-            elif isinstance(obj, MultiSyncModule):
-                self.multisync_mods.append(obj)
-            elif isinstance(obj, PresenceModule):
-                self.presence_mods.append(obj)
-            elif isinstance(obj, IQModule):
-                self.iq_mods.append(obj)
+            self._modules.add_mod(obj)
 
         self.mute = False
         self.occupants = Occupants()
 
     @property
     def modules(self):
-        return (self.async_mods + self.iq_mods + self.listen_mods +
-                self.multisync_mods + self.presence_mods + self.sync_mods)
+        return self._modules.get_all()
 
     def stop_modules(self):
         logger.info(u"Killing %s" % self.chatname)
-        for module in self.async_mods:
+        for module in self._modules.async.values():
             module.stop()
 
     def module_answer(self, mess):
@@ -64,14 +73,14 @@ class PipoBot:
         if self.mute:
             return
 
-        for module in self.sync_mods + self.multisync_mods:
+        for module in self._modules.sync.values() + self._modules.multisync.values():
             ret = module.do_answer(mess)
             if ret is not None:
                 return ret
 
         result = []
         # If no SyncModule was concerned by the message, we look for a ListenModule
-        for module in self.listen_mods:
+        for module in self._modules.listen.values():
             ret = module.do_answer(mess)
             if ret is not None:
                 result.append(ret)
