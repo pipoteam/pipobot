@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import traceback
-from pipobot.lib.modules import (AsyncModule, base_class)
+from pipobot.lib.modules import AsyncModule, base_class
 from pipobot.lib.user import Occupants
 
 logger = logging.getLogger('pipobot.pipobot')
@@ -10,31 +10,31 @@ logger = logging.getLogger('pipobot.pipobot')
 class Modules(object):
     def __init__(self):
         for modtype in base_class:
-            setattr(self, modtype.shortname, {})
+            setattr(self, modtype.shortname, [])
 
     def add_mod(self, mod):
-        short_type = mod.shortname
-        getattr(self, short_type)[mod.name] = mod
-        if isinstance(mod, AsyncModule):
-            mod.start()
-            getattr(self, AsyncModule.shortname)[mod.name] = mod
         # Not an elif here because some modules can be Async *and* Sync
         for klass in base_class:
             if isinstance(mod, klass):
-                getattr(self, klass.shortname)[mod.name] = mod
+                if klass is AsyncModule:
+                    mod.start()
+                getattr(self, klass.shortname).append(mod)
 
     def get_all(self):
         ret = []
         for klass in base_class:
-            ret.extend(getattr(self, klass.shortname).values())
+            ret.extend(getattr(self, klass.shortname))
         return ret
 
     def find(self, name):
         for klass in base_class:
-            try:
-                return getattr(self, klass.shortname)[name]
-            except KeyError:
-                pass
+            for mod in getattr(self, klass.shortname):
+                if mod.name == name:
+                    return mod
+
+    def stop(self):
+        for module in self.async:
+            module.stop()
 
 
 class PipoBot:
@@ -63,24 +63,37 @@ class PipoBot:
     def modules(self):
         return self._modules.get_all()
 
+    def __getattr__(self, name):
+        """ Proxy to have access to modules with :
+            - self.sync
+            - self.async
+            - self.presence
+            …
+        """
+        if name in [klass.shortname for klass in base_class]:
+            return getattr(self._modules, name)
+
     def stop_modules(self):
         logger.info(u"Killing %s" % self.chatname)
-        for module in self._modules.async.values():
-            module.stop()
+        self._modules.stop()
 
     def module_answer(self, mess):
+        """ Given a text message, try each registered module for an answer.
+            - Sync & Multisync first
+            - If no module answered, try every known ListenModule
+        """
         # First we look if a SyncModule matches
         if self.mute:
             return
 
-        for module in self._modules.sync.values() + self._modules.multisync.values():
+        for module in self.sync + self.multisync:
             ret = module.do_answer(mess)
             if ret is not None:
                 return ret
 
         result = []
         # If no SyncModule was concerned by the message, we look for a ListenModule
-        for module in self._modules.listen.values():
+        for module in self.listen:
             ret = module.do_answer(mess)
             if ret is not None:
                 result.append(ret)
@@ -90,4 +103,3 @@ class PipoBot:
     def disable_mute(self):
         """To give the bot its voice again"""
         self.mute = False
-

@@ -366,12 +366,11 @@ class Help(SyncModule):
 
     def genHelp(self):
         multi_lst = []
-        modules = self.bot._modules
-        for cmd in modules.multisync.values():
+        for cmd in self.bot.multisync:
             multi_lst.extend(cmd.names.keys())
-        sync_lst = sorted(modules.sync.keys())
-        listen_lst = sorted(modules.listen.keys())
-        pres_lst = sorted(modules.presence.keys())
+        sync_lst = sorted(mod.name for mod in self.bot.sync)
+        listen_lst = sorted(mod.name for mod in self.bot.listen)
+        pres_lst = sorted(mod.name for mod in self.bot.presence)
 
         delim = "*" * 10
         sync = _(u"%s[Sync commands]%s\n%s") % (delim, delim, Help.genString(sync_lst))

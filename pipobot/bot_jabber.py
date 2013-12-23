@@ -46,8 +46,8 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
         self.add_event_handler("session_start", self.connect_muc)
 
         # sleekxmpp handlers to XMPP stanzas
-        self.add_event_handler("message", self.message)
-        self.add_event_handler("groupchat_presence", self.presence)
+        self.add_event_handler("message", self.message_handler)
+        self.add_event_handler("groupchat_presence", self.presence_handler)
         self.add_event_handler("failed_auth", self.failed_auth)
 
         PipoBot.__init__(self, name, login, chat, modules, session)
@@ -64,7 +64,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
         hello_msg = _("Hello everyone !")
         self.send_message(mto=self.chatname, mbody=hello_msg, mtype="groupchat")
 
-    def message(self, mess):
+    def message_handler(self, mess):
         """Method called when the bot receives a message"""
         # We ignore messages in some cases :
         #   - the bot is muted
@@ -163,7 +163,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
                     for user, send_user in msg["users"].iteritems():
                         self.say(send_user, priv=user)
 
-    def presence(self, mess):
+    def presence_handler(self, mess):
         """Method called when the bot receives a presence message.
            Used to record users in the room, as well as their jid and roles"""
         try:
@@ -175,12 +175,12 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
             # No "status code" in the message
             pass
 
-        for module in self._modules.presence.values():
+        for module in self.presence:
             module.do_answer(mess)
 
-    def iq(self, conn, iqdata):
+    def iq_handler(self, conn, iqdata):
         """Method called when the bot receives an IQ message"""
-        for module in self._modules.iq.values():
+        for module in self.iq:
             module.do_answer(iqdata)
 
     def gen_xhtml(self, send):

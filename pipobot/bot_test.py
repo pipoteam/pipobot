@@ -30,7 +30,7 @@ class TestBot(PipoBot):
         self.session = session
 
         # Since we are in test mode, we remove time constraints
-        for module in self._modules.sync.values():
+        for module in self.sync:
             if hasattr(module, "lock_name"):
                 del module.lock_name
 
