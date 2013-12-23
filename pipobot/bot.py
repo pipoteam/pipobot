@@ -82,21 +82,3 @@ class PipoBot:
         """To give the bot its voice again"""
         self.mute = False
 
-    def gen_xhtml(self, send):
-        """ Creates messages with a dictionnary described as :
-        {"text": raw_message,    # Text message, transform XHTML if empty
-        "xhtml" : xhtml_message # XHTML message
-        "monospace" : True      # XHTML message is the text with monospace
-        "users" : { "pseudo1" : {...} } # Send the same type of dictionnary
-        #                                           in private to the users
-        }
-		"""
-        if "xhtml" not in send and "text" in send and "monospace" in send and send["monospace"]:
-            html_msg = send["text"]
-            html_msg = html_msg.replace("&", "&amp;")
-            html_msg = html_msg.replace("<", "&lt;")
-            html_msg = html_msg.replace(">", "&gt;")
-            html_msg = '<p><span style="font-family: monospace">%s</span></p>' % html_msg.replace("\n", "<br/>\n")
-            #TODO others characters to convert ?
-            send["xhtml"] = html_msg
-        return send

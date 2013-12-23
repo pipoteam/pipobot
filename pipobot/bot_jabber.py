@@ -7,10 +7,6 @@ import sleekxmpp
 import threading
 import time
 
-from pipobot.lib.modules import (AsyncModule, ListenModule,
-                                 MultiSyncModule, PresenceModule,
-                                 SyncModule, IQModule)
-from pipobot.lib.user import Occupants
 from pipobot.bot import PipoBot
 
 logger = logging.getLogger('pipobot.bot_jabber')
@@ -18,12 +14,8 @@ logger = logging.getLogger('pipobot.bot_jabber')
 
 class XMPPException(Exception):
     """ For errors due to XMPP (conflict, connection/authentification failed, …) """
-    def __init__(self, msg):
-        Exception.__init__(self)
-        self.msg = msg
+    pass
 
-    def __str__(self):
-        return self.msg
 
 XML_NAMESPACE = 'http://www.w3.org/1999/xhtml'
 _muc_xml = "{http://jabber.org/protocol/muc# user}status"
@@ -68,7 +60,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
     def connect_muc(self, event):
         self.send_presence()
         muc = self.plugin["xep_0045"]
-        join = muc.joinMUC(self.chatname, self.name)
+        muc.joinMUC(self.chatname, self.name)
         hello_msg = _("Hello everyone !")
         self.send_message(mto=self.chatname, mbody=hello_msg, mtype="groupchat")
 
@@ -81,7 +73,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
         if self.mute                 \
             or mess["subject"] != ""  \
             or mess["body"] == "":
-                return
+            return
 
         thread = threading.Thread(target=self.answer, args=(mess,))
         thread.start()
@@ -100,14 +92,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
         # The bot says goodbye
         self.say(_(u"I’ve been asked to leave you"))
         # The bot leaves the room
-        if getattr(self, 'disconnect_wait', None):
-            # sleekxmpp supports wait on disconnect
-            self.disconnect(wait=True)
-        else:
-            while not self.send_queue.empty():
-                time.sleep(.1)
-            self.disconnect()
-
+        self.disconnect(wait=True)
         self.stop_modules()
 
     def forge_message(self, mess, priv=None, in_reply_to=None):
@@ -197,3 +182,22 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
         """Method called when the bot receives an IQ message"""
         for module in self.iq_mods:
             module.do_answer(iqdata)
+
+    def gen_xhtml(self, send):
+        """ Creates messages with a dictionnary described as :
+        {"text": raw_message,    # Text message, transform XHTML if empty
+        "xhtml" : xhtml_message # XHTML message
+        "monospace" : True      # XHTML message is the text with monospace
+        "users" : { "pseudo1" : {...} } # Send the same type of dictionnary
+        #                                           in private to the users
+        }
+		"""
+        if "xhtml" not in send and "text" in send and "monospace" in send and send["monospace"]:
+            html_msg = send["text"]
+            html_msg = html_msg.replace("&", "&amp;")
+            html_msg = html_msg.replace("<", "&lt;")
+            html_msg = html_msg.replace(">", "&gt;")
+            html_msg = '<p><span style="font-family: monospace">%s</span></p>' % html_msg.replace("\n", "<br/>\n")
+            #TODO others characters to convert ?
+            send["xhtml"] = html_msg
+        return send

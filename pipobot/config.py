@@ -4,7 +4,7 @@
 Configuration parser module.
 """
 
-from optparse import OptionParser, SUPPRESS_HELP
+from optparse import OptionParser
 from os.path import basename
 import logging
 import sys
@@ -26,7 +26,6 @@ def _info(message, *args):
     Prints a message on the console.
     """
     sys.stdout.write(message % args + "\n")
-
 
 
 class Configuration(object):
@@ -69,7 +68,7 @@ class Configuration(object):
 
         # Global configuration
         self.lang = 'en'
-        self.logpath = None
+        self.logpath = "pipobot.log"
         global_conf = data.get('config', {})
         for param in ['logpath', 'lang']:
             value = global_conf.get(param, "")

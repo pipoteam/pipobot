@@ -3,10 +3,6 @@
 """This module contains a class to test the bot in a CLI mode"""
 
 import logging
-from pipobot.lib.modules import (AsyncModule, ListenModule,
-                                 MultiSyncModule, PresenceModule,
-                                 SyncModule, IQModule)
-from pipobot.lib.user import Occupants
 from pipobot.bot import PipoBot
 
 logger = logging.getLogger('pipobot.bot_jabber')

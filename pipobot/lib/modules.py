@@ -29,13 +29,7 @@ def answercmd(*args):
 
 class ModuleException(Exception):
     """ A general exception that modules will be able to raise """
-
-    def __init__(self, desc):
-        Exception.__init__(self)
-        self.desc = desc
-
-    def __unicode__(self):
-        return self.desc
+    pass
 
 
 class BotModule(object):
@@ -283,7 +277,7 @@ class AsyncModule(BotModule, threading.Thread):
 
     def action(self) :
         raise NotImplementedError("Must be subclassed")
- 
+
     def stop(self):
         self.alive = False
 
