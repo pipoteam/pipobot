@@ -203,7 +203,7 @@ class Configuration(object):
 
             if port is not None:
                 try:
-                    port = int(conf_room.get("port"))
+                    port = int(port)
                 except ValueError:
                     _info("Selected port %s is not valid : using default port 5222 instead", port)
                     port = 5222

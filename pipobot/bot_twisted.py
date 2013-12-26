@@ -6,7 +6,7 @@ from twisted.internet.protocol import Protocol, Factory
 from twisted.internet import reactor
 import logging
 import random
-from pipobot.bot_test import TestBot, ForgedMsg
+from pipobot.bot_test import TestBot
 from pipobot.lib.utils import color
 
 

@@ -8,15 +8,11 @@ logger = logging.getLogger('pipobot.pipobot')
 
 
 class Modules(object):
-    def __init__(self, modules, bot):
+    def __init__(self):
         for modtype in base_class:
             setattr(self, modtype.shortname, [])
 
-        for classe in modules:
-            self.add_mod(classe, bot)
-
     def add_mod(self, mod, bot):
-        # Not an elif here because some modules can be Async *and* Sync
         try:
             mod = mod(bot)
         except:
@@ -30,17 +26,15 @@ class Modules(object):
                     mod.start()
                 getattr(self, klass.shortname).append(mod)
 
-    def get_all(self):
-        ret = []
-        for klass in base_class:
-            ret.extend(getattr(self, klass.shortname))
-        return ret
-
-    def find(self, name):
+    def __iter__(self):
         for klass in base_class:
             for mod in getattr(self, klass.shortname):
-                if mod.name == name:
-                    return mod
+                yield mod
+
+    def find(self, name):
+        for mod in self:
+            if mod.name == name:
+                return mod
 
     def stop(self):
         """ Stop all async modules registered """
@@ -71,14 +65,15 @@ class PipoBot:
         self.chatname = chatname
         self.session = session
 
-        self._modules = Modules(modules, self)
-
         self.mute = False
+        self._modules = Modules()
+        for classe in modules:
+            self._modules.add_mod(classe, self)
         self.occupants = Occupants()
 
     @property
     def modules(self):
-        return self._modules.get_all()
+        return self._modules
 
     def __getattr__(self, name):
         """ Proxy to have access to modules with :
@@ -88,10 +83,13 @@ class PipoBot:
             …
         """
         if name in [klass.shortname for klass in base_class]:
-            return getattr(self._modules, name)
+            try:
+                return getattr(self._modules, name)
+            except AttributeError:
+                return
 
     def stop_modules(self):
-        logger.info(u"Killing %s" % self.chatname)
+        logger.info(u"Killing %s", self.chatname)
         self._modules.stop()
 
     def module_answer(self, msg):
