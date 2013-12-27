@@ -174,8 +174,10 @@ class SyncModule(BotModule):
         cmd_name = args.split(" ", 1)[0].strip()
 
         for regexp, fct in self.fcts:
-            # We check if the method is not defined by a regexp matching cmd_name
-            m = re.match("^"+regexp+"$", args)
+            try:
+                m = re.match("^"+regexp+"$", args)
+            except re.error:
+                logger.error(_("The regular expression %s is not correct !"), regexp)
             if m is not None:
                 return fct(sender, **m.groupdict())
 
