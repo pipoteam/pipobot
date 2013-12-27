@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-import logging
 import random
 import re
 import string
-import traceback
 import unittest
 
 
@@ -27,7 +25,7 @@ class ModuleTest(unittest.TestCase):
         return self.bot.create_msg(user, input_msg)
 
     def assertRegexpListMatches(self, bot_rep, expected_re):
-        expected = map(re.compile, expected_re)
+        expected = list(map(re.compile, expected_re))
         regex = expected[0]
         i = 0
 
@@ -39,4 +37,4 @@ class ModuleTest(unittest.TestCase):
             raise AssertionError(_("No regexp from %s matches %s") % (expected_re, bot_rep))
 
 def string_gen(size):
-    return "".join([random.choice(string.letters) for i in xrange(size)])
+    return "".join([random.choice(string.ascii_lowercase) for i in range(size)])

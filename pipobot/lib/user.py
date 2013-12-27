@@ -23,7 +23,7 @@ class Occupants:
             pass
 
     def get_all(self, separator, exceptions=[]):
-        return separator.join([user.nickname for user in self.users.itervalues()
+        return separator.join([user.nickname for user in self.users.values()
                                if user.nickname not in exceptions])
 
     def pseudo_to_jid(self, pseudo):
@@ -41,7 +41,7 @@ class Occupants:
             return ""
 
     def jid_to_pseudo(self, jid):
-        for user in self.users.itervalues():
+        for user in self.users.values():
             if user.jid == jid:
                 return user.nickname
         self.logger.error(_("The user with jid %s is not in the room !") % jid)

@@ -90,7 +90,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
         """Method used to kill the bot"""
 
         # The bot says goodbye
-        self.say(_(u"I’ve been asked to leave you"))
+        self.say(_("I’ve been asked to leave you"))
         # The bot leaves the room
         self.disconnect(wait=True)
         self.stop_modules()
@@ -132,8 +132,8 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
             if "xhtml" in mess:
                 mess_xhtml = mess["xhtml"]
                 mess_xhtml = "<p>%s</p>" % mess_xhtml
-                if type(mess_xhtml) is unicode:
-                    mess_xhtml = mess_xhtml.encode("utf-8")
+                if type(mess_xhtml) is str:
+                    mess_xhtml = mess_xhtml
                 msg["html"]["body"] = mess_xhtml
         else:
             msg = self.forge_message(mess, priv=priv, in_reply_to=in_reply_to)
@@ -143,7 +143,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
         """The method to call to make the bot sending messages"""
         # If the bot has not been disabled
         if not self.mute:
-            if type(msg) is str or type(msg) is unicode:
+            if type(msg) is str or type(msg) is str:
                 self.forge(msg, priv=priv, in_reply_to=in_reply_to).send()
             elif type(msg) is list:
                 for line in msg:
@@ -160,7 +160,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
                     # msg1(2) can be 'complex' messages (list, dict, unicode, str)
                     # Private / non private messages can be "mixed" if for instance
                     # msg1 = {"text": "some_text", "nopriv": True}
-                    for user, send_user in msg["users"].iteritems():
+                    for user, send_user in msg["users"].items():
                         self.say(send_user, priv=user)
 
     def presence_handler(self, mess):

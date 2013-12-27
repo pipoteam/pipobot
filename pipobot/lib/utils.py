@@ -2,12 +2,12 @@
 #-*- coding: utf-8 -*-
 
 import re
-import urllib
-import httplib
-import htmlentitydefs
+import urllib.request, urllib.parse, urllib.error
+import http.client
+import html.entities
 from xml.etree import cElementTree as ET
-from BeautifulSoup import BeautifulSoup, SoupStrainer
-from HTMLParser import HTMLParseError
+from bs4 import BeautifulSoup, SoupStrainer
+from html.parser import HTMLParseError
 
 ##
 # Removes HTML or XML character references and entities from a text string.
@@ -23,15 +23,15 @@ def unescape(text):
             # character reference
             try:
                 if text.startswith("&#x"):
-                    return unichr(int(text[3:-1], 16))
+                    return chr(int(text[3:-1], 16))
                 else:
-                    return unichr(int(text[2:-1]))
+                    return chr(int(text[2:-1]))
             except ValueError:
                 pass
         else:
             # named entity
             try:
-                text = unichr(htmlentitydefs.name2codepoint[text[1:-1]])
+                text = chr(html.entities.name2codepoint[text[1:-1]])
             except KeyError:
                 pass
         return text  # leave as is
@@ -80,19 +80,19 @@ def unmute(to_unmute, msg, bot):
     change_status(to_unmute, msg, bot, "participant")
 
 
-class AppURLopener(urllib.FancyURLopener):
+class AppURLopener(urllib.request.FancyURLopener):
     def prompt_user_passwd(self, host, realm):
         return ('', '')
 
     version = ("Mozilla/5.0 (X11; U; Linux; fr-fr) AppleWebKit/531+"
                "(KHTML, like Gecko) Safari/531.2+ Midori/0.2")
-urllib._urlopener = AppURLopener()
+urllib.request._urlopener = AppURLopener()
 
 
 def check_url(url, geturl=False):
     send = []
     try:
-        o = urllib.urlopen(url)
+        o = urllib.request.urlopen(url)
         ctype, clength = o.info().get("Content-Type"), o.info().get("Content-Length")
         if  o.info().gettype() == "text/html":
             title = 'Pas de titre'
@@ -127,7 +127,7 @@ def check_url(url, geturl=False):
             send.append("Il est interdit d'accéder à %s !" % url)
         else:
             send.append("Erreur %s sur %s" % (error[1], url))
-    except httplib.InvalidURL:
+    except http.client.InvalidURL:
         send.append("L'URL %s n'est pas valide !" % url)
     return send
 

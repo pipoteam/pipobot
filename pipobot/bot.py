@@ -17,7 +17,7 @@ class Modules(object):
             mod = mod(bot)
         except:
             msg = _("An exception was raised starting module %s for room %s : %s")
-            msg %= (mod, bot.chatname, traceback.format_exc().decode("utf-8"))
+            msg %= (mod, bot.chatname, traceback.format_exc())
             logger.error(msg)
             return
         for klass in base_class:
@@ -89,7 +89,7 @@ class PipoBot:
                 return
 
     def stop_modules(self):
-        logger.info(u"Killing %s", self.chatname)
+        logger.info("Killing %s", self.chatname)
         self._modules.stop()
 
     def module_answer(self, msg):

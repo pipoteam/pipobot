@@ -98,7 +98,7 @@ class BotModuleLoader(object):
                 module_data = imp.load_module(name, *module_info)
             except ImportError:
                 logger.error(("Module ‘%s’ could not be imported." % name))
-                logger.error(traceback.format_exc().decode("utf-8"))
+                logger.error(traceback.format_exc())
                 error += 1
                 continue
 

@@ -1,10 +1,10 @@
-import __builtin__
+import builtins
 import unittest
 from pipobot.lib.modules import defaultcmd, SyncModule, Help, answercmd
 from base_test import FakeUser, create_test_bot
 
 
-__builtin__._ = lambda x: x
+builtins._ = lambda x: x
 
 
 class SyncMod(SyncModule):

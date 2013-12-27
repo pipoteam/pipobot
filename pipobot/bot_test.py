@@ -45,7 +45,7 @@ class TestBot(PipoBot):
             if type(msg) is dict:
                 res = ""
                 if "users" in msg:
-                    for usr, message in msg["users"].iteritems():
+                    for usr, message in msg["users"].items():
                         if "nopriv" in message and message["nopriv"]:
                             res += "\n%s" % (self.decode_module_message(message))
                         else:
@@ -58,8 +58,6 @@ class TestBot(PipoBot):
                 res = msg[0]
             elif type(msg) is str:
                 res = msg
-            elif type(msg) is unicode:
-                res = msg.decode("utf-8")
             return res.strip()
 
     def message(self, mess):

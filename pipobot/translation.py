@@ -31,7 +31,7 @@ def setup_i18n(lang):
                          "disabling translations.", lang)
             trans = gettext.NullTranslations()
 
-    trans.install(unicode=True, names=['gettext', 'ngettext'])
+    trans.install(names=['gettext', 'ngettext'])
 
 # When install() is called on a gettext translations object, the functions “_”,
 # “gettext”, and “ngettext” are added to __builtins__ so they are available to
@@ -40,5 +40,5 @@ def setup_i18n(lang):
 # module is loaded so it can be used to translate string in modules loaded
 # afterwards.
 
-import __builtin__
-__builtin__.__dict__['_N'] = lambda text: text
+import builtins
+builtins.__dict__['_N'] = lambda text: text

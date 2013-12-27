@@ -31,7 +31,7 @@ class MultiClientEcho(Protocol):
         if not self.username:
             username, jid, role = data.strip().split(";")
             self.factory.bot.occupants.add_user(username, jid, role)
-            print "%s joined : jid=%s; role=%s" % (username, jid, role)
+            print("%s joined : jid=%s; role=%s" % (username, jid, role))
             self.username = username
             self.jid = jid
             self.role = role

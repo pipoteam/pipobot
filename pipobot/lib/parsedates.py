@@ -121,9 +121,9 @@ if __name__ == "__main__":
     dhs = ["18/01/12,18h10", "18h10", "J+1,18h02",
            "J+1,H+1", "M+30", "J+1", "h+3", "1h"]
     for dh in dhs:
-        print "-" * 10
-        print dh
-        print parseall(dh)
-        print time.mktime(parseall(dh))
-        print time.strftime("%d/%m/%y,%Hh%M",
-                            time.localtime(time.mktime(parseall(dh))))
+        print("-" * 10)
+        print(dh)
+        print(parseall(dh))
+        print(time.mktime(parseall(dh)))
+        print(time.strftime("%d/%m/%y,%Hh%M",
+                            time.localtime(time.mktime(parseall(dh)))))

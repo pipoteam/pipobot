@@ -88,7 +88,7 @@ class BotModule(object):
         except:
             self.bot.say(_("Error !"))
             logger.error(_("Error from module %s : %s") % (self.__class__,
-                                                           traceback.format_exc().decode("utf-8")))
+                                                           traceback.format_exc()))
 
     def is_concerned(self, msg) :
         raise NotImplementedError("Must be subclassed")
@@ -244,7 +244,7 @@ class MultiSyncModule(BotModule):
         return module_answer
 
     def help(self, body):
-        for name, desc in self.names.iteritems():
+        for name, desc in self.names.items():
             if body == name:
                 return desc
 
@@ -281,7 +281,7 @@ class AsyncModule(BotModule, threading.Thread):
                 self.action()
             except:
                logger.error(_("Error from module %s : %s") % (self.__class__,
-                                                               traceback.format_exc().decode("utf-8")))
+                                                               traceback.format_exc()))
 
     def action(self) :
         raise NotImplementedError("Must be subclassed")
@@ -347,11 +347,11 @@ class Help(SyncModule):
                     res = ""
                     if type(hlp) == dict:
                         if subcoms == "subcom":
-                            available_subcoms = ", ".join(sorted([key for key in hlp.keys() if key != ""]))
+                            available_subcoms = ", ".join(sorted([key for key in list(hlp.keys()) if key != ""]))
                             desc = " : %s" % hlp[""] if "" in hlp else ""
                             res = _("%s%s\nSub-commands : %s") % (cmd_name, desc, available_subcoms)
                         elif subcoms == "":
-                            res = '\n'.join(["%s : %s" % (key, val) for key, val in hlp.iteritems() if key != ""])
+                            res = '\n'.join(["%s : %s" % (key, val) for key, val in hlp.items() if key != ""])
                         else:
                             res = []
                             for subcom in subcoms.split(","):
@@ -369,19 +369,19 @@ class Help(SyncModule):
     def genHelp(self):
         multi_lst = []
         for cmd in self.bot.multisync:
-            multi_lst.extend(cmd.names.keys())
+            multi_lst.extend(list(cmd.names.keys()))
         sync_lst = sorted(mod.name for mod in self.bot.sync)
         listen_lst = sorted(mod.name for mod in self.bot.listen)
         pres_lst = sorted(mod.name for mod in self.bot.presence)
 
         delim = "*" * 10
-        sync = _(u"%s[Sync commands]%s\n%s") % (delim, delim, Help.genString(sync_lst))
-        listen = _(u"%s[Listen commands]%s\n%s") % (delim, delim, Help.genString(listen_lst))
-        multi = _(u"%s[Multi commands]%s\n%s") % (delim, delim, Help.genString(multi_lst))
-        pres = _(u"%s[Presence commands]%s\n%s") % (delim, delim, Help.genString(pres_lst))
-        self.all_help_content = u"\n%s\n%s\n%s\n%s" % (sync, listen, multi, pres)
+        sync = _("%s[Sync commands]%s\n%s") % (delim, delim, Help.genString(sync_lst))
+        listen = _("%s[Listen commands]%s\n%s") % (delim, delim, Help.genString(listen_lst))
+        multi = _("%s[Multi commands]%s\n%s") % (delim, delim, Help.genString(multi_lst))
+        pres = _("%s[Presence commands]%s\n%s") % (delim, delim, Help.genString(pres_lst))
+        self.all_help_content = "\n%s\n%s\n%s\n%s" % (sync, listen, multi, pres)
         allcmds = sync_lst + multi_lst
-        self.compact_help_content = _(u"I can execute: \n%s") % Help.genString(sorted(allcmds))
+        self.compact_help_content = _("I can execute: \n%s") % Help.genString(sorted(allcmds))
 
     @staticmethod
     def genString(l):
@@ -393,14 +393,14 @@ class Help(SyncModule):
             cmd3 = l[i + 2]
             espaces1 = " " * (25 - len(cmd1) - 1)
             espaces2 = " " * (25 - len(cmd2) - 1)
-            line = u"-%s%s-%s%s-%s\n" % (cmd1, espaces1, cmd2, espaces2, cmd3)
+            line = "-%s%s-%s%s-%s\n" % (cmd1, espaces1, cmd2, espaces2, cmd3)
             send += line
             i += 3
         if i < len(l):
             espaces = " " * (25 - len(l[i]) - 1)
-            send += u"-%s%s" % (l[i], espaces)
+            send += "-%s%s" % (l[i], espaces)
         if i + 1 < len(l):
-            send += u"-%s" % (l[i + 1])
+            send += "-%s" % (l[i + 1])
         if i == len(l):
             send = send.rstrip()
         return send

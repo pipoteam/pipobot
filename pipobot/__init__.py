@@ -3,7 +3,6 @@
 import fcntl
 import logging
 import os
-import pwd
 import signal
 import sys
 import unittest
@@ -12,7 +11,6 @@ import errno
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-from pipobot._version import __version__
 from pipobot.config import get_configuration
 from pipobot.lib.bdd import Base
 from pipobot.lib.loader import BotModuleLoader
@@ -102,9 +100,9 @@ class PipoBotManager(object):
         try:
             fd = os.open(self._config.pid_file, os.O_WRONLY | os.O_CREAT)
             fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except OSError, e:
+        except OSError as e:
             _abort(str(e))
-        except IOError, e:
+        except IOError as e:
             if e.errno == errno.EACCES or e.errno == errno.EAGAIN:
                 _abort("Unable to lock the PID file, is the bot already "
                        "running?")
@@ -146,7 +144,7 @@ class PipoBotManager(object):
                                 room.chan, room.nick, modules[room].modules,
                                 self._db_session, self._config.force_ipv4,
                                 room.address, room.port)
-            except XMPPException, exc:
+            except XMPPException as exc:
                 LOGGER.error("Unable to join room '%s': %s", room.chan,
                              exc)
                 continue
@@ -214,8 +212,8 @@ class PipoBotManager(object):
                 bot = TestBot(test_room.nick, test_room.login,
                               test_room.chan, m[test_room].modules, self._db_session)
                 for msg in self._config.script.split(";"):
-                    print "--> %s" % msg
-                    print "<== %s" % bot.create_msg("bob", msg)
+                    print("--> %s" % msg)
+                    print("<== %s" % bot.create_msg("bob", msg))
             # Interract/twisted mode
             elif self._config.interract:
                 # We import it here so the bot does not 'depend' on twisted
