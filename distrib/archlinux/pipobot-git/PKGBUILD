@@ -12,7 +12,8 @@ conflicts=('pipobot')
 optdepends=("pipobot-modules-git: a set of modules to add functionalities to pipobot"
             "twisted: used for the testing mode of pipobot (to test modules without an XMPP server)")
 makedepends=('python2' 'git')
-backup=('etc/pipobot.conf.yml')
+backup=('etc/pipobot.conf.yml'
+        'etc/conf.d/pipobot')
 install="$pkgname.install"
 source=("${_projectname}::git+https://github.com/pipoteam/pipobot")
 md5sums=('SKIP')
