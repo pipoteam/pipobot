@@ -12,7 +12,8 @@ conflicts=('pipobot')
 optdepends=("pipobot-modules-git: a set of modules to add functionalities to pipobot"
             "twisted: used for the testing mode of pipobot (to test modules without an XMPP server)")
 makedepends=('python2' 'git')
-backup=('etc/pipobot.conf.yml')
+backup=('etc/pipobot.conf.yml'
+        'etc/conf.d/pipobot')
 install="$pkgname.install"
 source=("${_projectname}::git+https://github.com/pipoteam/pipobot")
 md5sums=('SKIP')
@@ -37,6 +38,7 @@ package() {
   cd "$srcdir/$_projectname/distrib/systemd"
   install -D -m644 pipobot.service "$pkgdir"/usr/lib/systemd/system/pipobot.service
   install -D -m644 pipobot.tmpfiles.d "$pkgdir"/usr/lib/tmpfiles.d/pipobot.conf
+  install -D -m644 pipobot.conf "$pkgdir"/etc/conf.d/pipobot
 }
 
 # vim:set ts=2 sw=2 et:
