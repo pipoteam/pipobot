@@ -19,7 +19,7 @@ class Occupants:
         try:
             del self.users[nickname]
         except KeyError:
-            #Removing a user not in the room… should never happen
+            # Removing a user not in the room… should never happen
             pass
 
     def get_all(self, separator, exceptions=[]):
@@ -30,21 +30,21 @@ class Occupants:
         try:
             return self.users[pseudo].jid
         except KeyError:
-            self.logger.error(_("The user %s is not in the room !") % pseudo)
+            self.logger.info(_("The user %s is not in the room !") % pseudo)
             return ""
 
     def pseudo_to_role(self, pseudo):
         try:
             return self.users[pseudo].role
         except KeyError:
-            self.logger.error(_("The user %s is not in the room !") % pseudo)
+            self.logger.info(_("The user %s is not in the room !") % pseudo)
             return ""
 
     def jid_to_pseudo(self, jid):
         for user in self.users.itervalues():
             if user.jid == jid:
                 return user.nickname
-        self.logger.error(_("The user with jid %s is not in the room !") % jid)
+        self.logger.info(_("The user with jid %s is not in the room !") % jid)
         return jid
 
 
