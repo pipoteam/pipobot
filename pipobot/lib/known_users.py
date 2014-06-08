@@ -10,13 +10,13 @@ from pipobot.lib.modules import SyncModule, defaultcmd, answercmd
 
 def minpermlvl(lvl):
     def wrapper(fct):
-        def wrapped(self, sender, message):
+        def wrapped(self, sender, *args, **kwargs):
             user = KnownUser.get(sender, self.bot, authviapseudo=False)
             if not user:
                 return _("%s: You are not even registered…" % sender)
             if user.get_permlvl(self.bot.chatname) < lvl:
                 return _("%s: You need a permlvl of %i to do that." % (sender, lvl))
-            return fct(self, sender, message)
+            return fct(self, sender, *args, **kwargs)
         return wrapped
     return wrapper
 
