@@ -1,7 +1,8 @@
 #!/usr/bin/env python2
 
 from distutils.core import setup
-from os.path import dirname, join
+from os.path import dirname, join, isdir, splitext
+import os
 import sys
 
 try:
