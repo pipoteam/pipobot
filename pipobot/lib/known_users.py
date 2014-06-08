@@ -157,7 +157,7 @@ class KnownUsersManager(SyncModule):
         if not jids:
             jids = [self.bot.occupants.pseudo_to_jid(pseudo)]
         else:
-            jids = jids.strip().split()
+            jids = jids.split()
 
         senderuser = KnownUser.get(sender, self.bot, authviapseudo=False)
         if pseudo != sender:
