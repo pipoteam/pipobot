@@ -4,6 +4,7 @@
 
 import logging
 from pipobot.bot import PipoBot
+from sleekxmpp.basexmpp import BaseXMPP
 
 logger = logging.getLogger('pipobot.bot_jabber')
 
@@ -20,10 +21,12 @@ class ForgedMsg(dict):
         self["body"] = body
 
 
-class TestBot(PipoBot):
-    def __init__(self, name, login, chatname, modules, session):
+class TestBot(PipoBot, BaseXMPP):
+    def __init__(self, name, login, chatname, modules, session, output=None):
         PipoBot.__init__(self, name, login, chatname, modules, session)
+        BaseXMPP.__init__(self, "uselesjid")
         self.occupants.add_user(name, login, "moderator")
+        self.output = output
 
         logger.info("Starting console bot in fake room %s" % self.chatname)
 
@@ -85,3 +88,7 @@ class TestBot(PipoBot):
 
     def kill(self):
         self.stop_modules()
+
+    def send(self, data, mask=None, timeout=None, now=False):
+        if self.output is not None:
+            self.output.put(data)

@@ -3,8 +3,6 @@
 import inspect
 import imp
 import logging
-import sys
-import unittest
 import traceback
 from collections import namedtuple
 

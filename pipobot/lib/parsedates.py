@@ -11,12 +11,7 @@ import datetime
 
 class ParseExcept(Exception):
     """ Custom exception if a date/hour is not valid """
-    def __init__(self, msg):
-        Exception.__init__(self, msg)
-        self.msg = msg
-
-    def __str__(self):
-        return self.msg
+    pass
 
 
 def parsedate(day):
@@ -95,7 +90,10 @@ def parseall(datehour):
         h1 = parsehour(h)
         #We have just the date
         if d1 is None:
-            return h1.timetuple()
+            if h1 is None:
+                raise ParseExcept(_("The date %s is not valid !") % datehour)
+            else:
+                return h1.timetuple()
         #We have just the hour
         else:
             try:

@@ -3,6 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from pipobot.bot_test import TestBot
 from pipobot.lib.bdd import Base
+import queue
 
 
 DOMAIN = "domain.tld"
@@ -38,4 +39,4 @@ def create_test_bot(mods):
     Session = sessionmaker(bind=engine)
     session = Session()
     Base.metadata.create_all(engine)
-    return TestBot("pipotest", "login", CHAN, mods, session)
+    return TestBot("pipotest", "login", CHAN, mods, session, queue.Queue())
