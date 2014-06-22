@@ -113,19 +113,16 @@ class SyncModule(BotModule):
         for _, method in inspect.getmembers(self, predicate=inspect.ismethod):
             try:
                 if method.dflcommand:
-                    if self.default_cmd is not None :
+                    if self.default_cmd is not None:
                         logger.warn("Another default command defined for this module, the other will be ignored")
-                    else :
+                    else:
                         self.default_cmd = method
             except AttributeError :
                 pass
             try:
                 regexp = getattr(method, "subcommand")
-                if type(regexp) == tuple:
-                    for sub_re in regexp:
-                        self.fcts.append((sub_re, method))
-                else:
-                    self.fcts.append((regexp, method))
+                for sub_re in regexp:
+                    self.fcts.append((sub_re, method))
             except AttributeError:
                 pass
         if lock_time > 0:
@@ -351,7 +348,9 @@ class Help(SyncModule):
                             desc = " : %s" % hlp[""] if "" in hlp else ""
                             res = _("%s%s\nSub-commands : %s") % (cmd_name, desc, available_subcoms)
                         elif subcoms == "":
-                            res = '\n'.join(["%s : %s" % (key, val) for key, val in hlp.items() if key != ""])
+                            res = '\n'.join(["%s : %s" % (key, val) for key, val in sorted(hlp.items()) if key != ""])
+                            desc = hlp[""] if "" in hlp else ""
+                            res = "%s - %s\n%s" % (cmd_name, desc, res)
                         else:
                             res = []
                             for subcom in subcoms.split(","):

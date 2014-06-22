@@ -7,11 +7,26 @@ from base_test import FakeUser, create_test_bot
 builtins._ = lambda x: x
 
 
+desc = {"": "A simple module to test",
+    "echo": "echo something",
+    "num": "!cmd 42"}
+name = "test_sync"
+
+hlp = """test_sync - A simple module to test
+echo : echo something
+num : !cmd 42"""
+
+hlp_subcoms = """test_sync : A simple module to test
+Sub-commands : echo, num"""
+
+
 class SyncMod(SyncModule):
     def __init__(self, bot):
-        desc = "A simple module to test"
-        name = "test_sync"
         SyncModule.__init__(self, bot, desc, name)
+
+    @defaultcmd
+    def useless(self, sender, message):
+        return message
 
     @defaultcmd
     def echo(self, sender, message):
@@ -36,7 +51,10 @@ class SyncModuleTest(unittest.TestCase):
     def test_help(self):
         user = FakeUser("bob", self.bot, self)
         user.ask("!help", u'I can execute: \n-test_sync')
-        user.ask("!help test_sync", "A simple module to test")
+        user.ask("!help test_sync", hlp)
+        user.ask("!help test_sync subcom", hlp_subcoms)
+        user.ask("!help test_sync num", "!cmd 42")
+        user.ask("!help test_sync pipo", "")
 
     def test_sync(self):
         user = FakeUser("bob", self.bot, self)
