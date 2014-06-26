@@ -39,6 +39,7 @@ class KnownUser(Base):
     __tablename__ = "knownuser"
     kuid = Column(Integer, primary_key=True)
     pseudo = Column(String(250), unique=True)
+    hl_pseudo = Column(String(250))
     permlvl = Column(Integer)  # Permissions level 1: none, 2: moderator, 3: super-moderator, 4: admin, 5: super-admin
     hllvl = Column(Integer)  # HighlightLevel 1: never, 2: sometimes, 3: always
     jids = relationship("KnownUsersJIDs", backref="knownuser")
@@ -50,6 +51,11 @@ class KnownUser(Base):
         self.hllvl = hllvl
 
     def __str__(self):
+        return self.get_pseudo()
+
+    def get_pseudo(self, hl=False):
+        if hl and self.hl_pseudo is not None:
+            return self.hl_pseudo
         return self.pseudo
 
     def get_permlvl(self, chan):
@@ -125,6 +131,7 @@ class KnownUsersManager(SyncModule):
         desc += _("\nuser permlvl [<pseudo>]: prints the Permission Level of <pseudo> (defaults: you)")
         desc += _("\nuser permlvl [<pseudo>] <lvl>: sets the Permission Level of <pseudo> (defaults: you) to <lvl>")
         desc += _("\nuser nick <pseudo>: sets your pseudo to <pseudo>")
+        desc += _("\nuser hl <hl_pseudo>: sets your hl_pseudo to <hl_pseudo>")
         SyncModule.__init__(self,
                 bot,
                 desc=desc,
