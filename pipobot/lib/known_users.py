@@ -151,7 +151,6 @@ class KnownUsersManager(SyncModule):
                     user = bot.session.query(KnownUser).filter(KnownUser.pseudo == admin).first()
                 if user:
                     user.permlvl = 5
-                    bot.session.add(user)
                     bot.session.commit()
                 else:
                     self.logger.error(_('Admin %s is not yet registered !' % admin))
