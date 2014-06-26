@@ -54,7 +54,7 @@ class KnownUser(Base):
         return self.get_pseudo()
 
     def get_pseudo(self, hl=False):
-        if hl and self.hl_pseudo is not None:
+        if not hl and self.hl_pseudo is not None:
             return self.hl_pseudo
         return self.pseudo
 
@@ -219,7 +219,7 @@ class KnownUsersManager(SyncModule):
         knownuser = KnownUser.get(user, self.bot, authviapseudo=True)
         if not knownuser:
             return _("I don't know that %s…" % user)
-        ret = _('%s: Your Highlight Level is %i, your Permission Level is %s, and your JID(s) are:' % (knownuser.pseudo, knownuser.hllvl, knownuser.permlvl))
+        ret = _('%s: Your Highlight Level is %i, your Permission Level is %s, and your JID(s) are:' % (knownuser.get_pseudo(), knownuser.hllvl, knownuser.permlvl))
         for jid in knownuser.jids:
             ret += ' %s' % jid.jid
         return ret
@@ -323,9 +323,9 @@ class KnownUsersManager(SyncModule):
         senderuser = KnownUser.get(sender, self.bot, authviapseudo=False)
         if not senderuser:
             return _("I don't know you, %s…" % sender)
-        senderuser.hl = nickname
+        senderuser.hl_pseudo = nickname
         self.bot.session.commit()
-        return _("%s: your highlight-pseudo is now %s" % (sender, senderuser.pseudo))
+        return _("%s: your highlight-pseudo is now %s" % (sender, senderuser.hl_pseudo))
 
     @defaultcmd
     def answer(self, sender, args):
