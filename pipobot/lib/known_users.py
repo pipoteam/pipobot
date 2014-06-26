@@ -97,7 +97,7 @@ class KnownUser(Base):
             usersjid = bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == jid).first()
             if usersjid:
                 return usersjid.user
-        return bot.session.query(KnownUser).filter(KnownUser.kuid == pseudo).first()
+        return None
 
 
 class KnownUsersJIDs(Base):
@@ -313,6 +313,19 @@ class KnownUsersManager(SyncModule):
             return _("I don't know you, %s…" % sender)
         try:
             senderuser.pseudo = nickname
+            self.bot.session.commit()
+            return _("%s: your pseudo is now %s" % (sender, senderuser.pseudo))
+        except IntegrityError:
+            self.bot.session.rollback()
+            return _("%s: DO NOT EVEN *THINK* ABOUT DOING THAT" % sender)
+
+    @answercmd(r'hl (?P<nickname>\S+)')
+    def answer_hl(self, sender, nickname):
+        senderuser = KnownUser.get(sender, self.bot, authviapseudo=False)
+        if not senderuser:
+            return _("I don't know you, %s…" % sender)
+        try:
+            senderuser.hl = nickname
             self.bot.session.commit()
             return _("%s: your pseudo is now %s" % (sender, senderuser.pseudo))
         except IntegrityError:
