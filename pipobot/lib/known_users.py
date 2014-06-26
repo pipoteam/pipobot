@@ -324,13 +324,9 @@ class KnownUsersManager(SyncModule):
         senderuser = KnownUser.get(sender, self.bot, authviapseudo=False)
         if not senderuser:
             return _("I don't know you, %s…" % sender)
-        try:
-            senderuser.hl = nickname
-            self.bot.session.commit()
-            return _("%s: your pseudo is now %s" % (sender, senderuser.pseudo))
-        except IntegrityError:
-            self.bot.session.rollback()
-            return _("%s: DO NOT EVEN *THINK* ABOUT DOING THAT" % sender)
+        senderuser.hl = nickname
+        self.bot.session.commit()
+        return _("%s: your highlight-pseudo is now %s" % (sender, senderuser.pseudo))
 
     @defaultcmd
     def answer(self, sender, args):
