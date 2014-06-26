@@ -17,8 +17,8 @@ NAME=pipobot
 USER=pipobot
 CONFFILE=/etc/pipobot.conf.yml
 DAEMON=/usr/bin/python
-DAEMON_ARGS="-W ignore::DeprecationWarning /usr/bin/pipobot -b --pid /var/run/$NAME.pid"
 PIDFILE=/var/run/$NAME.pid
+DAEMON_ARGS="-W ignore::DeprecationWarning /usr/bin/pipobot -b --pid $PIDFILE"
 SCRIPTNAME=/etc/init.d/$NAME
 
 [ -x "$DAEMON" ] || exit 0
