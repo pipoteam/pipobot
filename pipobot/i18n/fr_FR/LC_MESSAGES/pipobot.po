@@ -5,197 +5,330 @@
 # EMAIL : <pipobot@xouillet.info>
 msgid ""
 msgstr ""
-"Project-Id-Version: 2\n"
+"Project-Id-Version:  2\n"
 "Report-Msgid-Bugs-To: <plong@sleduc.fr>\n"
-"POT-Creation-Date: 18-06-2011\n"
+"POT-Creation-Date: 2014-06-26 17:17+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: pipobot <pipobot@xouillet.info>\n"
 "Language-Team: pipobot <pipobot@xouillet.info>\n"
-"Language: fr_FR\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 1.3\n"
 
-#: ../bot_jabber.py:25 ../bot_jabber.py:30
+#: pipobot/bot.py:19
 #, python-format
-msgid "Connecting to %s"
-msgstr "Connexion à %s"
+msgid "An exception was raised starting module %s for room %s : %s"
+msgstr ""
 
-#: ../bot.py:102 ../bot.py:139 ../bot.py:51 ../pipobot/bot.py:52
-msgid "Ctrl-c signal !"
-msgstr "Signal Ctrl-c reçu"
-
-#: ../bot.py:104 ../bot.py:141
-msgid "Killing bots"
-msgstr "Tuons les bots"
-
-#: ../bot_jabber.py:46 ../bot_jabber.py:51
+#: pipobot/bot_jabber.py:40 pipobot/bot_jabber.py:41
 msgid "Unable to connect !"
 msgstr "Connexion impossible"
 
-#: ../bot_jabber.py:50 ../bot_jabber.py:55
+#: pipobot/bot_jabber.py:58
 msgid "Unable to authenticate !"
 msgstr "Authentification impossible"
 
-#: ../bot_jabber.py:62 ../bot_jabber.py:67
+#: pipobot/bot_jabber.py:64
 msgid "Hello everyone !"
 msgstr "Bonjour à tous !"
 
-#: ../bot_jabber.py:141 ../bot_jabber.py:144 ../bot_jabber.py:163
-#: ../bot_jabber.py:166 ../lib/modules.py:103 ../lib/modules.py:106
-#: ../pipobot/lib/modules.py:104 ../pipobot/lib/modules.py:107
-#, python-format
-msgid "Error from module %s : %s"
-msgstr "Erreur dans le module %s : %s"
-
-#: ../bot_jabber.py:143 ../bot_jabber.py:165 ../lib/modules.py:105
-#: ../pipobot/lib/modules.py:106
-msgid "Error !"
-msgstr "Erreur !"
-
-#: ../bot_jabber.py:162 ../bot_jabber.py:184
-msgid "I've been asked to leave you"
+#: pipobot/bot_jabber.py:93
+#, fuzzy
+#| msgid "I've been asked to leave you"
+msgid "I’ve been asked to leave you"
 msgstr "J'ai reçu l'ordre de vous quitter"
 
-#: ../bot_jabber.py:180 ../bot_jabber.py:202
-#, python-format
-msgid "Message sent to %s, type %s"
-msgstr "Message envoyé à %s, type %s"
-
-#: ../bot_jabber.py:264 ../bot_jabber.py:272 ../bot_jabber.py:287
-#: ../bot_jabber.py:295 ../lib/user.py:28 ../lib/user.py:35
-#: ../pipobot/lib/user.py:28 ../pipobot/lib/user.py:35
-#, python-format
-msgid "The user %s is not in the room !"
-msgstr "L'utilisateur %s n'est pas dans le salon !"
-
-#: ../bot_jabber.py:265 ../bot_jabber.py:273 ../bot_jabber.py:288
-#: ../bot_jabber.py:296
-#, python-format
-msgid "unknown user %s"
-msgstr "Utilisateur %s inconnu"
-
-#: ../bot_jabber.py:223 ../bot_jabber.py:246
-#, python-format
-msgid "User %s leaves without being in the room !"
-msgstr "L'utilisateur %s quitte le salon sans y être entré !"
-
-#: ../bot_jabber.py:230 ../bot_jabber.py:253
-msgid "I can't read JID in this room !"
-msgstr "Je ne peux pas lire les JID dans ce salon !"
-
-#: ../bot.py:44 ../pipobot/bot.py:45
-msgid "You must have a 'rooms' section in your configuration file"
-msgstr ""
-"Vous devez avoir une section 'rooms' dans votre fichier de configuration"
-
-#: ../bot.py:53 ../pipobot/bot.py:54
-#, python-format
-msgid "Killing bot from %s"
-msgstr "Arrêt du bot du salon %s"
-
-#: ../bot.py:78 ../pipobot/bot.py:79
-#, python-format
-msgid "The room %s has no modules configured in %s"
-msgstr "Le salon %s n'a pas de modules configuré pour %s"
-
-#: ../bot.py:86 ../pipobot/bot.py:87
-#, python-format
-msgid ""
-"Your configuration file must have a 'groups' section with the group %s "
-"required by the room %s"
-msgstr ""
-"Votre fichier de configuration doit avoir une section 'group' contenant %s "
-"pour le salon %s"
-
-#: ../bot.py:94
-#, python-format
-msgid "The module %s selected for %s cannot be found"
-msgstr "Le module %s sélectionné pour %s est introuvable"
-
-#: ../bot.py:134 ../bot.py:135 ../pipobot/bot.py:133
-#, python-format
-msgid "Your room %s has no parameter %s in %s"
-msgstr "Le salon %s n'a pas le paramètre %s dans %s"
-
-#: ../bot.py:136 ../bot.py:137 ../pipobot/bot.py:135
-#, python-format
-msgid "One of your room has no 'chan' parameter in %s"
-msgstr "Un des salons n'a pas de paramêtre 'chan' dans %s"
-
-#: ../bot.py:220 ../bot.py:223 ../pipobot/bot.py:219
-msgid "Your database section must contain parameters 'engine' and 'src'"
-msgstr ""
-"La section database du fichier de configuration doit contenir les paramètres "
-"'engine' et 'src'"
-
-#: ../lib/user.py:42 ../pipobot/lib/user.py:42
-#, python-format
-msgid "The user with jid %s is not in the room !"
-msgstr "L'utilisateur de jid %s n'est pas dans le salon !"
-
-#: ../modules/botmpd/__init__.py:138
-#, python-format
-msgid "Can't connect to server %s:%s"
-msgstr "Impossible de se connecter au serveur %s:%s"
-
-#: ../lib/abstract_modules.py:45 ../pipobot/lib/abstract_modules.py:47
+#: pipobot/lib/abstract_modules.py:65
 #, python-format
 msgid "You must override extract_data for %s !!!"
 msgstr "Vous devez surcharger extract_data dans %s !!!"
 
-#: ../lib/abstract_modules.py:57 ../pipobot/lib/abstract_modules.py:61
+#: pipobot/lib/abstract_modules.py:83
 #, python-format
 msgid "Disabling notifications for command %s"
 msgstr "Suppression des notifications pour la commande %s"
 
-#: ../lib/abstract_modules.py:63 ../pipobot/lib/abstract_modules.py:67
+#: pipobot/lib/abstract_modules.py:90
 #, python-format
 msgid "Enabling notifications for command %s"
 msgstr "Actication des notifications pour la commande %s"
 
-#: ../lib/abstract_modules.py:70 ../pipobot/lib/abstract_modules.py:74
+#: pipobot/lib/abstract_modules.py:99
 msgid "Not implemented"
 msgstr "Non implémentée"
 
-#: ../lib/parsedates.py:106 ../pipobot/lib/parsedates.py:106
+#: pipobot/lib/known_users.py:16
 #, python-format
-msgid "The date %s is not valid !"
-msgstr "La date %s n'est pas valide !"
+msgid "%s: You are not even registered…"
+msgstr ""
 
-#: ../lib/modules.py:183 ../pipobot/lib/modules.py:186
+#: pipobot/lib/known_users.py:18
+#, python-format
+msgid "%s: You need a permlvl of %i to do that."
+msgstr ""
+
+#: pipobot/lib/known_users.py:35
+#, python-format
+msgid "%i on %s"
+msgstr ""
+
+#: pipobot/lib/known_users.py:125
+msgid "user: shows this help"
+msgstr ""
+
+#: pipobot/lib/known_users.py:126
+msgid ""
+"\n"
+"user register <args>: register user <pseudo> (defaults: you) with JID(s) "
+"<jid(s)> (defaults: your JID)"
+msgstr ""
+
+#: pipobot/lib/known_users.py:127
+msgid ""
+"\n"
+"user show: prints the whole Knows Users database"
+msgstr ""
+
+#: pipobot/lib/known_users.py:128
+msgid ""
+"\n"
+"user show <pseudo>: prints informations about <pseudo> (can also be 'me')"
+msgstr ""
+
+#: pipobot/lib/known_users.py:129
+msgid ""
+"\n"
+"user hllvl [<pseudo>]: prints the Highlight Level of <pseudo> (defaults: "
+"you)"
+msgstr ""
+
+#: pipobot/lib/known_users.py:130
+msgid ""
+"\n"
+"user hllvl [<pseudo>] <lvl>: sets the Highlight Level of <pseudo> "
+"(defaults: you) to <lvl>"
+msgstr ""
+
+#: pipobot/lib/known_users.py:131
+msgid ""
+"\n"
+"user permlvl [<pseudo>]: prints the Permission Level of <pseudo> "
+"(defaults: you)"
+msgstr ""
+
+#: pipobot/lib/known_users.py:132
+msgid ""
+"\n"
+"user permlvl [<pseudo>] <lvl>: sets the Permission Level of <pseudo> "
+"(defaults: you) to <lvl>"
+msgstr ""
+
+#: pipobot/lib/known_users.py:133
+msgid ""
+"\n"
+"user nick <pseudo>: sets your pseudo to <pseudo>"
+msgstr ""
+
+#: pipobot/lib/known_users.py:134
+msgid ""
+"\n"
+"user hl <hl_pseudo>: sets your hl_pseudo to <hl_pseudo>"
+msgstr ""
+
+#: pipobot/lib/known_users.py:149 pipobot/lib/known_users.py:157
+#, python-format
+msgid "Admin %s is not yet registered !"
+msgstr ""
+
+#: pipobot/lib/known_users.py:159
+#, fuzzy
+#| msgid "You must have a 'rooms' section in your configuration file"
+msgid "You shall add an admin section in your configuration file"
+msgstr "Vous devez avoir une section 'rooms' dans votre fichier de configuration"
+
+#: pipobot/lib/known_users.py:173
+#, python-format
+msgid "I don't know you %s…"
+msgstr ""
+
+#: pipobot/lib/known_users.py:175
+#, python-format
+msgid "I don't trust you, %s…"
+msgstr ""
+
+#: pipobot/lib/known_users.py:188
+#, python-format
+msgid "%s: %s is already registered, and you can't modify his settings"
+msgstr ""
+
+#: pipobot/lib/known_users.py:195
+#, python-format
+msgid "%s: %s is associated to JID(s) "
+msgstr ""
+
+#: pipobot/lib/known_users.py:206
+#, python-format
+msgid "pseudo %s is now associated to jid(s) %s"
+msgstr ""
+
+#: pipobot/lib/known_users.py:209
+msgid "Registered users:"
+msgstr ""
+
+#: pipobot/lib/known_users.py:216
+#, python-format
+msgid ""
+"\n"
+"    special permissions: %s"
+msgstr ""
+
+#: pipobot/lib/known_users.py:222
+#, python-format
+msgid "I don't know that %s…"
+msgstr ""
+
+#: pipobot/lib/known_users.py:223
+#, python-format
+msgid ""
+"%s: Your Highlight Level is %i, your Permission Level is %s, and your "
+"JID(s) are:"
+msgstr ""
+
+#: pipobot/lib/known_users.py:241 pipobot/lib/known_users.py:251
+#: pipobot/lib/known_users.py:267 pipobot/lib/known_users.py:280
+#: pipobot/lib/known_users.py:313
+#, python-format
+msgid "I don't know you, %s…"
+msgstr ""
+
+#: pipobot/lib/known_users.py:243
+#, python-format
+msgid "%s: Your Highlight Level is %i"
+msgstr ""
+
+#: pipobot/lib/known_users.py:247 pipobot/lib/known_users.py:276
+#, python-format
+msgid "%s: I don't trust you…"
+msgstr ""
+
+#: pipobot/lib/known_users.py:254
+#, python-format
+msgid "%s: you don't have the permisson to do that."
+msgstr ""
+
+#: pipobot/lib/known_users.py:259
+#, python-format
+msgid "%s's Highlight Level modified to %i"
+msgstr ""
+
+#: pipobot/lib/known_users.py:269
+#, python-format
+msgid "%s: Your Permission Level is %i"
+msgstr ""
+
+#: pipobot/lib/known_users.py:271
+#, python-format
+msgid ", and you have specials rights on some chans: %s"
+msgstr ""
+
+#: pipobot/lib/known_users.py:283
+#, python-format
+msgid "%s: you don't have the right permissons to do that."
+msgstr ""
+
+#: pipobot/lib/known_users.py:285
+#, python-format
+msgid "%s: No, you can't give more rights than you have…"
+msgstr ""
+
+#: pipobot/lib/known_users.py:307
+#, python-format
+msgid "%s's Permission Level modified to %i"
+msgstr ""
+
+#: pipobot/lib/known_users.py:317
+#, python-format
+msgid "%s: your pseudo is now %s"
+msgstr ""
+
+#: pipobot/lib/known_users.py:320
+#, python-format
+msgid "%s: DO NOT EVEN *THINK* ABOUT DOING THAT"
+msgstr ""
+
+#: pipobot/lib/loader.py:55
+#, python-format
+msgid ""
+"Parameter ‘%s‘ of configuration of module ‘%s‘ must be a %s, but is "
+"currently a %s"
+msgstr ""
+
+#: pipobot/lib/loader.py:66
+#, python-format
+msgid "Configuration of ‘%s‘ requires ‘%s‘ parameter"
+msgstr ""
+
+#: pipobot/lib/loader.py:71
+#, python-format
+msgid ""
+"Optional parameter for module ‘%s‘ : ‘%s‘ (default value ‘%s‘ will be "
+"used)"
+msgstr ""
+
+#: pipobot/lib/module_test.py:39
+#, python-format
+msgid "No regexp from %s matches %s"
+msgstr ""
+
+#: pipobot/lib/modules.py:89
+msgid "Error !"
+msgstr "Erreur !"
+
+#: pipobot/lib/modules.py:90 pipobot/lib/modules.py:283
+#, python-format
+msgid "Error from module %s : %s"
+msgstr "Erreur dans le module %s : %s"
+
+#: pipobot/lib/modules.py:170
 msgid "Please do not flood !"
 msgstr "Veuillez ne pas flooder !"
 
-#: ../lib/modules.py:197 ../pipobot/lib/modules.py:200
+#: pipobot/lib/modules.py:180
 #, python-format
-msgid "The %s command requires args"
-msgstr "La commande %s nécessite des arguments"
+msgid "The regular expression %s is not correct !"
+msgstr ""
 
-#: ../lib/modules.py:239 ../pipobot/lib/modules.py:243
+#: pipobot/lib/modules.py:237
 #, python-format
 msgid "Command %s not handled by this module"
 msgstr "La commande %s n'est pas gérée par ce module"
 
-#: ../lib/modules.py:309 ../pipobot/lib/modules.py:315
+#: pipobot/lib/modules.py:242
+msgid "MultiSyncModule must define a “@defaultcmd” method"
+msgstr ""
+
+#: pipobot/lib/modules.py:323
 msgid "Display help for modules"
 msgstr "Affiche l'aide des modules"
 
-#: ../lib/modules.py:310 ../pipobot/lib/modules.py:316
+#: pipobot/lib/modules.py:324
 msgid "help [module] : show the full help for a module"
 msgstr "help [module] : affiche l'aide complète pour un module"
 
-#: ../lib/modules.py:311 ../pipobot/lib/modules.py:317
+#: pipobot/lib/modules.py:325
 msgid "help module [subcom] : show the help for a sub-command of a module"
 msgstr ""
 "help module [sous_commande] : affiche l'aide pour la sous-commande d'un "
 "module"
 
-#: ../lib/modules.py:318 ../pipobot/lib/modules.py:324
+#: pipobot/lib/modules.py:332
 #, python-format
 msgid "The command %s does not exist"
 msgstr "La commande %s n'existe pas"
 
-#: ../lib/modules.py:338 ../pipobot/lib/modules.py:344
+#: pipobot/lib/modules.py:352
 #, python-format
 msgid ""
 "%s%s\n"
@@ -204,7 +337,7 @@ msgstr ""
 "%s%s\n"
 "Sous-commande: %s"
 
-#: ../lib/modules.py:370 ../pipobot/lib/modules.py:376
+#: pipobot/lib/modules.py:378
 #, python-format
 msgid ""
 "%s[Sync commands]%s\n"
@@ -213,7 +346,7 @@ msgstr ""
 "%s[Commandes synchrones]%s\n"
 "%s"
 
-#: ../lib/modules.py:371 ../pipobot/lib/modules.py:377
+#: pipobot/lib/modules.py:379
 #, python-format
 msgid ""
 "%s[Listen commands]%s\n"
@@ -222,7 +355,7 @@ msgstr ""
 "%s[Commande passives]%s\n"
 "%s"
 
-#: ../lib/modules.py:372 ../pipobot/lib/modules.py:378
+#: pipobot/lib/modules.py:380
 #, python-format
 msgid ""
 "%s[Multi commands]%s\n"
@@ -231,7 +364,7 @@ msgstr ""
 "%s[Commandes multiples]%s\n"
 "%s"
 
-#: ../lib/modules.py:373 ../pipobot/lib/modules.py:379
+#: pipobot/lib/modules.py:381
 #, python-format
 msgid ""
 "%s[Presence commands]%s\n"
@@ -240,20 +373,92 @@ msgstr ""
 "%s[Commande présence]%s\n"
 "%s"
 
-#: ../lib/modules.py:376 ../pipobot/lib/modules.py:382
-#, python-format
+#: pipobot/lib/modules.py:384
+#, fuzzy, python-format
+#| msgid "" "I can execute : \n" "%s"
 msgid ""
-"I can execute : \n"
+"I can execute: \n"
 "%s"
 msgstr ""
 "Je peux exécuter : \n"
 "%s"
 
-#: ../lib/modules.py:421 ../pipobot/lib/modules.py:429
+#: pipobot/lib/modules.py:432
 msgid "Recording users logins/logout"
 msgstr "Enregistre les connexions/déconnexions des utilisateurs"
 
-#: ../pipobot/bot.py:96
+#: pipobot/lib/parsedates.py:111
 #, python-format
-msgid "The module %s selected for %s cannot be loaded. Error was '%s'"
-msgstr ""
+msgid "The date %s is not valid !"
+msgstr "La date %s n'est pas valide !"
+
+#: pipobot/lib/user.py:33 pipobot/lib/user.py:40
+#, python-format
+msgid "The user %s is not in the room !"
+msgstr "L'utilisateur %s n'est pas dans le salon !"
+
+#: pipobot/lib/user.py:47
+#, python-format
+msgid "The user with jid %s is not in the room !"
+msgstr "L'utilisateur de jid %s n'est pas dans le salon !"
+
+#~ msgid "Connecting to %s"
+#~ msgstr "Connexion à %s"
+
+#~ msgid "Ctrl-c signal !"
+#~ msgstr "Signal Ctrl-c reçu"
+
+#~ msgid "Killing bots"
+#~ msgstr "Tuons les bots"
+
+#~ msgid "Message sent to %s, type %s"
+#~ msgstr "Message envoyé à %s, type %s"
+
+#~ msgid "unknown user %s"
+#~ msgstr "Utilisateur %s inconnu"
+
+#~ msgid "User %s leaves without being in the room !"
+#~ msgstr "L'utilisateur %s quitte le salon sans y être entré !"
+
+#~ msgid "I can't read JID in this room !"
+#~ msgstr "Je ne peux pas lire les JID dans ce salon !"
+
+#~ msgid "Killing bot from %s"
+#~ msgstr "Arrêt du bot du salon %s"
+
+#~ msgid "The room %s has no modules configured in %s"
+#~ msgstr "Le salon %s n'a pas de modules configuré pour %s"
+
+#~ msgid ""
+#~ "Your configuration file must have a "
+#~ "'groups' section with the group %s "
+#~ "required by the room %s"
+#~ msgstr ""
+#~ "Votre fichier de configuration doit "
+#~ "avoir une section 'group' contenant %s"
+#~ " pour le salon %s"
+
+#~ msgid "The module %s selected for %s cannot be found"
+#~ msgstr "Le module %s sélectionné pour %s est introuvable"
+
+#~ msgid "Your room %s has no parameter %s in %s"
+#~ msgstr "Le salon %s n'a pas le paramètre %s dans %s"
+
+#~ msgid "One of your room has no 'chan' parameter in %s"
+#~ msgstr "Un des salons n'a pas de paramêtre 'chan' dans %s"
+
+#~ msgid "Your database section must contain parameters 'engine' and 'src'"
+#~ msgstr ""
+#~ "La section database du fichier de "
+#~ "configuration doit contenir les paramètres "
+#~ "'engine' et 'src'"
+
+#~ msgid "Can't connect to server %s:%s"
+#~ msgstr "Impossible de se connecter au serveur %s:%s"
+
+#~ msgid "The %s command requires args"
+#~ msgstr "La commande %s nécessite des arguments"
+
+#~ msgid "The module %s selected for %s cannot be loaded. Error was '%s'"
+#~ msgstr ""
+
