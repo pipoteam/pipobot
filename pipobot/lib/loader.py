@@ -15,9 +15,21 @@ from pipobot.lib.module_test import ModuleTest
 logger = logging.getLogger('pipobot.lib.loader')
 
 
+def import_fct(full_function_path, path=["."]):
+    name, module = full_function_path.rsplit(".", 1)
+    for x in name.split('.'):
+        if path is not None and not type(path) is list:
+            path = [path]
+        file, path, descr = imp.find_module(x, path)
+    module_data = file, path, descr
+    mod = imp.load_module(module, *module_data)
+    fct = getattr(mod, module)
+    return fct
+
+
 class BotModuleLoader(object):
     def __init__(self, modules_paths=None, modules_settings=None):
-        self._paths = []
+        self._paths = ["."]
 
         if modules_paths:
             self._paths.extend(modules_paths)
@@ -75,6 +87,15 @@ class BotModuleLoader(object):
 
         return config_param
 
+    def set_post_hook(self, module_obj, module_name):
+        if module_name in self._module_settings and \
+           "post_hook" in self._module_settings[module_name]:
+                func_path = self._module_settings[module_name]["post_hook"]
+                fct = import_fct(func_path, self._paths)
+                setattr(module_obj,
+                        "post_hook",
+                        fct)
+
     def get_modules(self, module_names):
         modules_tpl = namedtuple('modules_tpl', ['modules', 'test_mods'])
         modules = []
@@ -109,6 +130,7 @@ class BotModuleLoader(object):
 
             # We search for _config parameter (ie required configuration parameter) in each module
             for module in bot_modules:
+                self.set_post_hook(module, name)
                 if hasattr(module, "_config"):
                     # For each config parameter specified in the module
                     for (param_name, param_type, default_value) in module._config:
