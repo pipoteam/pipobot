@@ -140,3 +140,13 @@ modules_config:
             - sub.domain.net
     cmdalacon:
         config_path: /usr/share/pipobot/modules/cmdalacon/pipobot.cfg
+
+# A module can also define a post_hook parameter
+#    date:
+#        post_hook: pipobot.lib.utils.rot13
+# After each call of !date, the rot13 function will be called
+# A post_hooks can also be defined in the `modules` path.
+# If you have a function my_hook defined in pipobot-modules/hooks/test.py, you
+# can set post_hook directly to :
+#   date:
+#       post_hook: hooks.test.my_hook

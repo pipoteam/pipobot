@@ -1,6 +1,8 @@
 #! /usr/bin/python
 #-*- coding: utf-8 -*-
 
+import codecs
+import random
 import re
 import urllib.request, urllib.parse, urllib.error
 import http.client
@@ -143,3 +145,23 @@ color_codes = {
 
 def color(txt, color_name):
     return "\033[%sm%s\033[0m" % (color_codes[color_name], txt)
+
+
+def rdyell(mod, message):
+    ret = ""
+    for c in message:
+        ret += c.upper() if random.randint(0, 1) == 1 else c
+    return ret
+
+
+def rd_censored(mod, message):
+    ret = ""
+    for c in message:
+        if c == " ":
+            ret += c
+        else:
+            ret += "*" if random.randint(0, 5) > 4 else c
+    return ret
+
+def rot13(mod, message):
+    return codecs.encode(message, "rot13")
