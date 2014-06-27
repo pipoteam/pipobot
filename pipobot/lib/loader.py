@@ -90,11 +90,14 @@ class BotModuleLoader(object):
     def set_post_hook(self, module_obj, module_name):
         if module_name in self._module_settings and \
            "post_hook" in self._module_settings[module_name]:
-                func_path = self._module_settings[module_name]["post_hook"]
+            func_path = self._module_settings[module_name]["post_hook"]
+            try:
                 fct = import_fct(func_path, self._paths)
                 setattr(module_obj,
                         "post_hook",
                         fct)
+            except (AttributeError, ImportError):
+                logger.error("Error trying to import post_hook %s for module %s", func_path, module_name)
 
     def get_modules(self, module_names):
         modules_tpl = namedtuple('modules_tpl', ['modules', 'test_mods'])
