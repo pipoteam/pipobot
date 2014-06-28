@@ -40,7 +40,7 @@ class TestBot(PipoBot, BaseXMPP):
     def create_msg(self, frm, content):
         """ Creates a fake message and returns the bot response """
         msg = ForgedMsg(frm, content)
-        return self.message(msg)
+        return self.message_handler(msg)
 
     def decode_module_message(self, msg):
         """ Extracts the 'text' value of a message return by BotJabber.answer """
@@ -63,7 +63,7 @@ class TestBot(PipoBot, BaseXMPP):
                 res = msg
             return res.strip()
 
-    def message(self, mess):
+    def answer(self, mess):
         """Method called when the bot receives a message"""
         #We ignore messages in some cases :
         #   - it has a subject (change of room topic for instance)
@@ -74,6 +74,7 @@ class TestBot(PipoBot, BaseXMPP):
             result = "\n".join(map(self.decode_module_message, ret))
         else:
             result = self.decode_module_message(ret)
+        self.output.put(result)
         return result
 
     def say(self, *args, **kwargs):

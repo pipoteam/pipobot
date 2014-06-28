@@ -24,6 +24,8 @@ class FakeUser:
 
     def ask(self, msg, expected):
         ret = self.bot.create_msg(self.name, msg)
+        ret.join()
+        ret = self.bot.output.get()
         self.tester.assertEqual(ret, expected)
 
     def change_nick(self, new_nick):

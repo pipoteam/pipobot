@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import threading
 import traceback
 from pipobot.lib.modules import AsyncModule, base_class
 from pipobot.lib.user import Occupants
@@ -91,6 +92,12 @@ class PipoBot:
     def stop_modules(self):
         logger.info("Killing %s", self.chatname)
         self._modules.stop()
+
+    def message_handler(self, msg):
+        """Method called when the bot receives a message"""
+        thread = threading.Thread(target=self.answer, args=(msg,))
+        thread.start()
+        return thread
 
     def module_answer(self, msg):
         """ Given a text message, try each registered module for an answer.

@@ -22,7 +22,9 @@ class ModuleTest(unittest.TestCase):
         return suite
 
     def bot_answer(self, input_msg, user="test"):
-        return self.bot.create_msg(user, input_msg)
+        th = self.bot.create_msg(user, input_msg)
+        th.join()
+        return self.bot.output.get()
 
     def assertRegexpListMatches(self, bot_rep, expected_re):
         expected = list(map(re.compile, expected_re))

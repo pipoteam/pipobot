@@ -75,8 +75,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
             or mess["body"] == "":
             return
 
-        thread = threading.Thread(target=self.answer, args=(mess,))
-        thread.start()
+        super(BotJabber, self).message_handler(mess)
 
     def answer(self, mess):
         result = self.module_answer(mess)

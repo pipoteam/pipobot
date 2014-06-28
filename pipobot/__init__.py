@@ -7,6 +7,7 @@ import signal
 import sys
 import unittest
 import errno
+from queue import Queue
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -202,18 +203,24 @@ class PipoBotManager(object):
             # Unit test mode : run unittest
             if self._config.unit_test:
                 bot = TestBot(test_room.nick, test_room.login,
-                              test_room.chan, m[test_room].modules, self._db_session)
+                              test_room.chan, m[test_room].modules,
+                              self._db_session, output=Queue())
                 suite = unittest.TestSuite()
                 for test in m[test_room].test_mods:
                     suite.addTests(ModuleTest.parametrize(test, bot=bot))
                 unittest.TextTestRunner(verbosity=2).run(suite)
+                bot.stop_modules()
             # Script mode
             elif self._config.script:
                 bot = TestBot(test_room.nick, test_room.login,
-                              test_room.chan, m[test_room].modules, self._db_session)
+                              test_room.chan, m[test_room].modules,
+                              self._db_session, output=Queue())
                 for msg in self._config.script.split(";"):
                     print("--> %s" % msg)
-                    print("<== %s" % bot.create_msg("bob", msg))
+                    ret = bot.create_msg("bob", msg)
+                    ret.join()
+                    print("<== %s" % bot.output.get())
+                    bot.stop_modules()
             # Interract/twisted mode
             elif self._config.interract:
                 # We import it here so the bot does not 'depend' on twisted
