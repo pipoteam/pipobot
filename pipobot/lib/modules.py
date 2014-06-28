@@ -84,7 +84,11 @@ class BotModule(object):
                 # A not specified module type !
                 return
 
-            return send
+            try:
+                if send is not None:
+                    return getattr(self, "post_hook")(send)
+            except AttributeError:
+                return send
         except:
             self.bot.say(_("Error !"))
             logger.error(_("Error from module %s : %s") % (self.__class__,
