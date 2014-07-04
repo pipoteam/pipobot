@@ -143,7 +143,7 @@ class KnownUsersManager(SyncModule):
         desc += _("\nuser permlvl [<pseudo>]: prints the Permission Level of <pseudo> (defaults: you)")
         desc += _("\nuser permlvl [<pseudo>] <lvl>: sets the Permission Level of <pseudo> (defaults: you) to <lvl>")
         desc += _("\nuser nick <pseudo>: sets your pseudo to <pseudo>")
-        desc += _("\nuser hl <hl_pseudo>: sets your hl_pseudo to <hl_pseudo>")
+        desc += _("\nuser antihl <hl_pseudo>: sets your antihl-pseudo to <hl_pseudo>")
         SyncModule.__init__(self,
                 bot,
                 desc=desc,
@@ -332,7 +332,7 @@ class KnownUsersManager(SyncModule):
             self.bot.session.rollback()
             return _("%s: DO NOT EVEN *THINK* ABOUT DOING THAT" % sender)
 
-    @answercmd(r'hl (?P<nickname>\S+)')
+    @answercmd(r'antihl (?P<nickname>\S+)')
     def answer_hl(self, sender, nickname):
         senderuser = KnownUser.get(sender, self.bot, authviapseudo=False)
         if not senderuser:
