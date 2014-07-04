@@ -99,6 +99,18 @@ class KnownUser(Base):
                 return usersjid.user
         return None
 
+    @staticmethod
+    def get_antihl(pseudo, bot):
+        user = KnownUser.get(pseudo, bot, authviapseudo=True)
+        if user:
+            return user.get_pseudo()
+        return pseudo
+
+    @staticmethod
+    def get_all(bot, separator, exceptions=[]):
+        return separator.join([KnownUser.get_antihl(user.nickname, bot) for user in bot.occupants.users.itervalues()
+            if user.nickname not in exceptions])
+
 
 class KnownUsersJIDs(Base):
     __tablename__ = "knownusersjids"
@@ -215,8 +227,8 @@ class KnownUsersManager(SyncModule):
                 ret += _("\n    special permissions: %s" % user.chanperms)
         return ret
 
-    def show_one_user(self, user):
-        knownuser = KnownUser.get(user, self.bot, authviapseudo=True)
+    def show_one_user(self, user, authviapseudo=True):
+        knownuser = KnownUser.get(user, self.bot, authviapseudo=authviapseudo)
         if not knownuser:
             return _("I don't know that %s…" % user)
         ret = _('%s: Your Highlight Level is %i, your Permission Level is %s, and your JID(s) are:' % (knownuser.get_pseudo(), knownuser.hllvl, knownuser.permlvl))
@@ -226,9 +238,11 @@ class KnownUsersManager(SyncModule):
 
     @answercmd('show', r'show (?P<user>\S+)')
     def answer_show(self, sender, user=""):
+        authviapseudo = True
         if user == "me":
             user = sender
-        return self.show_one_user(user) if user else self.show_all_users()
+            authviapseudo = False
+        return self.show_one_user(user, authviapseudo) if user else self.show_all_users()
 
 
     @answercmd(r'hllvl (?P<pseudo>\S+) (?P<lvl>\d+)')
