@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 
-from distutils.core import setup
+from setuptools import setup
 from os.path import dirname, join, isdir, splitext
 import os
 import sys
@@ -20,10 +20,9 @@ except ImportError:
     build_doc = None
 
 
-if sys.hexversion < 0x02060000 or sys.hexversion >= 0x03000000:
+if sys.hexversion < 0x02060000:
     sys.stderr.write(
-        "This program require Python 2.6 or newer, but is not yet compatible "
-        "with Python 3.\n"
+        "This program require Python 2.6 or newer"
     )
     sys.exit(1)
 
@@ -32,7 +31,11 @@ if __name__ == '__main__':
     # We cannot import pipobot._version directly since we could get an already
     # installed version.
 
-    execfile(join(dirname(__file__), 'pipobot', '_version.py'))
+    filename = join(dirname(__file__), 'pipobot', '_version.py')
+
+    with open(filename) as f:
+        code = compile(f.read(), "_version.py", 'exec')
+        exec(code, globals(), locals())
     # __version__ is now defined.
 
     kwargs = {}
