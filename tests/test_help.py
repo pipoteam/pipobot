@@ -25,6 +25,9 @@ class HelpTest(unittest.TestCase):
     def test_help(self):
         user = FakeUser("bob", self.bot, self)
         ret = self.bot.create_msg(user.name, "!help all")
+        ret.join()
+
+        answer = self.bot.output.get()
 
         for mod in ("pipo", "pouet", "qsdf", "test_listen2"):
-            self.assertIn(mod, ret)
+            self.assertIn(mod, answer)

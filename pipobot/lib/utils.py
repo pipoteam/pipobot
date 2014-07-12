@@ -52,6 +52,7 @@ def xhtml2text(html):
     # On récupère le lien dans les balises <a>
     p = re.compile('<a.*?(?<=href=\")((?:http|www)[^"]*)[^>]*>(.*?)</a>', re.S)
     html = p.sub(r'\2 (\1)', html)
+    html = re.sub(r'<br */>', '\n', html)
     # on enlève toutes les autres balises
     html = re.sub('<[^>]*>', '', html)
 
@@ -88,6 +89,14 @@ class AppURLopener(urllib.request.FancyURLopener):
     version = ("Mozilla/5.0 (X11; U; Linux; fr-fr) AppleWebKit/531+"
                "(KHTML, like Gecko) Safari/531.2+ Midori/0.2")
 urllib.request._urlopener = AppURLopener()
+
+
+def url_to_soup(url):
+    page = urllib.request.urlopen(url)
+    content = page.read()
+    page.close()
+
+    return BeautifulSoup(content)
 
 
 def check_url(url, geturl=False):
