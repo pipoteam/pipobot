@@ -5,7 +5,6 @@ import codecs
 import random
 import re
 import urllib.request, urllib.parse, urllib.error
-import http.client
 import html.entities
 from xml.etree import cElementTree as ET
 from bs4 import BeautifulSoup, SoupStrainer
@@ -113,7 +112,7 @@ def check_url(url, geturl=False):
                 SoupList = BeautifulSoup(unescape(html.decode("latin1", "ignore")),
                                          parse_only=SoupStrainer('title'))
             try:
-                title = xhtml2text(SoupList.contents[1].text)
+                title = xhtml2text(SoupList.contents[0].text)
             except (IndexError, HTMLParseError):
                 title = "Pas de titre"
             if geturl:
