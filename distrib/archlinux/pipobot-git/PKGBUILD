@@ -7,11 +7,10 @@ pkgdesc="A modular bot for jabber MUCs"
 arch=("any")
 url="https://github.com/pipoteam/pipobot"
 license=('GPL')
-depends=('python2' 'python2-sleekxmpp' 'python2-yaml' 'python2-sqlalchemy' )
+depends=('python' 'python-sleekxmpp' 'python-yaml' 'python-sqlalchemy' )
 conflicts=('pipobot')
-optdepends=("pipobot-modules-git: a set of modules to add functionalities to pipobot"
-            "twisted: used for the testing mode of pipobot (to test modules without an XMPP server)")
-makedepends=('python2' 'git')
+optdepends=("pipobot-modules-git: a set of modules to add functionalities to pipobot")
+makedepends=('python' 'git')
 backup=('etc/pipobot.conf.yml'
         'etc/conf.d/pipobot')
 install="$pkgname.install"
@@ -24,12 +23,12 @@ pkgver () {
 }
 build() {
   cd "$srcdir/$_projectname"
-  python2 setup.py build
+  python setup.py build
 }
 
 package() {
   cd "$srcdir/$_projectname"
-  python2 setup.py install --root="$pkgdir/" --optimize=1
+  python setup.py install --root="$pkgdir/" --optimize=1
 
   install -d -m750 "$pkgdir"/var/lib/pipobot
   install -d -m750 "$pkgdir"/var/log/pipobot
