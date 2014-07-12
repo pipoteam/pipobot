@@ -112,8 +112,8 @@ def check_url(url, geturl=False):
                 SoupList = BeautifulSoup(unescape(html.decode("latin1", "ignore")),
                                          parse_only=SoupStrainer('title'))
             try:
-                title = xhtml2text(SoupList.contents[0].text)
-            except (IndexError, HTMLParseError):
+                title = xhtml2text(SoupList.title.text)
+            except (AttributeError, HTMLParseError):
                 title = "Pas de titre"
             if geturl:
                 send.append("%s : [Lien] Titre : %s" %
