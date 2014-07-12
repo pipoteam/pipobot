@@ -22,6 +22,58 @@ from pipobot.bot_test import TestBot
 
 LOGGER = logging.getLogger('pipobot.manager')
 
+def console(bot):
+    """
+    Opens a python interpretor with the bot loaded.
+    The bot itself can be retrieved with the local variable `bot`
+    Each module can be retrieve with _module_name.
+    Loaded modules are the one defined in the `test` section of the configuration.
+    Example:
+    in yaml configuration:
+
+    test:
+        fake_nick: Pipotest
+        fake_chan: fake@example.org
+        modules:
+            - chiffres_lettres
+
+    >>> from pprint import pprint
+    >>> _chiffres.init("bob")
+    'Nouvelle partie lancée\nTotal à trouver : 336\nNombres fournis : 5, 7, 10, 75, 75, 100'
+    >>> pprint(_chiffres.solve("bob"))
+    "J'ai trouvé une solution exacte : \n"
+    '75 - 7 = 68\n'
+    '68 + 100 = 168\n'
+    '10 ÷ 5 = 2\n'
+    '168 × 2 = 336'
+
+    """
+
+    import code
+    import readline
+    import rlcompleter
+
+    list_modules = []
+    loc = locals()
+    for mod in bot.modules:
+        local_name = "_" + mod.name
+        loc[local_name] = mod
+        list_modules.append(local_name)
+
+    loc["bot"] = bot
+    banner = ("Your bot is now loaded as `bot`\n"
+              "Your instanciated modules can be accessed with `_module_name`\n"
+              "Here is the list of the modules currently loaded :\n"
+              "\t %s\n"
+              "Now you are on your own, have fun !" % ", ".join(list_modules))
+    vars = globals()
+    vars.update(loc)
+    readline.set_completer(rlcompleter.Completer(vars).complete)
+    readline.parse_and_bind("tab: complete")
+    shell = code.InteractiveConsole(vars)
+    shell.interact(banner)
+
+
 
 class PipoBotManager(object):
     """
@@ -191,7 +243,7 @@ class PipoBotManager(object):
 
         # Test mode : load test room
         elif self._config.unit_test or self._config.script or \
-             self._config.interract :
+             self._config.interract or self._config.console:
 
             test_room = self._config.test_room
             if test_room is None :
@@ -228,6 +280,12 @@ class PipoBotManager(object):
                 from pipobot.bot_twisted import TwistedBot
                 bot = TwistedBot(test_room.nick, test_room.login,
                                  test_room.chan, m[test_room].modules, self._db_session)
+            # Console mode
+            elif self._config.console:
+                bot = TestBot(test_room.nick, test_room.login,
+                              test_room.chan, m[test_room].modules, self._db_session)
+                console(bot)
+
         # Standard mode
         else:
             rooms = self._config.rooms
