@@ -17,8 +17,8 @@ NAME=pipobot
 USER=pipobot
 CONFFILE=/etc/pipobot.conf.yml
 DAEMON=/usr/bin/python
-DAEMON_ARGS="-W ignore::DeprecationWarning /usr/bin/pipobot -b --pid /var/run/$NAME.pid"
-PIDFILE=/var/run/$NAME.pid
+PIDFILE=/var/run/$NAME/$NAME.pid
+DAEMON_ARGS="-W ignore::DeprecationWarning /usr/bin/pipobot -b --pid $PIDFILE"
 SCRIPTNAME=/etc/init.d/$NAME
 
 [ -x "$DAEMON" ] || exit 0
@@ -31,18 +31,18 @@ SCRIPTNAME=/etc/init.d/$NAME
 do_start()
 {
 	if [ "$ENABLE_DAEMON" != 1 ]; then
-        	log_progress_msg "(disabled, see /etc/default/${NAME})"
+		log_progress_msg "(disabled, see /etc/default/${NAME})"
 		return
 	fi
 
 	if [ ! -f "$CONFFILE" ]; then
-		log_progress_msg "(not started, $CONFFILE not found - see /usr/share/doc/pipobot for sample configuration)"  
+		log_progress_msg "(not started, $CONFFILE not found - see /usr/share/doc/pipobot for sample configuration)"
 		return
 	fi
 
 	mkdir -p /var/run/pipobot
 	chown pipobot:pipobot /var/run/pipobot
-	
+
 	start-stop-daemon --start --quiet --chuid $USER --pidfile $PIDFILE --exec $DAEMON -- $DAEMON_ARGS
 }
 

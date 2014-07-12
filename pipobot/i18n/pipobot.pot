@@ -1,147 +1,382 @@
 # Translations template for PipoBot.
-# Copyright (C) 2012 Pipoteam
+# Copyright (C) 2014 Pipoteam
 # This file is distributed under the same license as the PipoBot project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2012.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2014.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PipoBot 1.0\n"
 "Report-Msgid-Bugs-To: pipoteam@xouillet.info\n"
-"POT-Creation-Date: 2012-07-08 23:23+0200\n"
+"POT-Creation-Date: 2014-06-26 17:17+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 0.9.6\n"
+"Generated-By: Babel 1.3\n"
 
-#: pipobot/user.py:31 pipobot/user.py:38
+#: pipobot/bot.py:19
 #, python-format
-msgid "The user %s is not in the room !"
+msgid "An exception was raised starting module %s for room %s : %s"
 msgstr ""
 
-#: pipobot/user.py:45
-#, python-format
-msgid "The user with jid %s is not in the room !"
+#: pipobot/bot_jabber.py:40 pipobot/bot_jabber.py:41
+msgid "Unable to connect !"
 msgstr ""
 
-#: pipobot/xmpp_bot.py:99
-msgid "Hello everyone!"
+#: pipobot/bot_jabber.py:58
+msgid "Unable to authenticate !"
 msgstr ""
 
-#: pipobot/xmpp_bot.py:124
+#: pipobot/bot_jabber.py:64
+msgid "Hello everyone !"
+msgstr ""
+
+#: pipobot/bot_jabber.py:93
 msgid "I’ve been asked to leave you"
-msgstr ""
-
-#: pipobot/lib/abstract_modules.py:45
-#, python-format
-msgid "You must override extract_data for %s !!!"
-msgstr ""
-
-#: pipobot/lib/abstract_modules.py:59
-#, python-format
-msgid "Disabling notifications for command %s"
 msgstr ""
 
 #: pipobot/lib/abstract_modules.py:65
 #, python-format
+msgid "You must override extract_data for %s !!!"
+msgstr ""
+
+#: pipobot/lib/abstract_modules.py:83
+#, python-format
+msgid "Disabling notifications for command %s"
+msgstr ""
+
+#: pipobot/lib/abstract_modules.py:90
+#, python-format
 msgid "Enabling notifications for command %s"
 msgstr ""
 
-#: pipobot/lib/abstract_modules.py:72
+#: pipobot/lib/abstract_modules.py:99
 msgid "Not implemented"
 msgstr ""
 
-#: pipobot/lib/parsedates.py:106
+#: pipobot/lib/known_users.py:16
 #, python-format
-msgid "The date %s is not valid !"
+msgid "%s: You are not even registered…"
 msgstr ""
 
-#: pipobot/modules/__init__.py:108
+#: pipobot/lib/known_users.py:18
+#, python-format
+msgid "%s: You need a permlvl of %i to do that."
+msgstr ""
+
+#: pipobot/lib/known_users.py:35
+#, python-format
+msgid "%i on %s"
+msgstr ""
+
+#: pipobot/lib/known_users.py:125
+msgid "user: shows this help"
+msgstr ""
+
+#: pipobot/lib/known_users.py:126
+msgid ""
+"\n"
+"user register <args>: register user <pseudo> (defaults: you) with JID(s) "
+"<jid(s)> (defaults: your JID)"
+msgstr ""
+
+#: pipobot/lib/known_users.py:127
+msgid ""
+"\n"
+"user show: prints the whole Knows Users database"
+msgstr ""
+
+#: pipobot/lib/known_users.py:128
+msgid ""
+"\n"
+"user show <pseudo>: prints informations about <pseudo> (can also be 'me')"
+msgstr ""
+
+#: pipobot/lib/known_users.py:129
+msgid ""
+"\n"
+"user hllvl [<pseudo>]: prints the Highlight Level of <pseudo> (defaults: you)"
+msgstr ""
+
+#: pipobot/lib/known_users.py:130
+msgid ""
+"\n"
+"user hllvl [<pseudo>] <lvl>: sets the Highlight Level of <pseudo> (defaults: "
+"you) to <lvl>"
+msgstr ""
+
+#: pipobot/lib/known_users.py:131
+msgid ""
+"\n"
+"user permlvl [<pseudo>]: prints the Permission Level of <pseudo> (defaults: "
+"you)"
+msgstr ""
+
+#: pipobot/lib/known_users.py:132
+msgid ""
+"\n"
+"user permlvl [<pseudo>] <lvl>: sets the Permission Level of <pseudo> "
+"(defaults: you) to <lvl>"
+msgstr ""
+
+#: pipobot/lib/known_users.py:133
+msgid ""
+"\n"
+"user nick <pseudo>: sets your pseudo to <pseudo>"
+msgstr ""
+
+#: pipobot/lib/known_users.py:134
+msgid ""
+"\n"
+"user hl <hl_pseudo>: sets your hl_pseudo to <hl_pseudo>"
+msgstr ""
+
+#: pipobot/lib/known_users.py:149 pipobot/lib/known_users.py:157
+#, python-format
+msgid "Admin %s is not yet registered !"
+msgstr ""
+
+#: pipobot/lib/known_users.py:159
+msgid "You shall add an admin section in your configuration file"
+msgstr ""
+
+#: pipobot/lib/known_users.py:173
+#, python-format
+msgid "I don't know you %s…"
+msgstr ""
+
+#: pipobot/lib/known_users.py:175
+#, python-format
+msgid "I don't trust you, %s…"
+msgstr ""
+
+#: pipobot/lib/known_users.py:188
+#, python-format
+msgid "%s: %s is already registered, and you can't modify his settings"
+msgstr ""
+
+#: pipobot/lib/known_users.py:195
+#, python-format
+msgid "%s: %s is associated to JID(s) "
+msgstr ""
+
+#: pipobot/lib/known_users.py:206
+#, python-format
+msgid "pseudo %s is now associated to jid(s) %s"
+msgstr ""
+
+#: pipobot/lib/known_users.py:209
+msgid "Registered users:"
+msgstr ""
+
+#: pipobot/lib/known_users.py:216
+#, python-format
+msgid ""
+"\n"
+"    special permissions: %s"
+msgstr ""
+
+#: pipobot/lib/known_users.py:222
+#, python-format
+msgid "I don't know that %s…"
+msgstr ""
+
+#: pipobot/lib/known_users.py:223
+#, python-format
+msgid ""
+"%s: Your Highlight Level is %i, your Permission Level is %s, and your JID(s) "
+"are:"
+msgstr ""
+
+#: pipobot/lib/known_users.py:241 pipobot/lib/known_users.py:251
+#: pipobot/lib/known_users.py:267 pipobot/lib/known_users.py:280
+#: pipobot/lib/known_users.py:313
+#, python-format
+msgid "I don't know you, %s…"
+msgstr ""
+
+#: pipobot/lib/known_users.py:243
+#, python-format
+msgid "%s: Your Highlight Level is %i"
+msgstr ""
+
+#: pipobot/lib/known_users.py:247 pipobot/lib/known_users.py:276
+#, python-format
+msgid "%s: I don't trust you…"
+msgstr ""
+
+#: pipobot/lib/known_users.py:254
+#, python-format
+msgid "%s: you don't have the permisson to do that."
+msgstr ""
+
+#: pipobot/lib/known_users.py:259
+#, python-format
+msgid "%s's Highlight Level modified to %i"
+msgstr ""
+
+#: pipobot/lib/known_users.py:269
+#, python-format
+msgid "%s: Your Permission Level is %i"
+msgstr ""
+
+#: pipobot/lib/known_users.py:271
+#, python-format
+msgid ", and you have specials rights on some chans: %s"
+msgstr ""
+
+#: pipobot/lib/known_users.py:283
+#, python-format
+msgid "%s: you don't have the right permissons to do that."
+msgstr ""
+
+#: pipobot/lib/known_users.py:285
+#, python-format
+msgid "%s: No, you can't give more rights than you have…"
+msgstr ""
+
+#: pipobot/lib/known_users.py:307
+#, python-format
+msgid "%s's Permission Level modified to %i"
+msgstr ""
+
+#: pipobot/lib/known_users.py:317
+#, python-format
+msgid "%s: your pseudo is now %s"
+msgstr ""
+
+#: pipobot/lib/known_users.py:320
+#, python-format
+msgid "%s: DO NOT EVEN *THINK* ABOUT DOING THAT"
+msgstr ""
+
+#: pipobot/lib/loader.py:55
+#, python-format
+msgid ""
+"Parameter ‘%s‘ of configuration of module ‘%s‘ must be a %s, but is currently"
+" a %s"
+msgstr ""
+
+#: pipobot/lib/loader.py:66
+#, python-format
+msgid "Configuration of ‘%s‘ requires ‘%s‘ parameter"
+msgstr ""
+
+#: pipobot/lib/loader.py:71
+#, python-format
+msgid "Optional parameter for module ‘%s‘ : ‘%s‘ (default value ‘%s‘ will be used)"
+msgstr ""
+
+#: pipobot/lib/module_test.py:39
+#, python-format
+msgid "No regexp from %s matches %s"
+msgstr ""
+
+#: pipobot/lib/modules.py:89
 msgid "Error !"
 msgstr ""
 
-#: pipobot/modules/__init__.py:187
+#: pipobot/lib/modules.py:90 pipobot/lib/modules.py:283
+#, python-format
+msgid "Error from module %s : %s"
+msgstr ""
+
+#: pipobot/lib/modules.py:170
 msgid "Please do not flood !"
 msgstr ""
 
-#: pipobot/modules/__init__.py:201
+#: pipobot/lib/modules.py:180
 #, python-format
-msgid "The %s command requires args"
+msgid "The regular expression %s is not correct !"
 msgstr ""
 
-#: pipobot/modules/__init__.py:244
+#: pipobot/lib/modules.py:237
 #, python-format
 msgid "Command %s not handled by this module"
 msgstr ""
 
-#: pipobot/modules/__init__.py:316
+#: pipobot/lib/modules.py:242
+msgid "MultiSyncModule must define a “@defaultcmd” method"
+msgstr ""
+
+#: pipobot/lib/modules.py:323
 msgid "Display help for modules"
 msgstr ""
 
-#: pipobot/modules/__init__.py:317
+#: pipobot/lib/modules.py:324
 msgid "help [module] : show the full help for a module"
 msgstr ""
 
-#: pipobot/modules/__init__.py:318
+#: pipobot/lib/modules.py:325
 msgid "help module [subcom] : show the help for a sub-command of a module"
 msgstr ""
 
-#: pipobot/modules/__init__.py:325
+#: pipobot/lib/modules.py:332
 #, python-format
 msgid "The command %s does not exist"
 msgstr ""
 
-#: pipobot/modules/__init__.py:345
+#: pipobot/lib/modules.py:352
 #, python-format
 msgid ""
 "%s%s\n"
 "Sub-commands : %s"
 msgstr ""
 
-#: pipobot/modules/__init__.py:377
+#: pipobot/lib/modules.py:378
 #, python-format
 msgid ""
 "%s[Sync commands]%s\n"
 "%s"
 msgstr ""
 
-#: pipobot/modules/__init__.py:378
+#: pipobot/lib/modules.py:379
 #, python-format
 msgid ""
 "%s[Listen commands]%s\n"
 "%s"
 msgstr ""
 
-#: pipobot/modules/__init__.py:379
+#: pipobot/lib/modules.py:380
 #, python-format
 msgid ""
 "%s[Multi commands]%s\n"
 "%s"
 msgstr ""
 
-#: pipobot/modules/__init__.py:380
+#: pipobot/lib/modules.py:381
 #, python-format
 msgid ""
 "%s[Presence commands]%s\n"
 "%s"
 msgstr ""
 
-#: pipobot/modules/__init__.py:383
+#: pipobot/lib/modules.py:384
 #, python-format
 msgid ""
 "I can execute: \n"
 "%s"
 msgstr ""
 
-#: pipobot/modules/__init__.py:430
+#: pipobot/lib/modules.py:432
 msgid "Recording users logins/logout"
 msgstr ""
 
-#: pipobot/modules/botmpd/__init__.py:144
+#: pipobot/lib/parsedates.py:111
 #, python-format
-msgid "Can't connect to server %s:%s"
+msgid "The date %s is not valid !"
+msgstr ""
+
+#: pipobot/lib/user.py:33 pipobot/lib/user.py:40
+#, python-format
+msgid "The user %s is not in the room !"
+msgstr ""
+
+#: pipobot/lib/user.py:47
+#, python-format
+msgid "The user with jid %s is not in the room !"
 msgstr ""
 

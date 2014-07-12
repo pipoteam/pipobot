@@ -39,6 +39,7 @@ class KnownUser(Base):
     __tablename__ = "knownuser"
     kuid = Column(Integer, primary_key=True)
     pseudo = Column(String(250), unique=True)
+    hl_pseudo = Column(String(250))
     permlvl = Column(Integer)  # Permissions level 1: none, 2: moderator, 3: super-moderator, 4: admin, 5: super-admin
     hllvl = Column(Integer)  # HighlightLevel 1: never, 2: sometimes, 3: always
     jids = relationship("KnownUsersJIDs", backref="knownuser")
@@ -50,6 +51,11 @@ class KnownUser(Base):
         self.hllvl = hllvl
 
     def __str__(self):
+        return self.get_pseudo()
+
+    def get_pseudo(self, hl=False):
+        if not hl and self.hl_pseudo is not None:
+            return self.hl_pseudo
         return self.pseudo
 
     def get_permlvl(self, chan):
@@ -91,7 +97,19 @@ class KnownUser(Base):
             usersjid = bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == jid).first()
             if usersjid:
                 return usersjid.user
-        return bot.session.query(KnownUser).filter(KnownUser.kuid == pseudo).first()
+        return None
+
+    @staticmethod
+    def get_antihl(pseudo, bot):
+        user = KnownUser.get(pseudo, bot, authviapseudo=True)
+        if user:
+            return user.get_pseudo()
+        return pseudo
+
+    @staticmethod
+    def get_all(bot, separator, exceptions=[]):
+        return separator.join([KnownUser.get_antihl(user.nickname, bot) for user in bot.occupants.users.values()
+            if user.nickname not in exceptions])
 
 
 class KnownUsersJIDs(Base):
@@ -125,6 +143,7 @@ class KnownUsersManager(SyncModule):
         desc += _("\nuser permlvl [<pseudo>]: prints the Permission Level of <pseudo> (defaults: you)")
         desc += _("\nuser permlvl [<pseudo>] <lvl>: sets the Permission Level of <pseudo> (defaults: you) to <lvl>")
         desc += _("\nuser nick <pseudo>: sets your pseudo to <pseudo>")
+        desc += _("\nuser antihl <hl_pseudo>: sets your antihl-pseudo to <hl_pseudo>")
         SyncModule.__init__(self,
                 bot,
                 desc=desc,
@@ -144,7 +163,6 @@ class KnownUsersManager(SyncModule):
                     user = bot.session.query(KnownUser).filter(KnownUser.pseudo == admin).first()
                 if user:
                     user.permlvl = 5
-                    bot.session.add(user)
                     bot.session.commit()
                 else:
                     self.logger.error(_('Admin %s is not yet registered !' % admin))
@@ -209,20 +227,22 @@ class KnownUsersManager(SyncModule):
                 ret += _("\n    special permissions: %s" % user.chanperms)
         return ret
 
-    def show_one_user(self, user):
-        knownuser = KnownUser.get(user, self.bot, authviapseudo=True)
+    def show_one_user(self, user, authviapseudo=True):
+        knownuser = KnownUser.get(user, self.bot, authviapseudo=authviapseudo)
         if not knownuser:
             return _("I don't know that %s…" % user)
-        ret = _('%s: Your Highlight Level is %i, your Permission Level is %s, and your JID(s) are:' % (knownuser.pseudo, knownuser.hllvl, knownuser.permlvl))
+        ret = _('%s: Your Highlight Level is %i, your Permission Level is %s, and your JID(s) are:' % (knownuser.get_pseudo(), knownuser.hllvl, knownuser.permlvl))
         for jid in knownuser.jids:
             ret += ' %s' % jid.jid
         return ret
 
     @answercmd('show', r'show (?P<user>\S+)')
     def answer_show(self, sender, user=""):
+        authviapseudo = True
         if user == "me":
             user = sender
-        return self.show_one_user(user) if user else self.show_all_users()
+            authviapseudo = False
+        return self.show_one_user(user, authviapseudo) if user else self.show_all_users()
 
 
     @answercmd(r'hllvl (?P<pseudo>\S+) (?P<lvl>\d+)')
@@ -311,6 +331,15 @@ class KnownUsersManager(SyncModule):
         except IntegrityError:
             self.bot.session.rollback()
             return _("%s: DO NOT EVEN *THINK* ABOUT DOING THAT" % sender)
+
+    @answercmd(r'antihl (?P<nickname>\S+)')
+    def answer_hl(self, sender, nickname):
+        senderuser = KnownUser.get(sender, self.bot, authviapseudo=False)
+        if not senderuser:
+            return _("I don't know you, %s…" % sender)
+        senderuser.hl_pseudo = nickname
+        self.bot.session.commit()
+        return _("%s: your highlight-pseudo is now %s" % (sender, senderuser.hl_pseudo))
 
     @defaultcmd
     def answer(self, sender, args):
