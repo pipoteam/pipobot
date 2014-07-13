@@ -275,11 +275,25 @@ class PipoBotManager(object):
                     bot.stop_modules()
             # Interract/twisted mode
             elif self._config.interract:
-                # We import it here so the bot does not 'depend' on twisted
+                # We import it here so the bot does not 'depend' on asyncio
                 # unless you *really* want to use the --interract mode
-                from pipobot.bot_twisted import TwistedBot
-                bot = TwistedBot(test_room.nick, test_room.login,
+                import asyncio
+                from pipobot.bot_asyncio import AsyncioBot
+                bot = AsyncioBot(test_room.nick, test_room.login,
                                  test_room.chan, m[test_room].modules, self._db_session)
+                loop = asyncio.get_event_loop()
+                # TODO add this in the config file
+                port = 4242
+                f = asyncio.start_server(bot.accept_client, host=None, port=port)
+                LOGGER.info("Bot started on port %d" % port)
+                LOGGER.info("Connect to it with `telnet localhost %d`" % port)
+                loop.run_until_complete(f)
+                try:
+                    loop.run_forever()
+                except:
+                    loop.stop()
+
+
             # Console mode
             elif self._config.console:
                 bot = TestBot(test_room.nick, test_room.login,

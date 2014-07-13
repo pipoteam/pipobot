@@ -66,6 +66,6 @@ if __name__ == '__main__':
         package_data={'pipobot': data_files},
         data_files=[('/etc', ['pipobot.conf.yml'])],
         requires=['yaml', 'sqlalchemy'],
-        scripts=['bin/pipobot', 'bin/pipobot-twisted'],
+        scripts=['bin/pipobot', 'bin/pipobot-asyncio'],
         **kwargs
     )

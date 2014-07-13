@@ -1,0 +1,115 @@
+#!/usr/bin/env python
+
+import asyncio
+import logging
+import sys
+
+
+log = logging.getLogger(__name__)
+
+
+class AsyncioClient:
+    """ A client to connect to the bot when stated in --interract mode """
+    def __init__(self, hostname, port, username, jid, role):
+        self.host = hostname
+        self.port = port
+        self.username = username
+        self.jid = jid
+        self.role = role
+        self.bot = None
+
+    @asyncio.coroutine
+    def handle_server(self):
+        """ Connect to the bot, read its message and print them in stdout """
+        loop = asyncio.get_event_loop()
+        log.info("Connecting to %s %d", self.host, self.port)
+        try:
+            client_reader, client_writer = yield from asyncio.open_connection(self.host,
+                                                                              self.port)
+        except OSError as err:
+            log.error("Can't connect to (%s, %s)" % (self.host, self.port))
+            log.error(str(err))
+            loop.stop()
+            return
+
+        self.bot = client_writer
+        log.info("Connected to %s %d", self.host, self.port)
+        try:
+            # Send the "welcome" message with identification of the user
+            msg = "%s;%s;%s\n" % (self.username, self.jid, self.role)
+            client_writer.write(msg.encode())
+
+            sdata = None
+            while sdata != "":
+                # Wait for data sent by the bot
+                done, pending = yield from asyncio.wait([client_reader.readline()])
+                task = done.pop()
+                sdata = task.result().decode().rstrip()
+                print(sdata)
+
+            # send QUIT to disconnect gracefully
+            client_writer.write("QUIT\n".encode())
+        finally:
+            log.info("Disconnecting from %s %d", self.host, self.port)
+            client_writer.close()
+            loop.stop()
+
+    @asyncio.coroutine
+    def handle_stdin(self):
+        """
+        Read from stdin and send to the bot any message entered.
+        Entering an empty message will stop the connection
+        """
+        # connect to stdin
+        loop = asyncio.get_event_loop()
+        stdin = asyncio.StreamReader(loop=loop)
+
+        factory = lambda: asyncio.StreamReaderProtocol(stdin)
+        yield from loop.connect_read_pipe(factory, sys.stdin)
+
+        while True:
+            # Wait for data in stdin
+            data = yield from stdin.readline()
+
+            # If we are connected to the bot, send it
+            if self.bot is not None:
+                self.bot.write(data)
+            else:
+                log.error("Not yet connected to the bot")
+
+
+def main(hostname, port, username, jid, role):
+    client = AsyncioClient(hostname, port, username, jid, role)
+
+    asyncio.Task(client.handle_server())
+    asyncio.Task(client.handle_stdin())
+
+    loop = asyncio.get_event_loop()
+    try:
+        loop.run_forever()
+    except KeyboardInterrupt:
+        print("Quit")
+    finally:
+        loop.stop()
+        loop.close()
+
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument("-u", dest="username", help="username to connect to the bot", default="pipo")
+    parser.add_argument("-j", dest="jid", help="jid to connect to the bot", default="pipo@domain.tld")
+    parser.add_argument("-r", dest="role", help="XMPP role to simulate", default="participant")
+    parser.add_argument("--hostname", dest="hostname", help="hostname of the asyncio server", default="localhost")
+    parser.add_argument("--port", dest="port", help="port of the asyncio server", default=4242)
+    # setup console logging
+    log.setLevel(logging.INFO)
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.INFO)
+    formatter = logging.Formatter("%(asctime)s %(levelname)s " +
+                                  "[%(module)s:%(lineno)d] %(message)s")
+
+    ch.setFormatter(formatter)
+    log.addHandler(ch)
+    args = parser.parse_args()
+    main(args.hostname, args.port, args.username, args.jid, args.role)
