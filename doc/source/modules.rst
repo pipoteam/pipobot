@@ -36,8 +36,8 @@ For more details, see :ref:`sync_module`.
 MultiSyncModule
 ^^^^^^^^^^^^^^^
 
-A *MultiSyncModule* is very similar to a *SyncModule* is very similar to a SyncModule, 
-except that one *MultiSyncModule* can handle several commands in it.
+A *MultiSyncModule* is very similar to a *SyncModule*, except that one *MultiSyncModule*
+can handle several commands in it.
 This is quite useful when commands are very simple, and does not require python code to 
 be handled.
 
