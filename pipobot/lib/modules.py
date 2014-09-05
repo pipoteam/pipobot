@@ -33,7 +33,7 @@ class ModuleException(Exception):
 
 
 class Pasteque(Exception):
-    """ An exception that can be raised by a module to report an error (pepin) """
+    """ An exception that can be raised by a module to report an error (pepin) directly in the MUC"""
     def __init__(self, pepin):
         self.pepin = pepin
 
