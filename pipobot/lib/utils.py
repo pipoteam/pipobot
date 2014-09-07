@@ -2,6 +2,7 @@
 #-*- coding: utf-8 -*-
 
 import codecs
+import configparser
 import random
 import re
 import urllib.request, urllib.parse, urllib.error
@@ -173,3 +174,13 @@ def rd_censored(mod, message):
 
 def rot13(mod, message):
     return codecs.encode(message, "rot13")
+
+
+class ListConfigParser(configparser.RawConfigParser):
+    def get(self, section, option):
+        "Redéfinition du get pour gérer les listes"
+        value = configparser.RawConfigParser.get(self, section, option)
+        if (value[0] == "[") and (value[-1] == "]"):
+            return eval(value)
+        else:
+            return value

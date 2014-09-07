@@ -32,6 +32,11 @@ class ModuleException(Exception):
     pass
 
 
+class Pasteque(Exception):
+    """ An exception that can be raised by a module to report an error (pepin) directly in the MUC"""
+    pass
+
+
 class BotModule(object):
     """ Defines a basic bot module. Will be subclassed by different types
     of modules than will then by subclassed by actual modules """
@@ -89,6 +94,9 @@ class BotModule(object):
                     return getattr(self, "post_hook")(send)
             except AttributeError:
                 return send
+        except Pasteque as pasteque:
+            self.bot.say(_("pepin: %s" % pasteque))
+            logger.info(_("Pasteque from module %s : %s") % (self.__class__, pasteque))
         except:
             self.bot.say(_("Error !"))
             logger.error(_("Error from module %s : %s") % (self.__class__,
