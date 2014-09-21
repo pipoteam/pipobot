@@ -1,10 +1,7 @@
-import builtins
 import unittest
 from pipobot.lib.modules import Help, ListenModule
-from base_test import FakeUser, create_test_bot
+from pipobot.lib.module_test import FakeUser, create_test_bot
 
-
-builtins._ = lambda x: x
 
 class ListenMod(ListenModule):
     def __init__(self, bot):
@@ -25,6 +22,7 @@ class ListenMod2(ListenModule):
     def answer(self, sender, message):
         if sender == "bob":
             return "Answer2"
+
 
 class ListenModuleTest(unittest.TestCase):
     def setUp(self):

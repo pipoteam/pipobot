@@ -1,8 +1,8 @@
 import unittest
 
 from pipobot.lib.modules import SyncModule, Help
+from pipobot.lib.module_test import create_test_bot, FakeUser
 from listen_module_test import ListenMod, ListenMod2
-from base_test import create_test_bot, FakeUser
 
 
 class SyncMod(SyncModule):

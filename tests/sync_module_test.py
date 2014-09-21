@@ -1,10 +1,6 @@
-import builtins
 import unittest
 from pipobot.lib.modules import defaultcmd, SyncModule, Help, answercmd
-from base_test import FakeUser, create_test_bot
-
-
-builtins._ = lambda x: x
+from pipobot.lib.module_test import FakeUser, create_test_bot
 
 
 desc = {"": "A simple module to test",

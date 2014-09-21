@@ -1,7 +1,7 @@
 import time
 import unittest
 from pipobot.lib.modules import Help, AsyncModule
-from base_test import FakeUser, create_test_bot
+from pipobot.lib.module_test import FakeUser, create_test_bot
 
 
 MODULE_DELAY = 3

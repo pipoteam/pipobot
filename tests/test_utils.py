@@ -1,11 +1,8 @@
-import builtins
 import unittest
 
 import pipobot.lib.utils as utils
 
-from base_test import create_test_bot
-
-builtins._ = lambda x: x
+from pipobot.lib.module_test import create_test_bot
 
 
 class TestUtils(unittest.TestCase):
