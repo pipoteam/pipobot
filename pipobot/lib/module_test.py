@@ -13,11 +13,25 @@ from pipobot.lib.bdd import Base
 import builtins
 builtins._ = lambda x: x
 
+
+def create_test_bot(mods):
+    engine = create_engine(
+        'sqlite:///:memory:',
+        connect_args={'check_same_thread': False},
+    )
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    Base.metadata.create_all(engine)
+    return TestBot("pipotest", "login", CHAN, mods, session, queue.Queue())
+
+
 class ModuleTest(unittest.TestCase):
     __usable = False
 
-    def __init__(self, methodName='runTest', bot=None):
+    def __init__(self, methodName='runTest', bot=None, cmds=[]):
         unittest.TestCase.__init__(self, methodName)
+        if bot is None:
+            bot = create_test_bot(cmds)
         self.bot = bot
 
     def bot_answer(self, input_msg, user="test"):
@@ -71,9 +85,3 @@ class FakeUser:
     def leave(self):
         self.bot.users.rm_user(self.name)
 
-def create_test_bot(mods):
-    engine = create_engine('sqlite:///:memory:')
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    Base.metadata.create_all(engine)
-    return TestBot("pipotest", "login", CHAN, mods, session, queue.Queue())
