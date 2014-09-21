@@ -5,7 +5,6 @@ import logging
 import os
 import signal
 import sys
-import unittest
 import errno
 from queue import Queue
 
@@ -17,7 +16,6 @@ from pipobot.lib.bdd import Base
 from pipobot.lib.loader import BotModuleLoader
 from pipobot.translation import setup_i18n
 from pipobot.bot_jabber import BotJabber, XMPPException
-from pipobot.lib.module_test import ModuleTest
 from pipobot.bot_test import TestBot
 
 LOGGER = logging.getLogger('pipobot.manager')
@@ -72,7 +70,6 @@ def console(bot):
     readline.parse_and_bind("tab: complete")
     shell = code.InteractiveConsole(vars)
     shell.interact(banner)
-
 
 
 class PipoBotManager(object):
@@ -194,7 +191,7 @@ class PipoBotManager(object):
         for room in rooms:
             try:
                 bot = BotJabber(room.login, room.passwd, room.resource,
-                                room.chan, room.nick, modules[room].modules,
+                                room.chan, room.nick, modules[room],
                                 self._db_session, self._config.force_ipv4,
                                 room.address, room.port)
             except XMPPException as exc:
@@ -242,7 +239,7 @@ class PipoBotManager(object):
             LOGGER.info("All modules checked, exiting…")
 
         # Test mode : load test room
-        elif self._config.unit_test or self._config.script or \
+        elif self._config.script or \
              self._config.interract or self._config.console:
 
             test_room = self._config.test_room
@@ -252,20 +249,10 @@ class PipoBotManager(object):
             if e :
                 _abort("Unable to load all test modules")
 
-            # Unit test mode : run unittest
-            if self._config.unit_test:
-                bot = TestBot(test_room.nick, test_room.login,
-                              test_room.chan, m[test_room].modules,
-                              self._db_session, output=Queue())
-                suite = unittest.TestSuite()
-                for test in m[test_room].test_mods:
-                    suite.addTests(ModuleTest.parametrize(test, bot=bot))
-                unittest.TextTestRunner(verbosity=2).run(suite)
-                bot.stop_modules()
             # Script mode
-            elif self._config.script:
+            if self._config.script:
                 bot = TestBot(test_room.nick, test_room.login,
-                              test_room.chan, m[test_room].modules,
+                              test_room.chan, m[test_room],
                               self._db_session, output=Queue())
                 for msg in self._config.script.split(";"):
                     print("--> %s" % msg)
@@ -280,7 +267,7 @@ class PipoBotManager(object):
                 import asyncio
                 from pipobot.bot_asyncio import AsyncioBot
                 bot = AsyncioBot(test_room.nick, test_room.login,
-                                 test_room.chan, m[test_room].modules, self._db_session)
+                                 test_room.chan, m[test_room], self._db_session)
                 loop = asyncio.get_event_loop()
                 # TODO add this in the config file
                 port = 4242
@@ -297,7 +284,7 @@ class PipoBotManager(object):
             # Console mode
             elif self._config.console:
                 bot = TestBot(test_room.nick, test_room.login,
-                              test_room.chan, m[test_room].modules, self._db_session)
+                              test_room.chan, m[test_room], self._db_session)
                 console(bot)
 
         # Standard mode

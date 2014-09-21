@@ -35,7 +35,7 @@ class Configuration(object):
 
     __slots__ = ('log_level', 'daemonize', 'only_check', 'pid_file',
                  'rooms', 'logpath', 'xmpp_logpath', 'database', 'lang',
-                 'modules_path', 'modules_conf', 'unit_test', 'script',
+                 'modules_path', 'modules_conf', 'script',
                  'interract', 'console', 'force_ipv4', 'test_room')
 
     # Default values
@@ -47,7 +47,6 @@ class Configuration(object):
         self.daemonize = cmd_options.daemonize
         self.only_check = cmd_options.only_check
         self.pid_file = cmd_options.pid_file
-        self.unit_test = cmd_options.unit_test
         self.script = cmd_options.script
         self.interract = cmd_options.interract
         self.console = cmd_options.console
@@ -280,10 +279,6 @@ def get_configuration():
     parser.add_option("--only-check", action="store_const",
                       dest="only_check", const=True, default=False,
                       help="Check if modules configuration are correct and exit")
-
-    parser.add_option("--unit-test", action="store_const",
-                      dest="unit_test", const=True,
-                      help="Run unit test defined in the config file")
 
     parser.add_option("--script", action="store",
                       dest="script", type="string", default="",
