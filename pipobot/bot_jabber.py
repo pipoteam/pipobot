@@ -27,15 +27,19 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
     def __init__(self, login, passwd, res, chat, name, modules, session, force_ipv4, address=None, port=None):
         sleekxmpp.ClientXMPP.__init__(self, "%s/%s" % (login, res), passwd)
 
-        port = port if port is not None else 5222
-        address = address if address is not None else self.boundjid.host
+        n_port = port if port is not None else 5222
+        # TODO : do an SRV lookup on address or self.boundjid.host
+        n_address = address if address is not None else self.boundjid.host
 
-        address = (address, port)
+        if address is None and port is None :
+            t_address = ()
+        else :
+            t_address = (n_address, n_port)
 
         logger.info("Connecting to %s", chat)
         self.use_ipv6 = not force_ipv4
         # Connecting
-        con = self.connect(address=address, reattempt=False)
+        con = self.connect(address=t_address, reattempt=False)
         if not con:
             logger.error(_("Unable to connect !"))
             raise XMPPException(_("Unable to connect !"))
