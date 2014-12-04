@@ -41,14 +41,12 @@ class KnownUser(Base):
     pseudo = Column(String(250), unique=True)
     hl_pseudo = Column(String(250))
     permlvl = Column(Integer)  # Permissions level 1: none, 2: moderator, 3: super-moderator, 4: admin, 5: super-admin
-    hllvl = Column(Integer)  # HighlightLevel 1: never, 2: sometimes, 3: always
     jids = relationship("KnownUsersJIDs", backref="knownuser")
     chanperms = relationship("PerChanPermissions")
 
-    def __init__(self, pseudo, permlvl=1, hllvl=3):
+    def __init__(self, pseudo, permlvl=1):
         self.pseudo = pseudo
         self.permlvl = permlvl
-        self.hllvl = hllvl
 
     def __str__(self):
         return self.get_pseudo()
@@ -138,8 +136,6 @@ class KnownUsersManager(SyncModule):
         desc += _("\nuser register <args>: register user <pseudo> (defaults: you) with JID(s) <jid(s)> (defaults: your JID)")
         desc += _("\nuser show: prints the whole Knows Users database")
         desc += _("\nuser show <pseudo>: prints informations about <pseudo> (can also be 'me')")
-        desc += _("\nuser hllvl [<pseudo>]: prints the Highlight Level of <pseudo> (defaults: you)")
-        desc += _("\nuser hllvl [<pseudo>] <lvl>: sets the Highlight Level of <pseudo> (defaults: you) to <lvl>")
         desc += _("\nuser permlvl [<pseudo>]: prints the Permission Level of <pseudo> (defaults: you)")
         desc += _("\nuser permlvl [<pseudo>] <lvl>: sets the Permission Level of <pseudo> (defaults: you) to <lvl>")
         desc += _("\nuser nick <pseudo>: sets your pseudo to <pseudo>")
@@ -220,7 +216,7 @@ class KnownUsersManager(SyncModule):
         ret = _('Registered users:')
         users = self.bot.session.query(KnownUser).all()
         for user in users:
-            ret += "\n  %-30s %s %s " % (user.pseudo, user.permlvl, user.hllvl)
+            ret += "\n  %-30s %s " % (user.pseudo, user.permlvl)
             for jid in user.jids:
                 ret += '%s ' % jid.jid
             if user.chanperms:
@@ -231,7 +227,7 @@ class KnownUsersManager(SyncModule):
         knownuser = KnownUser.get(user, self.bot, authviapseudo=authviapseudo)
         if not knownuser:
             return _("I don't know that %s…" % user)
-        ret = _('%s: Your Highlight Level is %i, your Permission Level is %s, and your JID(s) are:' % (knownuser.get_pseudo(), knownuser.hllvl, knownuser.permlvl))
+        ret = _('%s: Your Permission Level is %s, and your JID(s) are:' % (knownuser.get_pseudo(), knownuser.permlvl))
         for jid in knownuser.jids:
             ret += ' %s' % jid.jid
         return ret
@@ -243,33 +239,6 @@ class KnownUsersManager(SyncModule):
             user = sender
             authviapseudo = False
         return self.show_one_user(user, authviapseudo) if user else self.show_all_users()
-
-
-    @answercmd(r'hllvl (?P<pseudo>\S+) (?P<lvl>\d+)')
-    def answer_hllvl(self, sender, pseudo="", lvl=0):
-        if not pseudo:
-            pseudo = sender
-        user = KnownUser.get(pseudo, self.bot, authviapseudo=True)
-        if not user:
-            return _("I don't know you, %s…" % sender)
-        if not lvl:
-            return _('%s: Your Highlight Level is %i' % (user.pseudo, user.hllvl))
-
-        user = KnownUser.get(pseudo, self.bot, authviapseudo=False)
-        if not user:
-            return _("%s: I don't trust you…" % sender)
-
-        senderuser = KnownUser.get(sender, self.bot, authviapseudo=False)
-        if not senderuser:
-            return _("I don't know you, %s…" % sender)
-
-        if not senderuser.has_the_power_on(user, self.bot.chatname):
-            return _("%s: you don't have the permisson to do that." % sender)
-
-        user.hllvl = lvl
-        self.bot.session.commit()
-
-        return _("%s's Highlight Level modified to %i" % (pseudo, lvl))
 
     @answercmd(r'permlvl (?P<pseudo>\S+) (?P<lvl>\d+)')
     def answer_permlvl(self, sender, pseudo="", lvl=0):
