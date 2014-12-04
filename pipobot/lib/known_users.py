@@ -140,6 +140,7 @@ class KnownUsersManager(SyncModule):
         desc += _("\nuser permlvl [<pseudo>] <lvl>: sets the Permission Level of <pseudo> (defaults: you) to <lvl>")
         desc += _("\nuser nick <pseudo>: sets your pseudo to <pseudo>")
         desc += _("\nuser antihl <hl_pseudo>: sets your antihl-pseudo to <hl_pseudo>")
+        desc += _("\nuser del <jid>: deletes <jid>")
         SyncModule.__init__(self,
                 bot,
                 desc=desc,
@@ -164,6 +165,20 @@ class KnownUsersManager(SyncModule):
                     self.logger.error(_('Admin %s is not yet registered !' % admin))
         except KeyError:
             self.logger.error(_('You shall add an admin section in your configuration file'))
+
+    @answercmd('del (?P<jid>.*)')
+    def answer_del(self, sender, jid):
+        senderuser = KnownUser.get(sender, self.bot, authviapseudo=False)
+        if not senderuser:
+            return _("I don't know you, %s" % sender)
+        jid = self.bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == jid).first()
+        if not jid:
+            return _("I don't know this JID...")
+        if not senderuser.has_the_power_on(jid.user, self.bot.chatname):
+            return _("You have no power here, %s the Grey!" % senderuser.get_pseudo())
+        self.bot.session.delete(jid)
+        self.bot.session.commit()
+        return _("%s as been deleted" % jid.jid)
 
     @answercmd('register', r'register (?P<pseudo>\S+)(?P<jids>.*)')
     def answer_register(self, sender, pseudo="", jids=""):
