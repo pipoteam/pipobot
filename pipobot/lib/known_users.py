@@ -141,6 +141,7 @@ class KnownUsersManager(SyncModule):
         desc += _("\nuser nick <pseudo>: sets your pseudo to <pseudo>")
         desc += _("\nuser antihl <hl_pseudo>: sets your antihl-pseudo to <hl_pseudo>")
         desc += _("\nuser del <jid>: deletes <jid>")
+        desc += _("\nuser add: show the connected user you can add")
         SyncModule.__init__(self,
                 bot,
                 desc=desc,
@@ -166,6 +167,11 @@ class KnownUsersManager(SyncModule):
         except KeyError:
             self.logger.error(_('You shall add an admin section in your configuration file'))
 
+    @answercmd('add')
+    def answer_add(self, sender):
+        unknown_users = [u for u in self.bot.occupants.users.itervalues() if KnownUser.get(u.jid, self.bot) is None and u.nickname != self.bot.name]
+        return _("I don't know: " + ', '.join(['%s (%s)' % (u.nickname, u.jid) for u in unknown_users]))
+
     @answercmd('del (?P<jid>.*)')
     def answer_del(self, sender, jid):
         senderuser = KnownUser.get(sender, self.bot, authviapseudo=False)
@@ -182,6 +188,9 @@ class KnownUsersManager(SyncModule):
 
     @answercmd('register', r'register (?P<pseudo>\S+)(?P<jids>.*)')
     def answer_register(self, sender, pseudo="", jids=""):
+        if '@' in pseudo:
+            jids = pseudo + jids
+            pseudo = sender
         if not pseudo:
             pseudo = sender
         if not jids:
