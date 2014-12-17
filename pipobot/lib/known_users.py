@@ -1,11 +1,13 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 import logging
-from sqlalchemy import Column, String, Integer, ForeignKey
-from sqlalchemy.orm import relationship
+
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import relationship
+
 from pipobot.lib.bdd import Base
-from pipobot.lib.modules import SyncModule, defaultcmd, answercmd
+from pipobot.lib.modules import answercmd, defaultcmd, SyncModule
 
 
 def minpermlvl(lvl):
@@ -170,7 +172,9 @@ class KnownUsersManager(SyncModule):
     @answercmd('add')
     def answer_add(self, sender):
         unknown_users = [u for u in self.bot.occupants.users.itervalues() if KnownUser.get(u.jid, self.bot) is None and u.nickname != self.bot.name]
-        return _("I don't know: " + ', '.join(['%s (%s)' % (u.nickname, u.jid) for u in unknown_users]))
+        if unknown_users:
+            return _("I don't know: ") + ', '.join(['%s (%s)' % (u.nickname, u.jid) for u in unknown_users])
+        return _("I know everybody here !")
 
     @answercmd('del (?P<jid>.*)')
     def answer_del(self, sender, jid):
