@@ -1,11 +1,13 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 import logging
-from sqlalchemy import Column, String, Integer, ForeignKey
-from sqlalchemy.orm import relationship
+
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import relationship
+
 from pipobot.lib.bdd import Base
-from pipobot.lib.modules import SyncModule, defaultcmd, answercmd
+from pipobot.lib.modules import answercmd, defaultcmd, SyncModule
 
 
 def minpermlvl(lvl):
@@ -41,14 +43,12 @@ class KnownUser(Base):
     pseudo = Column(String(250), unique=True)
     hl_pseudo = Column(String(250))
     permlvl = Column(Integer)  # Permissions level 1: none, 2: moderator, 3: super-moderator, 4: admin, 5: super-admin
-    hllvl = Column(Integer)  # HighlightLevel 1: never, 2: sometimes, 3: always
     jids = relationship("KnownUsersJIDs", backref="knownuser")
     chanperms = relationship("PerChanPermissions")
 
-    def __init__(self, pseudo, permlvl=1, hllvl=3):
+    def __init__(self, pseudo, permlvl=1):
         self.pseudo = pseudo
         self.permlvl = permlvl
-        self.hllvl = hllvl
 
     def __str__(self):
         return self.get_pseudo()
@@ -138,12 +138,12 @@ class KnownUsersManager(SyncModule):
         desc += _("\nuser register <args>: register user <pseudo> (defaults: you) with JID(s) <jid(s)> (defaults: your JID)")
         desc += _("\nuser show: prints the whole Knows Users database")
         desc += _("\nuser show <pseudo>: prints informations about <pseudo> (can also be 'me')")
-        desc += _("\nuser hllvl [<pseudo>]: prints the Highlight Level of <pseudo> (defaults: you)")
-        desc += _("\nuser hllvl [<pseudo>] <lvl>: sets the Highlight Level of <pseudo> (defaults: you) to <lvl>")
         desc += _("\nuser permlvl [<pseudo>]: prints the Permission Level of <pseudo> (defaults: you)")
         desc += _("\nuser permlvl [<pseudo>] <lvl>: sets the Permission Level of <pseudo> (defaults: you) to <lvl>")
         desc += _("\nuser nick <pseudo>: sets your pseudo to <pseudo>")
         desc += _("\nuser antihl <hl_pseudo>: sets your antihl-pseudo to <hl_pseudo>")
+        desc += _("\nuser del <jid>: deletes <jid>")
+        desc += _("\nuser add: show the connected user you can add")
         SyncModule.__init__(self,
                 bot,
                 desc=desc,
@@ -169,8 +169,32 @@ class KnownUsersManager(SyncModule):
         except KeyError:
             self.logger.error(_('You shall add an admin section in your configuration file'))
 
+    @answercmd('add')
+    def answer_add(self, sender):
+        unknown_users = [u for u in self.bot.occupants.users.values() if KnownUser.get(u.jid, self.bot) is None and u.nickname != self.bot.name]
+        if unknown_users:
+            return _("I don't know: ") + ', '.join(['%s (%s)' % (u.nickname, u.jid) for u in unknown_users])
+        return _("I know everybody here !")
+
+    @answercmd('del (?P<jid>.*)')
+    def answer_del(self, sender, jid):
+        senderuser = KnownUser.get(sender, self.bot, authviapseudo=False)
+        if not senderuser:
+            return _("I don't know you, %s" % sender)
+        jid = self.bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == jid).first()
+        if not jid:
+            return _("I don't know this JID...")
+        if not senderuser.has_the_power_on(jid.user, self.bot.chatname):
+            return _("You have no power here, %s the Grey!" % senderuser.get_pseudo())
+        self.bot.session.delete(jid)
+        self.bot.session.commit()
+        return _("%s as been deleted" % jid.jid)
+
     @answercmd('register', r'register (?P<pseudo>\S+)(?P<jids>.*)')
     def answer_register(self, sender, pseudo="", jids=""):
+        if '@' in pseudo:
+            jids = pseudo + jids
+            pseudo = sender
         if not pseudo:
             pseudo = sender
         if not jids:
@@ -220,7 +244,7 @@ class KnownUsersManager(SyncModule):
         ret = _('Registered users:')
         users = self.bot.session.query(KnownUser).all()
         for user in users:
-            ret += "\n  %-30s %s %s " % (user.pseudo, user.permlvl, user.hllvl)
+            ret += "\n  %-30s %s " % (user.pseudo, user.permlvl)
             for jid in user.jids:
                 ret += '%s ' % jid.jid
             if user.chanperms:
@@ -231,7 +255,7 @@ class KnownUsersManager(SyncModule):
         knownuser = KnownUser.get(user, self.bot, authviapseudo=authviapseudo)
         if not knownuser:
             return _("I don't know that %s…" % user)
-        ret = _('%s: Your Highlight Level is %i, your Permission Level is %s, and your JID(s) are:' % (knownuser.get_pseudo(), knownuser.hllvl, knownuser.permlvl))
+        ret = _('%s: Your Permission Level is %s, and your JID(s) are:' % (knownuser.get_pseudo(), knownuser.permlvl))
         for jid in knownuser.jids:
             ret += ' %s' % jid.jid
         return ret
@@ -243,33 +267,6 @@ class KnownUsersManager(SyncModule):
             user = sender
             authviapseudo = False
         return self.show_one_user(user, authviapseudo) if user else self.show_all_users()
-
-
-    @answercmd(r'hllvl (?P<pseudo>\S+) (?P<lvl>\d+)')
-    def answer_hllvl(self, sender, pseudo="", lvl=0):
-        if not pseudo:
-            pseudo = sender
-        user = KnownUser.get(pseudo, self.bot, authviapseudo=True)
-        if not user:
-            return _("I don't know you, %s…" % sender)
-        if not lvl:
-            return _('%s: Your Highlight Level is %i' % (user.pseudo, user.hllvl))
-
-        user = KnownUser.get(pseudo, self.bot, authviapseudo=False)
-        if not user:
-            return _("%s: I don't trust you…" % sender)
-
-        senderuser = KnownUser.get(sender, self.bot, authviapseudo=False)
-        if not senderuser:
-            return _("I don't know you, %s…" % sender)
-
-        if not senderuser.has_the_power_on(user, self.bot.chatname):
-            return _("%s: you don't have the permisson to do that." % sender)
-
-        user.hllvl = lvl
-        self.bot.session.commit()
-
-        return _("%s's Highlight Level modified to %i" % (pseudo, lvl))
 
     @answercmd(r'permlvl (?P<pseudo>\S+) (?P<lvl>\d+)')
     def answer_permlvl(self, sender, pseudo="", lvl=0):
