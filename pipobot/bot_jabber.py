@@ -24,7 +24,7 @@ _muc_xml = "{http://jabber.org/protocol/muc# user}status"
 class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
     """The implementation of a bot for jabber MUC"""
 
-    def __init__(self, login, passwd, res, chat, name, modules, session, force_ipv4, address=None, port=None):
+    def __init__(self, login, passwd, res, chat, name, modules, session, force_ipv4, address=None, port=None, chatpasswd=''):
         sleekxmpp.ClientXMPP.__init__(self, "%s/%s" % (login, res), passwd)
 
         n_port = port if port is not None else 5222
@@ -54,7 +54,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
         self.add_event_handler("groupchat_presence", self.presence_handler)
         self.add_event_handler("failed_auth", self.failed_auth)
 
-        PipoBot.__init__(self, name, login, chat, modules, session)
+        PipoBot.__init__(self, name, login, chat, chatpasswd, modules, session)
 
         self.process(threaded=True)
 
@@ -64,7 +64,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
     def connect_muc(self, event):
         self.send_presence()
         muc = self.plugin["xep_0045"]
-        muc.joinMUC(self.chatname, self.name)
+        muc.joinMUC(self.chatname, self.name, password=self.chatpasswd)
         hello_msg = _("Hello everyone !")
         self.send_message(mto=self.chatname, mbody=hello_msg, mtype="groupchat")
 

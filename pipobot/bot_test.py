@@ -22,7 +22,7 @@ class ForgedMsg(dict):
 
 class TestBot(PipoBot):
     def __init__(self, name, login, chatname, modules, session):
-        PipoBot.__init__(self, name, login, chatname, modules, session)
+        PipoBot.__init__(self, name, login, chatname, None, modules, session)
         self.occupants.add_user(name, login, "moderator")
 
         logger.info("Starting console bot in fake room %s" % self.chatname)
