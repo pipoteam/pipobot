@@ -59,10 +59,11 @@ class Modules(object):
 
 
 class PipoBot:
-    def __init__(self, name, login, chatname, modules, session):
+    def __init__(self, name, login, chatname, chatpasswd, modules, session):
         self.name = name
         self.login = login
         self.chatname = chatname
+        self.chatpasswd = chatpasswd
         self.session = session
 
         self.mute = False
