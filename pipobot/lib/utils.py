@@ -9,7 +9,6 @@ import urllib.request, urllib.parse, urllib.error
 import html.entities
 from xml.etree import cElementTree as ET
 from bs4 import BeautifulSoup, SoupStrainer
-from html.parser import HTMLParseError
 
 ##
 # Removes HTML or XML character references and entities from a text string.
@@ -114,7 +113,7 @@ def check_url(url, geturl=False):
                                          parse_only=SoupStrainer('title'))
             try:
                 title = xhtml2text(SoupList.title.text)
-            except (AttributeError, HTMLParseError):
+            except AttributeError:
                 title = "Pas de titre"
             if geturl:
                 send.append("%s : [Lien] Titre : %s" %
