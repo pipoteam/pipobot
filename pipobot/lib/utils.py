@@ -95,7 +95,7 @@ def url_to_soup(url):
     content = page.read()
     page.close()
 
-    return BeautifulSoup(content)
+    return BeautifulSoup(content, "lxml")
 
 
 def check_url(url, geturl=False):
@@ -107,9 +107,11 @@ def check_url(url, geturl=False):
             html = o.read(1000000)
             try:
                 SoupList = BeautifulSoup(unescape(html.decode("utf-8")),
+                                         "lxml",
                                          parse_only=SoupStrainer('title'))
             except UnicodeDecodeError:
                 SoupList = BeautifulSoup(unescape(html.decode("latin1", "ignore")),
+                                         "lxml",
                                          parse_only=SoupStrainer('title'))
             try:
                 title = xhtml2text(SoupList.title.text)
