@@ -80,6 +80,7 @@ class TestBot(PipoBot, BaseXMPP):
     def say(self, *args, **kwargs):
         """The method to call to make the bot sending messages"""
         #In test mode, say does nothing !
+        self.output.put(args[0])
         return args[0]
 
     def say_xhtml(self, *args, **kwargs):
