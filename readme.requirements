@@ -1,5 +1,5 @@
 global:
-    xmpppy
+    sleekxmpp
     python2-yaml
 python-beautifulsoup:
     bashfr, wiki, chuck, bashorg, bideetmusique, lyrics, mpd, url, exa, tv, vdm

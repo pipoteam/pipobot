@@ -1,0 +1,7 @@
+/var/log/pipobot/pipobot.log {
+	daily
+	missingok
+	rotate 7
+	compress
+	create 644 pipobot pipobot
+}
