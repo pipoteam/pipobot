@@ -2,6 +2,7 @@
 
 import fcntl
 import logging
+import logging.handlers
 import os
 import signal
 import sys
@@ -99,7 +100,7 @@ class PipoBotManager(object):
             # filter to select sleekxmpp logs
             sleek_filter = logging.Filter("sleekxmpp")
             try:
-                sleek_handler = logging.FileHandler(self._config.xmpp_logpath)
+                sleek_handler = logging.handlers.WatchedFileHandler(self._config.xmpp_logpath)
                 sleek_handler.addFilter(sleek_filter)
                 root_logger.addHandler(sleek_handler)
             except IOError as err:
@@ -117,7 +118,7 @@ class PipoBotManager(object):
         root_logger.addHandler(console_handler)
 
         try:
-            file_handler = logging.FileHandler(self._config.logpath)
+            file_handler = logging.handlers.WatchedFileHandler(self._config.logpath)
         except IOError as err:
             _abort("Unable to open the log file ‘%s’: %s",
                    self._config.logpath, err.strerror)
