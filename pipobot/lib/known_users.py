@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import relationship
 
 from pipobot.lib.bdd import Base
-from pipobot.lib.modules import answercmd, defaultcmd, SyncModule
+from pipobot.lib.modules import Pasteque, SyncModule, answercmd, defaultcmd
 
 
 def minpermlvl(lvl):
@@ -80,7 +80,9 @@ class KnownUser(Base):
         return False
 
     @staticmethod
-    def get(pseudo, bot, authviapseudo=False):
+    def get(pseudo, bot, authviapseudo=False, avoid_bot=True):
+        if avoid_bot and pseudo == bot.name:
+            raise Pasteque(_("Hey, that's me ! I'm not an user, I'm the bot !"))
         if '@' in pseudo:
             usersjid = bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == pseudo).first()
             if usersjid:
