@@ -102,8 +102,11 @@ def check_url(url, geturl=False):
     send = []
     try:
         o = urllib.request.urlopen(url)
+        ctype = o.info().get("Content-Type")
+        clength = o.info().get("Content-Length")
         ctype, clength = o.info().get("Content-Type"), o.info().get("Content-Length")
-        if o.headers["Content-type"].partition(";")[0] == "text/html":
+        if o.info().gettype() == "text/html":
+            title = 'Pas de titre'
             html = o.read(1000000)
             try:
                 SoupList = BeautifulSoup(unescape(html.decode("utf-8")),
@@ -122,8 +125,10 @@ def check_url(url, geturl=False):
                             (o.geturl(), " ".join(title.split())))
             else:
                 send.append("[Lien] Titre : %s" % " ".join(title.split()))
-        else:
+        elif clength:
             send.append("[Lien] Type: %s, Taille : %s octets" % (ctype, clength))
+        else:
+            send.append("[Lien] Type: %s" % ctype)
         o.close()
     except urllib.error.HTTPError as error:
         if error.code == 401:
@@ -172,6 +177,7 @@ def rd_censored(mod, message):
         else:
             ret += "*" if random.randint(0, 5) > 4 else c
     return ret
+
 
 def rot13(mod, message):
     return codecs.encode(message, "rot13")
