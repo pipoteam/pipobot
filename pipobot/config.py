@@ -36,7 +36,7 @@ class Configuration(object):
     __slots__ = ('log_level', 'daemonize', 'only_check', 'pid_file',
                  'rooms', 'logpath', 'xmpp_logpath', 'database', 'lang',
                  'modules_path', 'modules_conf', 'unit_test', 'script',
-                 'interract', 'force_ipv4', 'test_room')
+                 'interract', 'force_ipv4', 'test_room', 'info_modules')
 
     # Default values
     DEFAULT_CONF_FILE = "/etc/pipobot.conf.yml"
@@ -49,6 +49,7 @@ class Configuration(object):
         self.pid_file = cmd_options.pid_file
         self.unit_test = cmd_options.unit_test
         self.script = cmd_options.script
+        self.info_modules = cmd_options.info_modules
         self.interract = cmd_options.interract
         self.rooms = []
 
@@ -287,6 +288,10 @@ def get_configuration():
     parser.add_option("--script", action="store",
                       dest="script", type="string", default="",
                       help="Run unit test defined in the config file")
+
+    parser.add_option("--info-modules", action="store",
+                      dest="info_modules", type="string", default="",
+                      help="Shows descriptions of available modules")
 
     parser.add_option("--interract", action="store_const",
                       dest="interract", const=True,

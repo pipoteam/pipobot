@@ -193,7 +193,7 @@ class PipoBotManager(object):
 
         # Test mode : load test room
         elif self._config.unit_test or self._config.script or \
-             self._config.interract :
+             self._config.interract or self._config.info_modules:
 
             test_room = self._config.test_room
             if test_room is None :
@@ -217,6 +217,13 @@ class PipoBotManager(object):
                 for msg in self._config.script.split(";"):
                     print "--> %s" % msg
                     print "<== %s" % bot.create_msg("bob", msg)
+            # Module info mode
+            elif self._config.info_modules:
+                bot = TestBot(test_room.nick, test_room.login,
+                              test_room.chan, m[test_room].modules, self._db_session)
+                from info_modules import info_modules
+                info_modules(bot, self._config.modules_path)
+
             # Interract/twisted mode
             elif self._config.interract:
                 # We import it here so the bot does not 'depend' on twisted
