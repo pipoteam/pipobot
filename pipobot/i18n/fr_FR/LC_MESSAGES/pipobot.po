@@ -52,7 +52,7 @@ msgstr "Suppression des notifications pour la commande %s"
 #: pipobot/lib/abstract_modules.py:90
 #, python-format
 msgid "Enabling notifications for command %s"
-msgstr "Actication des notifications pour la commande %s"
+msgstr "Activation des notifications pour la commande %s"
 
 #: pipobot/lib/abstract_modules.py:99
 msgid "Not implemented"
