@@ -2,6 +2,8 @@ Pipobot
 =======
 Pipobot is a modular bot for jabber MUCs.
 
+Its documentation hosted on [Read the Docs](https://pipobot.readthedocs.org/en/latest/)
+
 Quickstart
 ==========
 
