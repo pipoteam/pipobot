@@ -9,6 +9,7 @@ import re
 import threading
 import time
 import traceback
+
 logger = logging.getLogger('pipobot.lib.modules')
 
 
@@ -288,6 +289,9 @@ class AsyncModule(BotModule, threading.Thread):
             time.sleep(self.delay)
             try:
                 self.action()
+            except Pasteque as pasteque:
+                self.bot.say(_("pepin: %s" % pasteque))
+                logger.info(_("Pasteque from module %s : %s") % (self.__class__, pasteque))
             except:
                logger.error(_("Error from module %s : %s") % (self.__class__,
                                                                traceback.format_exc()))
