@@ -2,12 +2,11 @@
 # -*- coding: UTF-8 -*-
 import logging
 
+from pipobot.lib.bdd import Base
+from pipobot.lib.modules import Pasteque, SyncModule, answercmd, defaultcmd
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import relationship
-
-from pipobot.lib.bdd import Base
-from pipobot.lib.modules import Pasteque, SyncModule, answercmd, defaultcmd
 
 
 def minpermlvl(lvl):
@@ -236,8 +235,9 @@ class KnownUsersManager(SyncModule):
                     self.bot.session.delete(targetuser)
                     self.bot.session.commit()
                 return ret
-            j = KnownUsersJIDs(jid, targetuser.kuid)
-            self.bot.session.add(j)
+            if jid:
+                j = KnownUsersJIDs(jid, targetuser.kuid)
+                self.bot.session.add(j)
         self.bot.session.commit()
 
         return _("pseudo %s is now associated to jid(s) %s" % (pseudo, jids))
