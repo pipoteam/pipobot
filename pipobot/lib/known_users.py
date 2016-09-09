@@ -257,7 +257,7 @@ class KnownUsersManager(SyncModule):
         knownuser = KnownUser.get(user, self.bot, authviapseudo=authviapseudo)
         if not knownuser:
             return _("I don't know that %s…" % user)
-        ret = knownuser.get_pseudo()
+        ret = knownuser.get_pseudo(hl=True)
         if knownuser.hl_pseudo is not None:
             ret += ' (%s)' % knownuser.hl_pseudo
         ret += _(': Your Permission Level is %s, and your JID(s) are:' % knownuser.permlvl)
