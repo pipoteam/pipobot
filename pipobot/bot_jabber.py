@@ -3,10 +3,10 @@
 """This file contains the class 'BotJabber' which is a bot for jabber MUC"""
 
 import logging
-import sleekxmpp
 import threading
 import time
 
+import sleekxmpp
 from pipobot.bot import PipoBot
 
 logger = logging.getLogger('pipobot.bot_jabber')
@@ -39,8 +39,11 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
         logger.info("Connecting to %s", chat)
         self.use_ipv6 = not force_ipv4
         # Connecting
-        con = self.connect(address=t_address, reattempt=False)
-        if not con:
+        for _ in range(10):
+            con = self.connect(address=t_address, reattempt=False)
+            if con:
+                break
+        else:
             logger.error(_("Unable to connect !"))
             raise XMPPException(_("Unable to connect !"))
 
