@@ -146,10 +146,10 @@ class BotModuleLoader(object):
             self._module_cache[name] = bot_modules
 
         modules.append(RecordUsers)
-        modules.append(Help)
         KnownUsersManager._settings = {}
         if "user" in self._module_settings:
             KnownUsersManager._settings = self._module_settings["user"]
 
         modules.append(KnownUsersManager)
+        modules.append(Help)
         return error, modules_tpl(modules, test_modules)
