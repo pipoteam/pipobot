@@ -183,8 +183,13 @@ class Configuration(object):
                    conf_file)
 
         for conf_room in conf_rooms:
-            kwargs = {}
-            for param in ['chan', 'login', 'passwd', 'resource', 'nick']:
+            protocol = conf_room.get('protocol', 'xmpp')
+            kwargs = {'protocol': protocol}
+            required_params = {'xmpp': ['resource', 'nick'],
+                               'mattermost': ['address', 'default_channel', 'default_team'],
+                               'matrix': ['address', 'chan'],
+                               }
+            for param in ['login', 'passwd'] + required_params[protocol]:
                 value = conf_room.get(param, "")
                 if not value or not isinstance(value, str):
                     if "chan" in kwargs:
@@ -236,9 +241,11 @@ class Configuration(object):
 
 
 class Room(object):
-    __slots__ = ('chan', 'login', 'passwd', 'resource', 'nick', 'modules', 'address', 'port')
+    __slots__ = ('chan', 'login', 'passwd', 'resource', 'nick', 'modules', 'address', 'port', 'protocol',
+                 'default_team', 'default_channel')
 
-    def __init__(self, chan, login, passwd, resource, nick, modules, address=None, port=None):
+    def __init__(self, login, passwd, modules, resource=None, nick=None, chan=None, address=None, port=None,
+                 default_team='', default_channel='', protocol='xmpp', ):
         self.chan = chan
         self.login = login
         self.passwd = passwd
@@ -247,6 +254,9 @@ class Room(object):
         self.modules = modules
         self.address = address
         self.port = port
+        self.protocol = protocol
+        self.default_team = default_team
+        self.default_channel = default_channel
 
 
 def get_configuration():

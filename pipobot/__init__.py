@@ -16,6 +16,7 @@ from pipobot.lib.bdd import Base
 from pipobot.lib.loader import BotModuleLoader
 from pipobot.translation import setup_i18n
 from pipobot.bot_jabber import BotJabber, XMPPException
+from pipobot.bot_mattermost import BotMattermost, MattermostException
 from pipobot.bot_test import TestBot
 
 LOGGER = logging.getLogger('pipobot.manager')
@@ -175,7 +176,7 @@ class PipoBotManager(object):
             getattr(sys, desc).close()
             setattr(sys, desc, null)
 
-    def _jabber_bot(self, rooms, modules):
+    def _bot(self, rooms, modules):
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
         signal.signal(signal.SIGQUIT, self._signal_handler)
@@ -189,18 +190,34 @@ class PipoBotManager(object):
         bots = []
 
         for room in rooms:
-            try:
-                bot = BotJabber(room.login, room.passwd, room.resource,
-                                room.chan, room.nick, modules[room],
-                                self._db_session, self._config.force_ipv4,
-                                room.address, room.port)
-            except XMPPException as exc:
-                LOGGER.error("Unable to join room '%s': %s", room.chan,
-                             exc)
-                continue
-
+            LOGGER.info("joining room %s on %s", room.chan, room.protocol)
+            if room.protocol == 'xmpp':
+                try:
+                    bot = BotJabber(room.login, room.passwd, room.resource,
+                                    room.chan, room.nick, modules[room],
+                                    self._db_session, self._config.force_ipv4,
+                                    room.address, room.port)
+                except XMPPException as exc:
+                    LOGGER.error("Unable to join room '%s': %s", room.chan, exc)
+                    continue
+            elif room.protocol == 'mattermost':
+                try:
+                    bot = BotMattermost(login=room.login, passwd=room.passwd, modules=modules[room],
+                                        session=self._db_session, address=room.address, default_team=room.default_team,
+                                        default_channel=room.default_channel)
+                except MattermostException as exc:
+                    LOGGER.error("Unable to join mattermost '%s': %s", room.address, exc)
+                    continue
+            elif room.protocol == 'matrix':
+                try:
+                    # Avoid importing matrix_client lib if not necessary
+                    from pipobot.bot_matrix import BotMatrix  # isort:skip
+                    bot = BotMatrix(login=room.login, passwd=room.passwd, chan=room.chan, modules=modules[room],
+                                     session=self._db_session, address=room.address)
+                except Exception as exc:
+                    LOGGER.error("Unable to join matrix '%s': %s", room.chan, exc)
+                    continue
             bots.append(bot)
-
 
         while self.is_running:
             signal.pause()
@@ -294,7 +311,7 @@ class PipoBotManager(object):
             if e :
                 _abort("Unable to load all modules")
 
-            self._jabber_bot(rooms, m)
+            self._bot(rooms, m)
 
         LOGGER.debug("Exiting…")
         logging.shutdown()
