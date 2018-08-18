@@ -48,7 +48,7 @@ class ModuleTest(unittest.TestCase):
             i += 1
             regex = expected[i]
 
-        if i == len(expected):
+        if i == len(expected) - 1:
             raise AssertionError(_("No regexp from %s matches %s") % (expected_re, bot_rep))
 
 def string_gen(size):

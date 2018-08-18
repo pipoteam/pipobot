@@ -69,7 +69,7 @@ class TestUtils(unittest.TestCase):
     def test_check_url(self):
         url = "http://httpbin.org/"
         ret = utils.check_url(url)
-        self.assertEqual(ret, ['[Lien] Titre : httpbin(1): HTTP Client Testing Service'])
+        self.assertEqual(ret, ['[Lien] Titre : httpbin.org'])
 
         url = "http://httpbin.org/gzip"
         ret = utils.check_url(url)[0]
@@ -100,7 +100,7 @@ class TestUtils(unittest.TestCase):
 
         url = "http://httpbin.org"
         ret = utils.check_url(url, True)
-        self.assertEqual(ret, ['%s : [Lien] Titre : httpbin(1): HTTP Client Testing Service' % url])
+        self.assertEqual(ret, ['%s : [Lien] Titre : httpbin.org' % url])
 
     def test_color(self):
         ret = utils.color("pipo", "cyan")

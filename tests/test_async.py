@@ -4,7 +4,7 @@ from pipobot.lib.modules import Help, AsyncModule
 from pipobot.lib.module_test import FakeUser, create_test_bot
 
 
-MODULE_DELAY = 3
+MODULE_DELAY = 0.1
 
 class AsyncMod(AsyncModule):
     def __init__(self, bot):
@@ -23,8 +23,10 @@ class AsyncModuleTest(unittest.TestCase):
     def test_async(self):
         t = time.time()
         result = self.bot.output.get()
-        self.assertEquals(int(result - t), MODULE_DELAY)
+        diff = round(result - t, 1)
+        self.assertEquals(diff, MODULE_DELAY)
 
         t = time.time()
         result = self.bot.output.get()
-        self.assertEquals(int(result - t), MODULE_DELAY)
+        diff = round(result - t, 1)
+        self.assertEquals(diff, MODULE_DELAY)
