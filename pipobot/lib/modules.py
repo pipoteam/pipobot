@@ -115,7 +115,7 @@ class SyncModule(BotModule):
     """ Defines a bot module that will answer/execute an action
     after a command. This is the most common case """
     __usable = False
-    shortname = "sync"
+    shortname = "synchronous"
 
     def __init__(self, bot, desc, name, pm_allowed=True, lock_time=1):
         BotModule.__init__(self, bot, desc)
@@ -266,7 +266,7 @@ class AsyncModule(BotModule, threading.Thread):
     daemon thread. Typically for waiting for asynchronous event
     such as mail, etc... """
     __usable = False
-    shortname = "async"
+    shortname = "asynchronous"
 
     def __init__(self, bot, name, desc, delay=0):
         threading.Thread.__init__(self)
@@ -381,7 +381,7 @@ class Help(SyncModule):
         multi_lst = []
         for cmd in self.bot.multisync:
             multi_lst.extend(list(cmd.names.keys()))
-        sync_lst = sorted(mod.name for mod in self.bot.sync)
+        sync_lst = sorted(mod.name for mod in self.bot.synchronous)
         listen_lst = sorted(mod.name for mod in self.bot.listen)
         pres_lst = sorted(mod.name for mod in self.bot.presence)
 

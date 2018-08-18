@@ -33,7 +33,7 @@ class TestBot(PipoBot, BaseXMPP):
         self.session = session
 
         # Since we are in test mode, we remove time constraints
-        for module in self.sync:
+        for module in self.synchronous:
             if hasattr(module, "lock_name"):
                 del module.lock_name
 

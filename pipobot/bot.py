@@ -22,7 +22,7 @@ class Modules(object):
             logger.error(msg)
             return
         for klass in base_class:
-            if isinstance(mod, klass):
+            if mod.shortname == klass.shortname:
                 if klass is AsyncModule:
                     mod.start()
                 getattr(self, klass.shortname).append(mod)
@@ -39,12 +39,12 @@ class Modules(object):
 
     def stop(self):
         """ Stop all async modules registered """
-        for module in self.async:
+        for module in self.asynchronous:
             module.stop()
 
     def sync_answer(self, msg):
         """ Try to find a SyncModule, or a MultiSyncModule that answers the `msg` """
-        for module in self.sync + self.multisync:
+        for module in self.synchronous + self.multisync:
             ret = module.do_answer(msg)
             if ret is not None:
                 return ret
@@ -78,8 +78,8 @@ class PipoBot:
 
     def __getattr__(self, name):
         """ Proxy to have access to modules with :
-            - self.sync
-            - self.async
+            - self.synchronous
+            - self.asynchronous
             - self.presence
             …
         """
