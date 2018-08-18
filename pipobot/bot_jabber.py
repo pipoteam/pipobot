@@ -45,6 +45,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
             raise XMPPException(_("Unable to connect !"))
 
         self.registerPlugin("xep_0045")
+        self.registerPlugin("xep_0071")
 
         # When the session start (bot connected) the connect_muc method will be called
         self.add_event_handler("session_start", self.connect_muc)
@@ -135,8 +136,6 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
             if "xhtml" in mess:
                 mess_xhtml = mess["xhtml"]
                 mess_xhtml = "<p>%s</p>" % mess_xhtml
-                if type(mess_xhtml) is str:
-                    mess_xhtml = mess_xhtml
                 msg["html"]["body"] = mess_xhtml
         else:
             msg = self.forge_message(mess, priv=priv, in_reply_to=in_reply_to)
