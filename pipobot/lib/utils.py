@@ -84,12 +84,6 @@ def unmute(to_unmute, msg, bot):
     change_status(to_unmute, msg, bot, "participant")
 
 
-class AppURLopener(urllib.request.FancyURLopener):
-    version = ("Mozilla/5.0 (X11; U; Linux; fr-fr) AppleWebKit/531+"
-               "(KHTML, like Gecko) Safari/531.2+ Midori/0.2")
-urllib.request._urlopener = AppURLopener()
-
-
 def url_to_soup(url):
     page = urllib.request.urlopen(url)
     content = page.read()
@@ -98,12 +92,19 @@ def url_to_soup(url):
     return BeautifulSoup(content, "lxml")
 
 
+USER_AGENT = ("Mozilla/5.0 (X11; U; Linux; fr-fr) AppleWebKit/531+"
+              "(KHTML, like Gecko) Safari/531.2+ Midori/0.2")
+
+
 def check_url(url, geturl=False):
     send = []
     try:
-        o = urllib.request.urlopen(url)
-        ctype, clength = o.info().get("Content-Type"), o.info().get("Content-Length")
-        if o.headers["Content-type"].partition(";")[0] == "text/html":
+        rq = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        o = urllib.request.urlopen(rq)
+        ctype = o.info().get_content_type()
+        clength = o.info().get("Content-Length")
+        if ctype == "text/html":
+            title = 'Pas de titre'
             html = o.read(1000000)
             try:
                 SoupList = BeautifulSoup(unescape(html.decode("utf-8")),
@@ -122,8 +123,10 @@ def check_url(url, geturl=False):
                             (o.geturl(), " ".join(title.split())))
             else:
                 send.append("[Lien] Titre : %s" % " ".join(title.split()))
-        else:
+        elif clength:
             send.append("[Lien] Type: %s, Taille : %s octets" % (ctype, clength))
+        else:
+            send.append("[Lien] Type: %s" % ctype)
         o.close()
     except urllib.error.HTTPError as error:
         if error.code == 401:
