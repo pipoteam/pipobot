@@ -54,10 +54,14 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
         self.add_event_handler("message", self.message_handler)
         self.add_event_handler("groupchat_presence", self.presence_handler)
         self.add_event_handler("failed_auth", self.failed_auth)
+        self.add_event_handler("ssl_invalid_cert", self.ssl_invalid_cert)
 
         PipoBot.__init__(self, name, login, chat, modules, session)
 
         self.process(threaded=True)
+
+    def ssl_invalid_cert(self, event):
+        logger.warning("Invalid SSL certificate (%r)", event)
 
     def failed_auth(self, event):
         logger.error(_("Unable to authenticate !"))
