@@ -14,7 +14,7 @@ makedepends=('python' 'git')
 backup=('etc/pipobot.conf.yml'
         'etc/conf.d/pipobot')
 install="$pkgname.install"
-source=("${_projectname}::git+https://github.com/pipoteam/pipobot")
+source=("${_projectname}::git+https://github.com/pipoteam/pipobot#branch=python3")
 md5sums=('SKIP')
 
 pkgver () {
