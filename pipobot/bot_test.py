@@ -4,6 +4,7 @@
 
 import logging
 from pipobot.bot import PipoBot
+from sleekxmpp.basexmpp import BaseXMPP
 
 logger = logging.getLogger('pipobot.bot_jabber')
 
@@ -20,24 +21,26 @@ class ForgedMsg(dict):
         self["body"] = body
 
 
-class TestBot(PipoBot):
-    def __init__(self, name, login, chatname, modules, session):
+class TestBot(PipoBot, BaseXMPP):
+    def __init__(self, name, login, chatname, modules, session, output=None):
         PipoBot.__init__(self, name, login, chatname, modules, session)
+        BaseXMPP.__init__(self, "uselesjid")
         self.occupants.add_user(name, login, "moderator")
+        self.output = output
 
         logger.info("Starting console bot in fake room %s" % self.chatname)
 
         self.session = session
 
         # Since we are in test mode, we remove time constraints
-        for module in self.sync:
+        for module in self.synchronous:
             if hasattr(module, "lock_name"):
                 del module.lock_name
 
     def create_msg(self, frm, content):
         """ Creates a fake message and returns the bot response """
         msg = ForgedMsg(frm, content)
-        return self.message(msg)
+        return self.message_handler(msg)
 
     def decode_module_message(self, msg):
         """ Extracts the 'text' value of a message return by BotJabber.answer """
@@ -45,7 +48,7 @@ class TestBot(PipoBot):
             if type(msg) is dict:
                 res = ""
                 if "users" in msg:
-                    for usr, message in msg["users"].iteritems():
+                    for usr, message in msg["users"].items():
                         if "nopriv" in message and message["nopriv"]:
                             res += "\n%s" % (self.decode_module_message(message))
                         else:
@@ -58,11 +61,9 @@ class TestBot(PipoBot):
                 res = msg[0]
             elif type(msg) is str:
                 res = msg
-            elif type(msg) is unicode:
-                res = msg.decode("utf-8")
             return res.strip()
 
-    def message(self, mess):
+    def answer(self, mess):
         """Method called when the bot receives a message"""
         #We ignore messages in some cases :
         #   - it has a subject (change of room topic for instance)
@@ -73,11 +74,13 @@ class TestBot(PipoBot):
             result = "\n".join(map(self.decode_module_message, ret))
         else:
             result = self.decode_module_message(ret)
+        self.output.put(result)
         return result
 
     def say(self, *args, **kwargs):
         """The method to call to make the bot sending messages"""
         #In test mode, say does nothing !
+        self.output.put(args[0])
         return args[0]
 
     def say_xhtml(self, *args, **kwargs):
@@ -87,3 +90,7 @@ class TestBot(PipoBot):
 
     def kill(self):
         self.stop_modules()
+
+    def send(self, data, mask=None, timeout=None, now=False):
+        if self.output is not None:
+            self.output.put(data)

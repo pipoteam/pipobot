@@ -1,11 +1,11 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from pipobot.lib.modules import AsyncModule, SyncModule, answercmd
 
 
-class AppURLopener(urllib.FancyURLopener):
+class AppURLopener(urllib.request.FancyURLopener):
     """ Redefines the user-agent used to retrieve HTML content """
     def prompt_user_passwd(self, host, realm):
         return ('', '')
@@ -41,23 +41,23 @@ class FortuneModule(SyncModule):
         page = self.url_random
         return self.retrieve_data(page)
 
-    def retrieve_data(self, url):
+    def retrieve_data(self, url, encoding="utf-8"):
         """ Download the content of the url and try to extract data from it"""
-        try:
-            opener = AppURLopener()
-            page = opener.open(url)
+        opener = AppURLopener()
+        page = opener.open(url)
+        code = page.getcode()
+        if code == 401:
+            return "Je ne peux pas m'authentifier sur %s :'(" % url
+        elif code == 404:
+            return "%s n'existe pas !" % url
+        elif code == 403:
+            return "Il est interdit d'accéder à %s !" % url
+        elif code == 200:
             content = page.read()
             page.close()
-            return self.extract_data(content)
-        except IOError as error:
-            if error[1] == 401:
-                return u"Je ne peux pas m'authentifier sur %s :'(" % url
-            elif error[1] == 404:
-                return u"%s n'existe pas !" % url
-            elif error[1] == 403:
-                return u"Il est interdit d'accéder à %s !" % url
-            else:
-                return u"Erreur %s sur %s" % (error[1], url)
+            return self.extract_data(content.decode(encoding))
+        else:
+            return "Erreur %s sur %s" % (code, url)
 
     def extract_data(self, html_content):
         """ This *MUST* be overriden : it is the function that will extract

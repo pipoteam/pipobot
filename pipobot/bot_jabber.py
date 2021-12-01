@@ -48,6 +48,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
             raise XMPPException(_("Unable to connect !"))
 
         self.registerPlugin("xep_0045")
+        self.registerPlugin("xep_0071")
 
         # When the session start (bot connected) the connect_muc method will be called
         self.add_event_handler("session_start", self.connect_muc)
@@ -56,10 +57,14 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
         self.add_event_handler("message", self.message_handler)
         self.add_event_handler("groupchat_presence", self.presence_handler)
         self.add_event_handler("failed_auth", self.failed_auth)
+        self.add_event_handler("ssl_invalid_cert", self.ssl_invalid_cert)
 
         PipoBot.__init__(self, name, login, chat, modules, session)
 
         self.process(threaded=True)
+
+    def ssl_invalid_cert(self, event):
+        logger.warning("Invalid SSL certificate (%r)", event)
 
     def failed_auth(self, event):
         logger.error(_("Unable to authenticate !"))
@@ -82,8 +87,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
             or mess["body"] == "":
             return
 
-        thread = threading.Thread(target=self.answer, args=(mess,))
-        thread.start()
+        super(BotJabber, self).message_handler(mess)
 
     def answer(self, mess):
         result = self.module_answer(mess)
@@ -97,7 +101,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
         """Method used to kill the bot"""
 
         # The bot says goodbye
-        self.say(_(u"I’ve been asked to leave you"))
+        self.say(_("I’ve been asked to leave you"))
         # The bot leaves the room
         self.disconnect(wait=True)
         self.stop_modules()
@@ -139,8 +143,6 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
             if "xhtml" in mess:
                 mess_xhtml = mess["xhtml"]
                 mess_xhtml = "<p>%s</p>" % mess_xhtml
-                if type(mess_xhtml) is unicode:
-                    mess_xhtml = mess_xhtml.encode("utf-8")
                 msg["html"]["body"] = mess_xhtml
         else:
             msg = self.forge_message(mess, priv=priv, in_reply_to=in_reply_to)
@@ -150,7 +152,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
         """The method to call to make the bot sending messages"""
         # If the bot has not been disabled
         if not self.mute:
-            if type(msg) is str or type(msg) is unicode:
+            if type(msg) is str or type(msg) is str:
                 self.forge(msg, priv=priv, in_reply_to=in_reply_to).send()
             elif type(msg) is list:
                 for line in msg:
@@ -167,7 +169,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
                     # msg1(2) can be 'complex' messages (list, dict, unicode, str)
                     # Private / non private messages can be "mixed" if for instance
                     # msg1 = {"text": "some_text", "nopriv": True}
-                    for user, send_user in msg["users"].iteritems():
+                    for user, send_user in msg["users"].items():
                         self.say(send_user, priv=user)
 
     def presence_handler(self, mess):

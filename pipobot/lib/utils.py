@@ -2,15 +2,13 @@
 #-*- coding: utf-8 -*-
 
 import codecs
-from ConfigParser import RawConfigParser
+import configparser
 import random
 import re
-import urllib
-import httplib
-import htmlentitydefs
+import urllib.request, urllib.parse, urllib.error
+import html.entities
 from xml.etree import cElementTree as ET
-from BeautifulSoup import BeautifulSoup, SoupStrainer
-from HTMLParser import HTMLParseError
+from bs4 import BeautifulSoup, SoupStrainer
 
 ##
 # Removes HTML or XML character references and entities from a text string.
@@ -26,15 +24,15 @@ def unescape(text):
             # character reference
             try:
                 if text.startswith("&#x"):
-                    return unichr(int(text[3:-1], 16))
+                    return chr(int(text[3:-1], 16))
                 else:
-                    return unichr(int(text[2:-1]))
+                    return chr(int(text[2:-1]))
             except ValueError:
                 pass
         else:
             # named entity
             try:
-                text = unichr(htmlentitydefs.name2codepoint[text[1:-1]])
+                text = chr(html.entities.name2codepoint[text[1:-1]])
             except KeyError:
                 pass
         return text  # leave as is
@@ -42,8 +40,9 @@ def unescape(text):
 
 
 def xhtml2text(html):
-#fonction de conversion xHTML -> texte pour les clients
-#ne supportant pas la XEP-0071
+    """
+    fonction de conversion xHTML -> texte pour les clients ne supportant pas la XEP-0071
+    """
     # on symbolise le gras par "*"
     html = re.sub('<[^>]*b>', '*', html)
     html = re.sub('<[^>]*strong>', '*', html)
@@ -52,6 +51,7 @@ def xhtml2text(html):
     # On récupère le lien dans les balises <a>
     p = re.compile('<a.*?(?<=href=\")((?:http|www)[^"]*)[^>]*>(.*?)</a>', re.S)
     html = p.sub(r'\2 (\1)', html)
+    html = re.sub(r'<br */>', '\n', html)
     # on enlève toutes les autres balises
     html = re.sub('<[^>]*>', '', html)
 
@@ -69,6 +69,7 @@ def change_status(user, msg, bot, perm):
     query.append(item)
     iq.append(query)
     bot.send(iq)
+    return iq
 
 
 def kick(to_kick, msg, bot):
@@ -83,37 +84,41 @@ def unmute(to_unmute, msg, bot):
     change_status(to_unmute, msg, bot, "participant")
 
 
-class AppURLopener(urllib.FancyURLopener):
-    def prompt_user_passwd(self, host, realm):
-        return ('', '')
+def url_to_soup(url):
+    page = urllib.request.urlopen(url)
+    content = page.read()
+    page.close()
 
-    version = ("Mozilla/5.0 (X11; U; Linux; fr-fr) AppleWebKit/531+"
-               "(KHTML, like Gecko) Safari/531.2+ Midori/0.2")
-urllib._urlopener = AppURLopener()
+    return BeautifulSoup(content, "lxml")
+
+
+USER_AGENT = ("Mozilla/5.0 (X11; U; Linux; fr-fr) AppleWebKit/531+"
+              "(KHTML, like Gecko) Safari/531.2+ Midori/0.2")
 
 
 def check_url(url, geturl=False):
     send = []
     try:
-        o = urllib.urlopen(url)
-        ctype = o.info().get("Content-Type")
+        rq = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        o = urllib.request.urlopen(rq)
+        ctype = o.info().get_content_type()
         clength = o.info().get("Content-Length")
-        if o.info().gettype() == "text/html":
+        if ctype == "text/html":
+
             title = 'Pas de titre'
             html = o.read(1000000)
             try:
-                SoupList = BeautifulSoup(unescape(html),
-                                         parseOnlyThese=SoupStrainer('title'))
+                SoupList = BeautifulSoup(unescape(html.decode("utf-8")),
+                                         "lxml",
+                                         parse_only=SoupStrainer('title'))
             except UnicodeDecodeError:
                 SoupList = BeautifulSoup(unescape(html.decode("latin1", "ignore")),
-                                         parseOnlyThese=SoupStrainer('title'))
+                                         "lxml",
+                                         parse_only=SoupStrainer('title'))
             try:
-                titles = [title for title in SoupList]
-                title = xhtml2text(titles[0].renderContents())
-            except IndexError:
+                title = xhtml2text(SoupList.title.text)
+            except AttributeError:
                 title = "Pas de titre"
-            except HTMLParseError:
-                pass
             if geturl:
                 send.append("%s : [Lien] Titre : %s" %
                             (o.geturl(), " ".join(title.split())))
@@ -124,19 +129,19 @@ def check_url(url, geturl=False):
         else:
             send.append("[Lien] Type: %s" % ctype)
         o.close()
-    except IOError as error:
-        if error[1] == 401:
+    except urllib.error.HTTPError as error:
+        if error.code == 401:
             send.append("Je ne peux pas m'authentifier sur %s :'(" % url)
-        elif error[1] == 404:
+        elif error.code == 404:
             send.append("%s n'existe pas !" % url)
-        elif error[1] == 403:
+        elif error.code == 403:
             send.append("Il est interdit d'accéder à %s !" % url)
         else:
-            send.append("Erreur %s sur %s" % (error[1], url))
-    except httplib.InvalidURL:
-        send.append("L'URL %s n'est pas valide !" % url)
+            send.append("Erreur %s sur %s" % (error.code, url))
     except UnicodeError as error:
         send.append("Erreur d'encodage: %s" % error)
+    except:
+        send.append("L'URL %s n'est pas valide !" % url)
     return send
 
 #Coloration functions
@@ -179,11 +184,11 @@ def rot13(mod, message):
     return codecs.encode(message, "rot13")
 
 
-class ListConfigParser(RawConfigParser):
+class ListConfigParser(configparser.RawConfigParser):
     def get(self, section, option):
         "Redéfinition du get pour gérer les listes"
-        value = RawConfigParser.get(self, section, option)
+        value = configparser.RawConfigParser.get(self, section, option)
         if (value[0] == "[") and (value[-1] == "]"):
-            return map(lambda s: s.decode("utf-8"), eval(value))
+            return eval(value)
         else:
-            return value.decode("utf-8")
+            return value

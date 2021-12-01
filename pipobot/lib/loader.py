@@ -3,14 +3,10 @@
 import inspect
 import imp
 import logging
-import sys
-import unittest
 import traceback
-from collections import namedtuple
 
 from pipobot.lib.modules import Help, RecordUsers, BotModule
 from pipobot.lib.known_users import KnownUsersManager
-from pipobot.lib.module_test import ModuleTest
 
 logger = logging.getLogger('pipobot.lib.loader')
 
@@ -45,16 +41,6 @@ class BotModuleLoader(object):
         """
 
         return (inspect.isclass(obj) and issubclass(obj, BotModule)
-                and not hasattr(obj, '_%s__usable' % obj.__name__))
-
-    @staticmethod
-    def is_test_unit(obj):
-        """
-        Returns True if an object found in a Python module is a test unit
-        class.
-        """
-
-        return (inspect.isclass(obj) and issubclass(obj, ModuleTest)
                 and not hasattr(obj, '_%s__usable' % obj.__name__))
 
     def set_module_config(self, module_name, param_name, param_type, default_value):
@@ -100,9 +86,7 @@ class BotModuleLoader(object):
                 logger.error("Error trying to import post_hook %s for module %s", func_path, module_name)
 
     def get_modules(self, module_names):
-        modules_tpl = namedtuple('modules_tpl', ['modules', 'test_mods'])
         modules = []
-        test_modules = []
 
         error = 0
 
@@ -122,11 +106,9 @@ class BotModuleLoader(object):
                 module_data = imp.load_module(name, *module_info)
             except ImportError:
                 logger.error(("Module ‘%s’ could not be imported." % name))
-                logger.error(traceback.format_exc().decode("utf-8"))
+                logger.error(traceback.format_exc())
                 error += 1
                 continue
-
-            test_modules.extend(elt[1] for elt in inspect.getmembers(module_data, self.is_test_unit))
 
             bot_modules = inspect.getmembers(module_data, self.is_bot_module)
             bot_modules = [item[1] for item in bot_modules]
@@ -152,4 +134,5 @@ class BotModuleLoader(object):
 
         modules.append(KnownUsersManager)
         modules.append(Help)
-        return error, modules_tpl(modules, test_modules)
+        return error, modules
+

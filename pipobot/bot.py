@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import threading
 import traceback
 from pipobot.lib.modules import AsyncModule, base_class
 from pipobot.lib.user import Occupants
@@ -17,11 +18,11 @@ class Modules(object):
             mod = mod(bot)
         except:
             msg = _("An exception was raised starting module %s for room %s : %s")
-            msg %= (mod, bot.chatname, traceback.format_exc().decode("utf-8"))
+            msg %= (mod, bot.chatname, traceback.format_exc())
             logger.error(msg)
             return
         for klass in base_class:
-            if isinstance(mod, klass):
+            if mod.shortname == klass.shortname:
                 if klass is AsyncModule:
                     mod.start()
                 getattr(self, klass.shortname).append(mod)
@@ -38,12 +39,12 @@ class Modules(object):
 
     def stop(self):
         """ Stop all async modules registered """
-        for module in self.async:
+        for module in self.asynchronous:
             module.stop()
 
     def sync_answer(self, msg):
         """ Try to find a SyncModule, or a MultiSyncModule that answers the `msg` """
-        for module in self.sync + self.multisync:
+        for module in self.synchronous + self.multisync:
             ret = module.do_answer(msg)
             if ret is not None:
                 return ret
@@ -77,8 +78,8 @@ class PipoBot:
 
     def __getattr__(self, name):
         """ Proxy to have access to modules with :
-            - self.sync
-            - self.async
+            - self.synchronous
+            - self.asynchronous
             - self.presence
             …
         """
@@ -89,8 +90,14 @@ class PipoBot:
                 return
 
     def stop_modules(self):
-        logger.info(u"Killing %s", self.chatname)
+        logger.info("Killing %s", self.chatname)
         self._modules.stop()
+
+    def message_handler(self, msg):
+        """Method called when the bot receives a message"""
+        thread = threading.Thread(target=self.answer, args=(msg,))
+        thread.start()
+        return thread
 
     def module_answer(self, msg):
         """ Given a text message, try each registered module for an answer.

@@ -109,7 +109,7 @@ class KnownUser(Base):
 
     @staticmethod
     def get_all(bot, separator, exceptions=[]):
-        return separator.join([KnownUser.get_antihl(user.nickname, bot) for user in bot.occupants.users.itervalues()
+        return separator.join([KnownUser.get_antihl(user.nickname, bot) for user in bot.occupants.users.values()
             if user.nickname not in exceptions])
 
 
@@ -172,7 +172,7 @@ class KnownUsersManager(SyncModule):
 
     @answercmd('add')
     def answer_add(self, sender):
-        unknown_users = [u for u in self.bot.occupants.users.itervalues() if KnownUser.get(u.jid, self.bot) is None and u.nickname != self.bot.name]
+        unknown_users = [u for u in self.bot.occupants.users.values() if KnownUser.get(u.jid, self.bot) is None and u.nickname != self.bot.name]
         if unknown_users:
             return _("I don't know: ") + ', '.join(['%s (%s)' % (u.nickname, u.jid) for u in unknown_users])
         return _("I know everybody here !")

@@ -4,25 +4,73 @@ import fcntl
 import logging
 import logging.handlers
 import os
-import pwd
 import signal
 import sys
-import unittest
 import errno
+from queue import Queue
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-from pipobot._version import __version__
 from pipobot.config import get_configuration
 from pipobot.lib.bdd import Base
 from pipobot.lib.loader import BotModuleLoader
 from pipobot.translation import setup_i18n
 from pipobot.bot_jabber import BotJabber, XMPPException
-from pipobot.lib.module_test import ModuleTest
 from pipobot.bot_test import TestBot
 
 LOGGER = logging.getLogger('pipobot.manager')
+
+def console(bot):
+    """
+    Opens a python interpretor with the bot loaded.
+    The bot itself can be retrieved with the local variable `bot`
+    Each module can be retrieve with _module_name.
+    Loaded modules are the one defined in the `test` section of the configuration.
+    Example:
+    in yaml configuration:
+
+    test:
+        fake_nick: Pipotest
+        fake_chan: fake@example.org
+        modules:
+            - chiffres_lettres
+
+    >>> from pprint import pprint
+    >>> _chiffres.init("bob")
+    'Nouvelle partie lancée\nTotal à trouver : 336\nNombres fournis : 5, 7, 10, 75, 75, 100'
+    >>> pprint(_chiffres.solve("bob"))
+    "J'ai trouvé une solution exacte : \n"
+    '75 - 7 = 68\n'
+    '68 + 100 = 168\n'
+    '10 ÷ 5 = 2\n'
+    '168 × 2 = 336'
+
+    """
+
+    import code
+    import readline
+    import rlcompleter
+
+    list_modules = []
+    loc = locals()
+    for mod in bot.modules:
+        local_name = "_" + mod.name
+        loc[local_name] = mod
+        list_modules.append(local_name)
+
+    loc["bot"] = bot
+    banner = ("Your bot is now loaded as `bot`\n"
+              "Your instanciated modules can be accessed with `_module_name`\n"
+              "Here is the list of the modules currently loaded :\n"
+              "\t %s\n"
+              "Now you are on your own, have fun !" % ", ".join(list_modules))
+    vars = globals()
+    vars.update(loc)
+    readline.set_completer(rlcompleter.Completer(vars).complete)
+    readline.parse_and_bind("tab: complete")
+    shell = code.InteractiveConsole(vars)
+    shell.interact(banner)
 
 
 class PipoBotManager(object):
@@ -103,9 +151,9 @@ class PipoBotManager(object):
         try:
             fd = os.open(self._config.pid_file, os.O_WRONLY | os.O_CREAT)
             fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except OSError, e:
+        except OSError as e:
             _abort(str(e))
-        except IOError, e:
+        except IOError as e:
             if e.errno == errno.EACCES or e.errno == errno.EAGAIN:
                 _abort("Unable to lock the PID file, is the bot already "
                        "running?")
@@ -144,10 +192,10 @@ class PipoBotManager(object):
         for room in rooms:
             try:
                 bot = BotJabber(room.login, room.passwd, room.resource,
-                                room.chan, room.nick, modules[room].modules,
+                                room.chan, room.nick, modules[room],
                                 self._db_session, self._config.force_ipv4,
                                 room.address, room.port)
-            except XMPPException, exc:
+            except XMPPException as exc:
                 LOGGER.error("Unable to join room '%s': %s", room.chan,
                              exc)
                 continue
@@ -192,9 +240,9 @@ class PipoBotManager(object):
             LOGGER.info("All modules checked, exiting…")
 
         # Test mode : load test room
-        elif self._config.unit_test or self._config.script or \
-             self._config.interract or self._config.info_modules:
-
+        elif self._config.script or \
+             self._config.interract or self._config.info_modules or self._config.console:
+            
             test_room = self._config.test_room
             if test_room is None :
                 _abort("Please define a test section in the configuration")
@@ -202,21 +250,17 @@ class PipoBotManager(object):
             if e :
                 _abort("Unable to load all test modules")
 
-            # Unit test mode : run unittest
-            if self._config.unit_test:
-                bot = TestBot(test_room.nick, test_room.login,
-                              test_room.chan, m[test_room].modules, self._db_session)
-                suite = unittest.TestSuite()
-                for test in m[test_room].test_mods:
-                    suite.addTests(ModuleTest.parametrize(test, bot=bot))
-                unittest.TextTestRunner(verbosity=2).run(suite)
             # Script mode
-            elif self._config.script:
+            if self._config.script:
                 bot = TestBot(test_room.nick, test_room.login,
-                              test_room.chan, m[test_room].modules, self._db_session)
+                              test_room.chan, m[test_room],
+                              self._db_session, output=Queue())
                 for msg in self._config.script.split(";"):
-                    print "--> %s" % msg
-                    print "<== %s" % bot.create_msg("bob", msg)
+                    print("--> %s" % msg)
+                    ret = bot.create_msg("bob", msg)
+                    ret.join()
+                    print("<== %s" % bot.output.get())
+                    bot.stop_modules()
             # Module info mode
             elif self._config.info_modules:
                 bot = TestBot(test_room.nick, test_room.login,
@@ -226,11 +270,31 @@ class PipoBotManager(object):
 
             # Interract/twisted mode
             elif self._config.interract:
-                # We import it here so the bot does not 'depend' on twisted
+                # We import it here so the bot does not 'depend' on asyncio
                 # unless you *really* want to use the --interract mode
-                from pipobot.bot_twisted import TwistedBot
-                bot = TwistedBot(test_room.nick, test_room.login,
-                                 test_room.chan, m[test_room].modules, self._db_session)
+                import asyncio
+                from pipobot.bot_asyncio import AsyncioBot
+                bot = AsyncioBot(test_room.nick, test_room.login,
+                                 test_room.chan, m[test_room], self._db_session)
+                loop = asyncio.get_event_loop()
+                # TODO add this in the config file
+                port = 4242
+                f = asyncio.start_server(bot.accept_client, host=None, port=port)
+                LOGGER.info("Bot started on port %d" % port)
+                LOGGER.info("Connect to it with `telnet localhost %d`" % port)
+                loop.run_until_complete(f)
+                try:
+                    loop.run_forever()
+                except:
+                    loop.stop()
+
+
+            # Console mode
+            elif self._config.console:
+                bot = TestBot(test_room.nick, test_room.login,
+                              test_room.chan, m[test_room], self._db_session)
+                console(bot)
+
         # Standard mode
         else:
             rooms = self._config.rooms

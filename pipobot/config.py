@@ -36,7 +36,8 @@ class Configuration(object):
     __slots__ = ('log_level', 'daemonize', 'only_check', 'pid_file',
                  'rooms', 'logpath', 'xmpp_logpath', 'database', 'lang',
                  'modules_path', 'modules_conf', 'unit_test', 'script',
-                 'interract', 'force_ipv4', 'test_room', 'info_modules')
+                 'interract', 'console', 'force_ipv4', 'test_room', 'info_modules')
+
 
     # Default values
     DEFAULT_CONF_FILE = "/etc/pipobot.conf.yml"
@@ -47,23 +48,23 @@ class Configuration(object):
         self.daemonize = cmd_options.daemonize
         self.only_check = cmd_options.only_check
         self.pid_file = cmd_options.pid_file
-        self.unit_test = cmd_options.unit_test
         self.script = cmd_options.script
         self.info_modules = cmd_options.info_modules
         self.interract = cmd_options.interract
+        self.console = cmd_options.console
         self.rooms = []
 
         try:
             with open(conf_file) as f:
                 data = yaml.load(f)
-        except IOError, err:
+        except IOError as err:
             _abort("Unable to read the configuration file ‘%s’: %s.",
                    conf_file, err.strerror)
-        except yaml.reader.ReaderError, err:
+        except yaml.reader.ReaderError as err:
             _abort("The configuration file ‘%s’ seems incorrect or "
                    "corrupt: %s (position %s)", conf_file, err.reason,
                    err.position)
-        except yaml.scanner.ScannerError, err:
+        except yaml.scanner.ScannerError as err:
             _abort("The configuration file seems incorrect or "
                    "corrupt: %s%s", err.problem, err.problem_mark)
 
@@ -73,7 +74,7 @@ class Configuration(object):
         global_conf = data.get('config', {})
         for param in ['logpath', 'lang']:
             value = global_conf.get(param, "")
-            if not value or not isinstance(value, basestring):
+            if not value or not isinstance(value, str):
                 _abort("Required parameter ‘%s’ not found or invalid in "
                        "configuration file ‘%s’.", param, conf_file)
             setattr(self, param, value)
@@ -82,7 +83,7 @@ class Configuration(object):
         self.force_ipv4 = global_conf.get('force_ipv4', False)
 
         self.modules_path = global_conf.get('modules_path', [])
-        if isinstance(self.modules_path, basestring):
+        if isinstance(self.modules_path, str):
             self.modules_path = [self.modules_path]
         elif type(self.modules_path) != list:
             _abort("Parameter ‘modules_path’ should be a string or a list in "
@@ -128,14 +129,14 @@ class Configuration(object):
             _abort("Parameter ‘groups’ should be a dictionary in "
                    "configuration file ‘%s’.", conf_file)
 
-        for group_name, group_items in groups_conf.iteritems():
+        for group_name, group_items in groups_conf.items():
             module_groups[group_name] = group = set()
             if type(group_items) != list:
                 _abort("Parameter ‘groups[%s]’ should be a list in "
                        "configuration file ‘%s’.", group_name, conf_file)
 
             for group_item in group_items:
-                if not isinstance(group_item, basestring):
+                if not isinstance(group_item, str):
                     _abort("Parameter ‘groups[%s]’ should only contain"
                            " strings in configuration file ‘%s’.", group_name,
                            conf_file)
@@ -147,11 +148,11 @@ class Configuration(object):
 
             if conf_modules is None:
                 conf_modules = []
-            elif isinstance(conf_modules, basestring):
+            elif isinstance(conf_modules, str):
                 conf_modules = [conf_modules]
 
             for conf_module in conf_modules:
-                if not isinstance(conf_module, basestring):
+                if not isinstance(conf_module, str):
                     _abort("Parameter ‘modules’ should only contain"
                            " strings in configuration file ‘%s’.", conf_file)
 
@@ -187,7 +188,7 @@ class Configuration(object):
             kwargs = {}
             for param in ['chan', 'login', 'passwd', 'resource', 'nick']:
                 value = conf_room.get(param, "")
-                if not value or not isinstance(value, basestring):
+                if not value or not isinstance(value, str):
                     if "chan" in kwargs:
                         _abort("Required parameter ‘rooms[%s][%s]’ not found or "
                                "invalid in configuration file ‘%s’.", kwargs[
@@ -281,10 +282,6 @@ def get_configuration():
                       dest="only_check", const=True, default=False,
                       help="Check if modules configuration are correct and exit")
 
-    parser.add_option("--unit-test", action="store_const",
-                      dest="unit_test", const=True,
-                      help="Run unit test defined in the config file")
-
     parser.add_option("--script", action="store",
                       dest="script", type="string", default="",
                       help="Run unit test defined in the config file")
@@ -296,6 +293,10 @@ def get_configuration():
     parser.add_option("--interract", action="store_const",
                       dest="interract", const=True,
                       help="Run the twisted bot")
+
+    parser.add_option("--console", action="store_const",
+                      dest="console", const=True,
+                      help="Run a Python interpretor with the bot and all modules loaded")
 
     (options, args) = parser.parse_args()
     parser.destroy()
