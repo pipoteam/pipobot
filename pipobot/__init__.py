@@ -240,7 +240,7 @@ class PipoBotManager(object):
             LOGGER.info("All modules checked, exiting…")
 
         # Test mode : load test room
-        elif self._config.unit_test or self._config.script or \
+        elif self._config.script or \
              self._config.interract or self._config.info_modules or self._config.console:
             
             test_room = self._config.test_room

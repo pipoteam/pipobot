@@ -138,10 +138,10 @@ def check_url(url, geturl=False):
             send.append("Il est interdit d'accéder à %s !" % url)
         else:
             send.append("Erreur %s sur %s" % (error.code, url))
-    except:
-        send.append("L'URL %s n'est pas valide !" % url)
     except UnicodeError as error:
         send.append("Erreur d'encodage: %s" % error)
+    except:
+        send.append("L'URL %s n'est pas valide !" % url)
     return send
 
 #Coloration functions
