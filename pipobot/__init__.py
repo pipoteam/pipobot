@@ -2,6 +2,7 @@
 
 import fcntl
 import logging
+import logging.handlers
 import os
 import signal
 import sys
@@ -99,7 +100,7 @@ class PipoBotManager(object):
             # filter to select sleekxmpp logs
             sleek_filter = logging.Filter("sleekxmpp")
             try:
-                sleek_handler = logging.FileHandler(self._config.xmpp_logpath)
+                sleek_handler = logging.handlers.WatchedFileHandler(self._config.xmpp_logpath)
                 sleek_handler.addFilter(sleek_filter)
                 root_logger.addHandler(sleek_handler)
             except IOError as err:
@@ -117,7 +118,7 @@ class PipoBotManager(object):
         root_logger.addHandler(console_handler)
 
         try:
-            file_handler = logging.FileHandler(self._config.logpath)
+            file_handler = logging.handlers.WatchedFileHandler(self._config.logpath)
         except IOError as err:
             _abort("Unable to open the log file ‘%s’: %s",
                    self._config.logpath, err.strerror)
@@ -239,9 +240,9 @@ class PipoBotManager(object):
             LOGGER.info("All modules checked, exiting…")
 
         # Test mode : load test room
-        elif self._config.script or \
-             self._config.interract or self._config.console:
-
+        elif self._config.unit_test or self._config.script or \
+             self._config.interract or self._config.info_modules or self._config.console:
+            
             test_room = self._config.test_room
             if test_room is None :
                 _abort("Please define a test section in the configuration")
@@ -260,6 +261,13 @@ class PipoBotManager(object):
                     ret.join()
                     print("<== %s" % bot.output.get())
                     bot.stop_modules()
+            # Module info mode
+            elif self._config.info_modules:
+                bot = TestBot(test_room.nick, test_room.login,
+                              test_room.chan, m[test_room].modules, self._db_session)
+                from info_modules import info_modules
+                info_modules(bot, self._config.modules_path)
+
             # Interract/twisted mode
             elif self._config.interract:
                 # We import it here so the bot does not 'depend' on asyncio

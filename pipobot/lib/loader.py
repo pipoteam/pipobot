@@ -134,4 +134,5 @@ class BotModuleLoader(object):
 
         modules.append(KnownUsersManager)
         modules.append(Help)
-        return error, modules
+        return error, modules_tpl(modules, test_modules)
+

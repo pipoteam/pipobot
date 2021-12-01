@@ -104,6 +104,7 @@ def check_url(url, geturl=False):
         ctype = o.info().get_content_type()
         clength = o.info().get("Content-Length")
         if ctype == "text/html":
+
             title = 'Pas de titre'
             html = o.read(1000000)
             try:
@@ -139,6 +140,8 @@ def check_url(url, geturl=False):
             send.append("Erreur %s sur %s" % (error.code, url))
     except:
         send.append("L'URL %s n'est pas valide !" % url)
+    except UnicodeError as error:
+        send.append("Erreur d'encodage: %s" % error)
     return send
 
 #Coloration functions
@@ -175,6 +178,7 @@ def rd_censored(mod, message):
         else:
             ret += "*" if random.randint(0, 5) > 4 else c
     return ret
+
 
 def rot13(mod, message):
     return codecs.encode(message, "rot13")

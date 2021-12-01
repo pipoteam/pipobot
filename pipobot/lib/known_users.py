@@ -2,12 +2,11 @@
 # -*- coding: UTF-8 -*-
 import logging
 
+from pipobot.lib.bdd import Base
+from pipobot.lib.modules import Pasteque, SyncModule, answercmd, defaultcmd
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import relationship
-
-from pipobot.lib.bdd import Base
-from pipobot.lib.modules import answercmd, defaultcmd, SyncModule
 
 
 def minpermlvl(lvl):
@@ -80,7 +79,9 @@ class KnownUser(Base):
         return False
 
     @staticmethod
-    def get(pseudo, bot, authviapseudo=False):
+    def get(pseudo, bot, authviapseudo=False, avoid_bot=True):
+        if avoid_bot and pseudo == bot.name:
+            raise Pasteque(_("Hey, that's me ! I'm not an user, I'm the bot !"))
         if '@' in pseudo:
             usersjid = bot.session.query(KnownUsersJIDs).filter(KnownUsersJIDs.jid == pseudo).first()
             if usersjid:
@@ -234,8 +235,9 @@ class KnownUsersManager(SyncModule):
                     self.bot.session.delete(targetuser)
                     self.bot.session.commit()
                 return ret
-            j = KnownUsersJIDs(jid, targetuser.kuid)
-            self.bot.session.add(j)
+            if jid:
+                j = KnownUsersJIDs(jid, targetuser.kuid)
+                self.bot.session.add(j)
         self.bot.session.commit()
 
         return _("pseudo %s is now associated to jid(s) %s" % (pseudo, jids))
@@ -255,7 +257,10 @@ class KnownUsersManager(SyncModule):
         knownuser = KnownUser.get(user, self.bot, authviapseudo=authviapseudo)
         if not knownuser:
             return _("I don't know that %s…" % user)
-        ret = _('%s: Your Permission Level is %s, and your JID(s) are:' % (knownuser.get_pseudo(), knownuser.permlvl))
+        ret = knownuser.get_pseudo(hl=True)
+        if knownuser.hl_pseudo is not None:
+            ret += ' (%s)' % knownuser.hl_pseudo
+        ret += _(': Your Permission Level is %s, and your JID(s) are:' % knownuser.permlvl)
         for jid in knownuser.jids:
             ret += ' %s' % jid.jid
         return ret
