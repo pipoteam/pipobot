@@ -56,16 +56,23 @@ class BotModule(object):
 
         self.prefixs.extend(base_prefixs)
 
+    def parse_mess(self, mess):
+        """ find message body, sender and type of a message """
+        if 'origin_server_ts' in mess:  # Matrix
+            logger.debug('parsing matrix message')
+            return mess['content']['body'], mess['sender'], mess['type']
+        logger.debug('parsing not matrix message')
+        return mess['body'].lstrip(), mess['from'].resource, mess['type']
+
     def do_answer(self, mess):
         """ With an xmpp message `mess`, checking if this module is concerned
             by it, and if so get the result of the module and make the bot
             say it """
 
-        msg_body = mess["body"].lstrip()
-        sender = mess["from"].resource
+        msg_body, sender, msg_type = self.parse_mess(mess)
 
         #The bot does not answer to itself (important to avoid some loops !)
-        if sender == self.bot.name:
+        if self.bot.name in sender:
             return
 
         #Check if the message is related to this module
@@ -77,7 +84,7 @@ class BotModule(object):
             if isinstance(self, SyncModule):
                 # Separates command/args and get answer from module
                 command, args = SyncModule.parse(msg_body, self.prefixs)
-                send = self._answer(sender, args, pm=(mess["type"] == "chat"))
+                send = self._answer(sender, args, pm=(msg_type == "chat"))
             elif isinstance(self, ListenModule):
                 # In a Listen module the name of the command is not specified
                 # so nothing to parse
@@ -85,7 +92,7 @@ class BotModule(object):
             elif isinstance(self, MultiSyncModule):
                 # Separates command/args and get answer from module
                 command, args = SyncModule.parse(msg_body, self.prefixs)
-                send = self._answer(sender, command, args, pm=(mess["type"] == "chat"))
+                send = self._answer(sender, command, args, pm=(msg_type == "chat"))
             else:
                 # A not specified module type !
                 return

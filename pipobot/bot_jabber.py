@@ -152,7 +152,7 @@ class BotJabber(sleekxmpp.ClientXMPP, PipoBot):
         """The method to call to make the bot sending messages"""
         # If the bot has not been disabled
         if not self.mute:
-            if type(msg) is str or type(msg) is str:
+            if type(msg) is str:
                 self.forge(msg, priv=priv, in_reply_to=in_reply_to).send()
             elif type(msg) is list:
                 for line in msg:
